@@ -1,0 +1,503 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10000010000000000000001 /* SportAppApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000001 /* SportAppApp.swift */; };
+		A10000010000000000000002 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000002 /* RootView.swift */; };
+		A10000010000000000000003 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000003 /* User.swift */; };
+		A10000010000000000000004 /* Team.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000004 /* Team.swift */; };
+		A10000010000000000000005 /* Tournament.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000005 /* Tournament.swift */; };
+		A10000010000000000000006 /* EloService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000006 /* EloService.swift */; };
+		A10000010000000000000007 /* DateFormatterService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000007 /* DateFormatterService.swift */; };
+		A10000010000000000000008 /* MockDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000008 /* MockDataService.swift */; };
+		A10000010000000000000009 /* AppViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000009 /* AppViewModel.swift */; };
+		A1000001000000000000000A /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000000A /* AuthView.swift */; };
+		A1000001000000000000000B /* MainTabView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000000B /* MainTabView.swift */; };
+		A1000001000000000000000C /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000000C /* HomeView.swift */; };
+		A1000001000000000000000D /* TournamentsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000000D /* TournamentsView.swift */; };
+		A1000001000000000000000E /* TournamentDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000000E /* TournamentDetailView.swift */; };
+		A1000001000000000000000F /* LeaderboardView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000000F /* LeaderboardView.swift */; };
+		A10000010000000000000010 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000010 /* ProfileView.swift */; };
+		A10000010000000000000011 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000012 /* Assets.xcassets */; };
+		A10000010000000000000012 /* Player.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000013 /* Player.swift */; };
+		A10000010000000000000013 /* PlayerMatch.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000014 /* PlayerMatch.swift */; };
+		A10000010000000000000014 /* PlayerProfileRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000015 /* PlayerProfileRepository.swift */; };
+		A10000010000000000000015 /* PlayerProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000016 /* PlayerProfileViewModel.swift */; };
+		A10000010000000000000016 /* Match.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000017 /* Match.swift */; };
+		A10000010000000000000017 /* MatchStatsAggregator.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000018 /* MatchStatsAggregator.swift */; };
+		A10000010000000000000018 /* MatchDetailsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000019 /* MatchDetailsView.swift */; };
+		A10000010000000000000019 /* MatchRSVPService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000001A /* MatchRSVPService.swift */; };
+		A1000001000000000000001A /* MatchLocalStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000001B /* MatchLocalStore.swift */; };
+		A1000001000000000000001B /* MatchDetailsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000001C /* MatchDetailsViewModel.swift */; };
+		A1000001000000000000001C /* AccessPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000001D /* AccessPolicy.swift */; };
+		A1000001000000000000001D /* AuditLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000001E /* AuditLogger.swift */; };
+		A1000001000000000000001E /* AdminView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000001F /* AdminView.swift */; };
+		A10000010000000000000020 /* AuthorizationUX.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000020 /* AuthorizationUX.swift */; };
+		A10000010000000000000021 /* PermissionDeniedView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000021 /* PermissionDeniedView.swift */; };
+		A10000010000000000000022 /* RoleBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000022 /* RoleBadge.swift */; };
+		A10000010000000000000023 /* DebugSwitchUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000023 /* DebugSwitchUserView.swift */; };
+		A10000010000000000000024 /* PositionPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000024 /* PositionPickerView.swift */; };
+		A10000010000000000000025 /* GameTeamsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000025 /* GameTeamsView.swift */; };
+		A10000010000000000000026 /* TournamentStandingsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000026 /* TournamentStandingsService.swift */; };
+		A10000010000000000000027 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000027 /* NotificationService.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		A20000010000000000000000 /* SportApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SportApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A20000010000000000000001 /* SportAppApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SportAppApp.swift; sourceTree = "<group>"; };
+		A20000010000000000000002 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
+		A20000010000000000000003 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
+		A20000010000000000000004 /* Team.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Team.swift; sourceTree = "<group>"; };
+		A20000010000000000000005 /* Tournament.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Tournament.swift; sourceTree = "<group>"; };
+		A20000010000000000000006 /* EloService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EloService.swift; sourceTree = "<group>"; };
+		A20000010000000000000007 /* DateFormatterService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DateFormatterService.swift; sourceTree = "<group>"; };
+		A20000010000000000000008 /* MockDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockDataService.swift; sourceTree = "<group>"; };
+		A20000010000000000000009 /* AppViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppViewModel.swift; sourceTree = "<group>"; };
+		A2000001000000000000000A /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
+		A2000001000000000000000B /* MainTabView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainTabView.swift; sourceTree = "<group>"; };
+		A2000001000000000000000C /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		A2000001000000000000000D /* TournamentsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TournamentsView.swift; sourceTree = "<group>"; };
+		A2000001000000000000000E /* TournamentDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TournamentDetailView.swift; sourceTree = "<group>"; };
+		A2000001000000000000000F /* LeaderboardView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LeaderboardView.swift; sourceTree = "<group>"; };
+		A20000010000000000000010 /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		A20000010000000000000011 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		A20000010000000000000012 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A20000010000000000000013 /* Player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Player.swift; sourceTree = "<group>"; };
+		A20000010000000000000014 /* PlayerMatch.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerMatch.swift; sourceTree = "<group>"; };
+		A20000010000000000000015 /* PlayerProfileRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerProfileRepository.swift; sourceTree = "<group>"; };
+		A20000010000000000000016 /* PlayerProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerProfileViewModel.swift; sourceTree = "<group>"; };
+		A20000010000000000000017 /* Match.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Match.swift; sourceTree = "<group>"; };
+		A20000010000000000000018 /* MatchStatsAggregator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchStatsAggregator.swift; sourceTree = "<group>"; };
+		A20000010000000000000019 /* MatchDetailsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchDetailsView.swift; sourceTree = "<group>"; };
+		A2000001000000000000001A /* MatchRSVPService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchRSVPService.swift; sourceTree = "<group>"; };
+		A2000001000000000000001B /* MatchLocalStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchLocalStore.swift; sourceTree = "<group>"; };
+		A2000001000000000000001C /* MatchDetailsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchDetailsViewModel.swift; sourceTree = "<group>"; };
+		A2000001000000000000001D /* AccessPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AccessPolicy.swift; sourceTree = "<group>"; };
+		A2000001000000000000001E /* AuditLogger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuditLogger.swift; sourceTree = "<group>"; };
+		A2000001000000000000001F /* AdminView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AdminView.swift; sourceTree = "<group>"; };
+		A20000010000000000000020 /* AuthorizationUX.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthorizationUX.swift; sourceTree = "<group>"; };
+		A20000010000000000000021 /* PermissionDeniedView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionDeniedView.swift; sourceTree = "<group>"; };
+		A20000010000000000000022 /* RoleBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoleBadge.swift; sourceTree = "<group>"; };
+		A20000010000000000000023 /* DebugSwitchUserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugSwitchUserView.swift; sourceTree = "<group>"; };
+		A20000010000000000000024 /* PositionPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PositionPickerView.swift; sourceTree = "<group>"; };
+		A20000010000000000000025 /* GameTeamsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameTeamsView.swift; sourceTree = "<group>"; };
+		A20000010000000000000026 /* TournamentStandingsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TournamentStandingsService.swift; sourceTree = "<group>"; };
+		A20000010000000000000027 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A30000010000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A40000010000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				A40000010000000000000002 /* SportApp */,
+				A40000010000000000000003 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A40000010000000000000002 /* SportApp */ = {
+			isa = PBXGroup;
+			children = (
+				A20000010000000000000001 /* SportAppApp.swift */,
+				A20000010000000000000002 /* RootView.swift */,
+				A40000010000000000000004 /* Models */,
+				A40000010000000000000005 /* Services */,
+				A40000010000000000000006 /* ViewModels */,
+				A40000010000000000000007 /* Views */,
+				A40000010000000000000008 /* Resources */,
+			);
+			path = SportApp;
+			sourceTree = "<group>";
+		};
+		A40000010000000000000003 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A20000010000000000000000 /* SportApp.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		A40000010000000000000004 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				A20000010000000000000003 /* User.swift */,
+				A20000010000000000000013 /* Player.swift */,
+				A20000010000000000000014 /* PlayerMatch.swift */,
+				A20000010000000000000017 /* Match.swift */,
+				A20000010000000000000004 /* Team.swift */,
+				A20000010000000000000005 /* Tournament.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		A40000010000000000000005 /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				A20000010000000000000006 /* EloService.swift */,
+				A20000010000000000000007 /* DateFormatterService.swift */,
+				A20000010000000000000008 /* MockDataService.swift */,
+				A20000010000000000000015 /* PlayerProfileRepository.swift */,
+				A20000010000000000000018 /* MatchStatsAggregator.swift */,
+				A2000001000000000000001A /* MatchRSVPService.swift */,
+				A2000001000000000000001B /* MatchLocalStore.swift */,
+				A2000001000000000000001D /* AccessPolicy.swift */,
+				A2000001000000000000001E /* AuditLogger.swift */,
+				A20000010000000000000020 /* AuthorizationUX.swift */,
+				A20000010000000000000026 /* TournamentStandingsService.swift */,
+				A20000010000000000000027 /* NotificationService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		A40000010000000000000006 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				A20000010000000000000009 /* AppViewModel.swift */,
+				A20000010000000000000016 /* PlayerProfileViewModel.swift */,
+				A2000001000000000000001C /* MatchDetailsViewModel.swift */,
+			);
+			path = ViewModels;
+			sourceTree = "<group>";
+		};
+		A40000010000000000000007 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				A40000010000000000000009 /* Auth */,
+				A4000001000000000000000A /* Main */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		A40000010000000000000008 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				A20000010000000000000011 /* Info.plist */,
+				A20000010000000000000012 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		A40000010000000000000009 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				A2000001000000000000000A /* AuthView.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		A4000001000000000000000A /* Main */ = {
+			isa = PBXGroup;
+			children = (
+				A2000001000000000000000B /* MainTabView.swift */,
+				A2000001000000000000000C /* HomeView.swift */,
+				A2000001000000000000000D /* TournamentsView.swift */,
+				A2000001000000000000000E /* TournamentDetailView.swift */,
+				A2000001000000000000000F /* LeaderboardView.swift */,
+				A20000010000000000000010 /* ProfileView.swift */,
+				A20000010000000000000019 /* MatchDetailsView.swift */,
+				A2000001000000000000001F /* AdminView.swift */,
+				A20000010000000000000021 /* PermissionDeniedView.swift */,
+				A20000010000000000000022 /* RoleBadge.swift */,
+				A20000010000000000000023 /* DebugSwitchUserView.swift */,
+				A20000010000000000000024 /* PositionPickerView.swift */,
+				A20000010000000000000025 /* GameTeamsView.swift */,
+			);
+			path = Main;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A50000010000000000000001 /* SportApp */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A60000010000000000000002 /* Build configuration list for PBXNativeTarget "SportApp" */;
+			buildPhases = (
+				A30000010000000000000002 /* Sources */,
+				A30000010000000000000001 /* Frameworks */,
+				A30000010000000000000003 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = SportApp;
+			productName = SportApp;
+			productReference = A20000010000000000000000 /* SportApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A70000010000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1520;
+				TargetAttributes = {
+					A50000010000000000000001 = {
+						CreatedOnToolsVersion = 15.0;
+					};
+				};
+			};
+			buildConfigurationList = A60000010000000000000001 /* Build configuration list for PBXProject "SportApp" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A40000010000000000000001;
+			productRefGroup = A40000010000000000000003 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A50000010000000000000001 /* SportApp */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A30000010000000000000003 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000010000000000000011 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A30000010000000000000002 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000010000000000000001 /* SportAppApp.swift in Sources */,
+				A10000010000000000000002 /* RootView.swift in Sources */,
+				A10000010000000000000003 /* User.swift in Sources */,
+				A10000010000000000000004 /* Team.swift in Sources */,
+				A10000010000000000000005 /* Tournament.swift in Sources */,
+				A10000010000000000000006 /* EloService.swift in Sources */,
+				A10000010000000000000007 /* DateFormatterService.swift in Sources */,
+				A10000010000000000000008 /* MockDataService.swift in Sources */,
+				A10000010000000000000009 /* AppViewModel.swift in Sources */,
+				A1000001000000000000000A /* AuthView.swift in Sources */,
+				A1000001000000000000000B /* MainTabView.swift in Sources */,
+				A1000001000000000000000C /* HomeView.swift in Sources */,
+				A1000001000000000000000D /* TournamentsView.swift in Sources */,
+				A1000001000000000000000E /* TournamentDetailView.swift in Sources */,
+				A1000001000000000000000F /* LeaderboardView.swift in Sources */,
+				A10000010000000000000010 /* ProfileView.swift in Sources */,
+				A10000010000000000000012 /* Player.swift in Sources */,
+				A10000010000000000000013 /* PlayerMatch.swift in Sources */,
+				A10000010000000000000014 /* PlayerProfileRepository.swift in Sources */,
+				A10000010000000000000015 /* PlayerProfileViewModel.swift in Sources */,
+				A10000010000000000000016 /* Match.swift in Sources */,
+				A10000010000000000000017 /* MatchStatsAggregator.swift in Sources */,
+				A10000010000000000000018 /* MatchDetailsView.swift in Sources */,
+				A10000010000000000000019 /* MatchRSVPService.swift in Sources */,
+				A1000001000000000000001A /* MatchLocalStore.swift in Sources */,
+				A1000001000000000000001B /* MatchDetailsViewModel.swift in Sources */,
+				A1000001000000000000001C /* AccessPolicy.swift in Sources */,
+				A1000001000000000000001D /* AuditLogger.swift in Sources */,
+				A1000001000000000000001E /* AdminView.swift in Sources */,
+				A10000010000000000000020 /* AuthorizationUX.swift in Sources */,
+				A10000010000000000000021 /* PermissionDeniedView.swift in Sources */,
+				A10000010000000000000022 /* RoleBadge.swift in Sources */,
+				A10000010000000000000023 /* DebugSwitchUserView.swift in Sources */,
+				A10000010000000000000024 /* PositionPickerView.swift in Sources */,
+				A10000010000000000000025 /* GameTeamsView.swift in Sources */,
+				A10000010000000000000026 /* TournamentStandingsService.swift in Sources */,
+				A10000010000000000000027 /* NotificationService.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		A80000010000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		A80000010000000000000002 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_USER_SCRIPT_SANDBOXING = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu17;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		A80000010000000000000003 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z9GWGYNRLL;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = SportApp/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.danielcoalstone.SportApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		A80000010000000000000004 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = Z9GWGYNRLL;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = SportApp/Resources/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.danielcoalstone.SportApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A60000010000000000000001 /* Build configuration list for PBXProject "SportApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A80000010000000000000001 /* Debug */,
+				A80000010000000000000002 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A60000010000000000000002 /* Build configuration list for PBXNativeTarget "SportApp" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A80000010000000000000003 /* Debug */,
+				A80000010000000000000004 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A70000010000000000000001 /* Project object */;
+}

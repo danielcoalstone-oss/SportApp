@@ -19,7 +19,19 @@ enum MockDataService {
                 coachSubscriptionEndsAt: Calendar.current.date(byAdding: .month, value: 1, to: now),
                 isCoachSubscriptionPaused: false
             ),
-            User(id: UUID(), fullName: "Olivia Reed", email: "olivia@mini5.app", favoritePosition: "Goalkeeper", city: "Miami", eloRating: 1440, matchesPlayed: 16, wins: 8, globalRole: .player)
+            User(
+                id: UUID(),
+                fullName: "Olivia Reed",
+                email: "olivia@mini5.app",
+                favoritePosition: "Goalkeeper",
+                city: "Miami",
+                eloRating: 1440,
+                matchesPlayed: 16,
+                wins: 8,
+                globalRole: .player,
+                organizerSubscriptionEndsAt: Calendar.current.date(byAdding: .month, value: 1, to: now),
+                isOrganizerSubscriptionPaused: false
+            )
         ]
     }
 

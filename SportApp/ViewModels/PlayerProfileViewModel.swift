@@ -1,10 +1,32 @@
 import Foundation
 
+enum MainPosition: String, CaseIterable, Identifiable {
+    case goalkeeper = "Goalkeeper"
+    case defender = "Defender"
+    case midfielder = "Midfielder"
+    case forward = "Forward"
+
+    var id: String { rawValue }
+
+    static func from(stored: String) -> MainPosition {
+        switch stored.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() {
+        case "goalkeeper", "gk":
+            return .goalkeeper
+        case "defender", "cb", "lb", "rb", "lwb", "rwb":
+            return .defender
+        case "forward", "lw", "rw", "st", "cf", "ss":
+            return .forward
+        default:
+            return .midfielder
+        }
+    }
+}
+
 @MainActor
 final class PlayerProfileViewModel: ObservableObject {
     @Published var name = ""
     @Published var avatarImageData: Data?
-    @Published var positionsText = ""
+    @Published var mainPosition: MainPosition = .midfielder
     @Published var preferredPositions: [FootballPosition] = []
     @Published var preferredFoot: PreferredFoot = .right
     @Published var skillLevel = 5.0
@@ -18,9 +40,12 @@ final class PlayerProfileViewModel: ObservableObject {
     private let playerID: UUID
     private let repository: any PlayerProfileRepository
 
-    init(playerID: UUID, repository: any PlayerProfileRepository) {
+    init(playerID: UUID, repository: any PlayerProfileRepository, seedPlayer: Player? = nil) {
         self.playerID = playerID
         self.repository = repository
+        if let seedPlayer {
+            apply(seedPlayer)
+        }
     }
 
     func loadProfile() async {
@@ -47,17 +72,12 @@ final class PlayerProfileViewModel: ObservableObject {
         isSaving = true
         errorMessage = nil
 
-        let cleanedPositions = positionsText
-            .split(separator: ",")
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-
         let updatedPlayer = Player(
             id: playerID,
             name: name.trimmingCharacters(in: .whitespacesAndNewlines),
             avatarURL: "",
             avatarImageData: avatarImageData,
-            positions: cleanedPositions,
+            positions: [mainPosition.rawValue],
             preferredPositions: preferredPositions,
             preferredFoot: preferredFoot,
             skillLevel: Int(skillLevel.rounded()),
@@ -81,7 +101,7 @@ final class PlayerProfileViewModel: ObservableObject {
     private func apply(_ player: Player) {
         name = player.name
         avatarImageData = player.avatarImageData
-        positionsText = player.positions.joined(separator: ", ")
+        mainPosition = MainPosition.from(stored: player.positions.first ?? "")
         preferredPositions = player.preferredPositions
         preferredFoot = player.preferredFoot
         skillLevel = Double(player.skillLevel)

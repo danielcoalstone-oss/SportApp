@@ -30,6 +30,8 @@ final class AccessPolicyTests: XCTestCase {
         XCTAssertTrue(AccessPolicy.canEnterMatchResult(admin, match))
         XCTAssertTrue(AccessPolicy.canCreateTournament(admin))
         XCTAssertTrue(AccessPolicy.canEditTournament(admin, tournament))
+        XCTAssertTrue(AccessPolicy.canManageTournamentTeams(admin, tournament))
+        XCTAssertTrue(AccessPolicy.canCreateTournamentMatch(admin, tournament))
         XCTAssertTrue(AccessPolicy.canEnterTournamentResult(admin, tournament))
         XCTAssertTrue(AccessPolicy.canCreateCoachSession(admin))
         XCTAssertTrue(AccessPolicy.canEditCoachSession(admin, coachSession))
@@ -49,8 +51,12 @@ final class AccessPolicyTests: XCTestCase {
         XCTAssertTrue(AccessPolicy.canEnterMatchResult(organiser, ownedMatch))
         XCTAssertFalse(AccessPolicy.canEditMatch(organiser, otherMatch))
         XCTAssertTrue(AccessPolicy.canEditTournament(organiser, ownedTournament))
+        XCTAssertTrue(AccessPolicy.canManageTournamentTeams(organiser, ownedTournament))
+        XCTAssertTrue(AccessPolicy.canCreateTournamentMatch(organiser, ownedTournament))
         XCTAssertTrue(AccessPolicy.canEnterTournamentResult(organiser, ownedTournament))
         XCTAssertFalse(AccessPolicy.canEditTournament(organiser, otherTournament))
+        XCTAssertFalse(AccessPolicy.canManageTournamentTeams(organiser, otherTournament))
+        XCTAssertFalse(AccessPolicy.canCreateTournamentMatch(organiser, otherTournament))
         XCTAssertFalse(AccessPolicy.canEnterTournamentResult(organiser, otherTournament))
     }
 
@@ -130,6 +136,8 @@ final class AccessPolicyTests: XCTestCase {
         XCTAssertTrue(AccessPolicy.canInviteToMatch(user, match))
         XCTAssertTrue(AccessPolicy.canEnterMatchResult(user, match))
         XCTAssertTrue(AccessPolicy.canEditTournament(user, tournament))
+        XCTAssertTrue(AccessPolicy.canManageTournamentTeams(user, tournament))
+        XCTAssertTrue(AccessPolicy.canCreateTournamentMatch(user, tournament))
         XCTAssertTrue(AccessPolicy.canEnterTournamentResult(user, tournament))
     }
 
@@ -171,6 +179,8 @@ final class AccessPolicyTests: XCTestCase {
         XCTAssertFalse(AccessPolicy.canInviteToMatch(player, match))
         XCTAssertFalse(AccessPolicy.canEnterMatchResult(player, match))
         XCTAssertFalse(AccessPolicy.canEditTournament(player, tournament))
+        XCTAssertFalse(AccessPolicy.canManageTournamentTeams(player, tournament))
+        XCTAssertFalse(AccessPolicy.canCreateTournamentMatch(player, tournament))
         XCTAssertFalse(AccessPolicy.canEnterTournamentResult(player, tournament))
         XCTAssertFalse(AccessPolicy.canCreateCoachSession(player))
         XCTAssertFalse(AccessPolicy.canEditCoachSession(player, coachSession))

@@ -20,6 +20,10 @@
 	<string>1</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>SUPABASE_ANON_KEY</key>
+	<string>eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imxqc2t0ZGptY2N6c2tsa21zc3F6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzExNDc0ODMsImV4cCI6MjA4NjcyMzQ4M30.vqJguKn2ih9VEJVNqqK3CPoXJAlILQOYlRbu9yql8Z4</string>
+	<key>SUPABASE_URL</key>
+	<string>https://ljsktdjmcczsklkmssqz.supabase.co</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

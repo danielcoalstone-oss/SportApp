@@ -10,6 +10,7 @@ struct SportAppApp: App {
                 .environmentObject(appViewModel)
                 .task {
                     await NotificationService.shared.requestAuthorization()
+                    await appViewModel.bootstrap()
                 }
         }
     }

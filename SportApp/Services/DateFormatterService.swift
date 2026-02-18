@@ -7,4 +7,10 @@ enum DateFormatterService {
         formatter.timeStyle = .short
         return formatter
     }()
+
+    static let monthDay: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.dateFormat = "MMM d"
+        return formatter
+    }()
 }

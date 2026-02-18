@@ -22,7 +22,7 @@ enum TournamentStandingsService {
             statsByTeam[team.id] = (0, 0, 0, 0, 0, 0)
         }
 
-        for match in tournament.matches where match.isCompleted {
+        for match in tournament.matches where match.status == .completed {
             guard
                 let home = match.homeScore,
                 let away = match.awayScore,

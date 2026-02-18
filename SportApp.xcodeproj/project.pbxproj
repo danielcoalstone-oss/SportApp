@@ -45,6 +45,13 @@
 		A10000010000000000000025 /* GameTeamsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000025 /* GameTeamsView.swift */; };
 		A10000010000000000000026 /* TournamentStandingsService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000026 /* TournamentStandingsService.swift */; };
 		A10000010000000000000027 /* NotificationService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000027 /* NotificationService.swift */; };
+		A10000010000000000000028 /* SupabaseConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000028 /* SupabaseConfig.swift */; };
+		A10000010000000000000029 /* SupabaseSessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000029 /* SupabaseSessionStore.swift */; };
+		A1000001000000000000002A /* SupabaseRESTClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000002A /* SupabaseRESTClient.swift */; };
+		A1000001000000000000002B /* SupabaseAuthService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000002B /* SupabaseAuthService.swift */; };
+		A1000001000000000000002C /* SupabaseDataService.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000002C /* SupabaseDataService.swift */; };
+		A1000001000000000000002D /* SupabaseEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000002D /* SupabaseEnvironment.swift */; };
+		A1000001000000000000002E /* SupabasePlayerProfileRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2000001000000000000002E /* SupabasePlayerProfileRepository.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -88,6 +95,13 @@
 		A20000010000000000000025 /* GameTeamsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameTeamsView.swift; sourceTree = "<group>"; };
 		A20000010000000000000026 /* TournamentStandingsService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TournamentStandingsService.swift; sourceTree = "<group>"; };
 		A20000010000000000000027 /* NotificationService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NotificationService.swift; sourceTree = "<group>"; };
+		A20000010000000000000028 /* SupabaseConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseConfig.swift; sourceTree = "<group>"; };
+		A20000010000000000000029 /* SupabaseSessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseSessionStore.swift; sourceTree = "<group>"; };
+		A2000001000000000000002A /* SupabaseRESTClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseRESTClient.swift; sourceTree = "<group>"; };
+		A2000001000000000000002B /* SupabaseAuthService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseAuthService.swift; sourceTree = "<group>"; };
+		A2000001000000000000002C /* SupabaseDataService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseDataService.swift; sourceTree = "<group>"; };
+		A2000001000000000000002D /* SupabaseEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseEnvironment.swift; sourceTree = "<group>"; };
+		A2000001000000000000002E /* SupabasePlayerProfileRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabasePlayerProfileRepository.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -159,6 +173,13 @@
 				A20000010000000000000020 /* AuthorizationUX.swift */,
 				A20000010000000000000026 /* TournamentStandingsService.swift */,
 				A20000010000000000000027 /* NotificationService.swift */,
+				A20000010000000000000028 /* SupabaseConfig.swift */,
+				A20000010000000000000029 /* SupabaseSessionStore.swift */,
+				A2000001000000000000002A /* SupabaseRESTClient.swift */,
+				A2000001000000000000002B /* SupabaseAuthService.swift */,
+				A2000001000000000000002C /* SupabaseDataService.swift */,
+				A2000001000000000000002D /* SupabaseEnvironment.swift */,
+				A2000001000000000000002E /* SupabasePlayerProfileRepository.swift */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -325,6 +346,13 @@
 				A10000010000000000000025 /* GameTeamsView.swift in Sources */,
 				A10000010000000000000026 /* TournamentStandingsService.swift in Sources */,
 				A10000010000000000000027 /* NotificationService.swift in Sources */,
+				A10000010000000000000028 /* SupabaseConfig.swift in Sources */,
+				A10000010000000000000029 /* SupabaseSessionStore.swift in Sources */,
+				A1000001000000000000002A /* SupabaseRESTClient.swift in Sources */,
+				A1000001000000000000002B /* SupabaseAuthService.swift in Sources */,
+				A1000001000000000000002C /* SupabaseDataService.swift in Sources */,
+				A1000001000000000000002D /* SupabaseEnvironment.swift in Sources */,
+				A1000001000000000000002E /* SupabasePlayerProfileRepository.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

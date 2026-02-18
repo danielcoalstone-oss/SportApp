@@ -123,7 +123,7 @@ struct Player: Identifiable, Equatable, Codable {
         return Player(
             id: user.id,
             name: user.fullName,
-            avatarURL: "",
+            avatarURL: user.avatarURL ?? "",
             avatarImageData: user.avatarImageData,
             positions: positionStrings,
             preferredPositions: user.preferredPositions,

@@ -50,6 +50,7 @@ struct GameDraft {
     var anyoneCanInvite = false
     var anyPlayerCanInputResults = false
     var entranceWithoutConfirmation = false
+    var isDraft = false
     var notes = ""
 
     var scheduledDate: Date {
@@ -68,9 +69,38 @@ struct GameDraft {
     }
 }
 
+struct TournamentDraft {
+    var title = ""
+    var location = ""
+    var startAt: Date = Calendar.current.date(byAdding: .day, value: 1, to: Date()) ?? Date()
+    var hasEndDate = false
+    var endAt: Date = Calendar.current.date(byAdding: .day, value: 2, to: Date()) ?? Date()
+    var visibility: TournamentVisibility = .public
+    var status: TournamentStatus = .published
+    var format: MatchFormat = .fiveVFive
+    var maxTeams = 8
+    var entryFee: Double = 0
+    var notes = ""
+}
+
+struct PracticeDraft {
+    var title = ""
+    var location = ""
+    var startAt: Date = Calendar.current.date(byAdding: .hour, value: 4, to: Date()) ?? Date()
+    var durationMinutes = 90
+    var numberOfPlayers = 12
+    var minElo = 1000
+    var maxElo = 2000
+    var isOpenJoin = true
+    var isDraft = false
+    var focusArea = "Technical"
+    var notes = ""
+}
+
 struct CreatedGame: Identifiable {
     let id: UUID
     let ownerId: UUID
+    let organiserIds: [UUID]
     let clubLocation: ClubLocation
     let startAt: Date
     let durationMinutes: Int
@@ -91,6 +121,10 @@ struct CreatedGame: Identifiable {
     let createdBy: String
     let inviteLink: String?
     var players: [User]
+    var status: MatchStatus = .scheduled
+    var isDraft: Bool = false
+    var finalHomeScore: Int? = nil
+    var finalAwayScore: Int? = nil
     var isDeleted: Bool
     var deletedAt: Date?
 
@@ -122,17 +156,90 @@ enum CreateGameValidationError: LocalizedError {
     }
 }
 
-struct PracticeSession: Identifiable {
+enum CreateTournamentValidationError: LocalizedError {
+    case unauthorized
+    case missingTitle
+    case missingLocation
+    case startAtMustBeFuture
+    case endBeforeStart
+    case maxTeamsTooLow
+
+    var errorDescription: String? {
+        switch self {
+        case .unauthorized:
+            return AuthorizationUX.permissionDeniedMessage
+        case .missingTitle:
+            return "Tournament name is required."
+        case .missingLocation:
+            return "Tournament location is required."
+        case .startAtMustBeFuture:
+            return "Tournament start date must be in the future."
+        case .endBeforeStart:
+            return "Tournament end date must be after start date."
+        case .maxTeamsTooLow:
+            return "Tournament requires at least 4 teams."
+        }
+    }
+}
+
+enum CreatePracticeValidationError: LocalizedError {
+    case unauthorized
+    case missingTitle
+    case missingLocation
+    case startAtMustBeFuture
+    case invalidCapacity
+
+    var errorDescription: String? {
+        switch self {
+        case .unauthorized:
+            return AuthorizationUX.permissionDeniedMessage
+        case .missingTitle:
+            return "Practice title is required."
+        case .missingLocation:
+            return "Practice location is required."
+        case .startAtMustBeFuture:
+            return "Practice start time must be in the future."
+        case .invalidCapacity:
+            return "Number of players must be between 2 and 60."
+        }
+    }
+}
+
+struct CoachReview: Identifiable, Hashable {
     let id: UUID
-    let title: String
-    let location: String
-    let startDate: Date
-    let numberOfPlayers: Int
-    let minElo: Int
-    let maxElo: Int
-    let isOpenJoin: Bool
+    let coachID: UUID
+    let authorID: UUID
+    let authorName: String
+    let rating: Int
+    let text: String
+    let createdAt: Date
+}
+
+struct PracticeSession: Identifiable, Hashable {
+    let id: UUID
+    var title: String
+    var location: String
+    var startDate: Date
+    var durationMinutes: Int
+    var numberOfPlayers: Int
+    var minElo: Int
+    var maxElo: Int
+    var isOpenJoin: Bool
+    var focusArea: String
+    var notes: String
+    var ownerId: UUID?
+    var organiserIds: [UUID]
+    var isDraft: Bool = false
     var isDeleted: Bool = false
     var deletedAt: Date? = nil
+}
+
+struct Club: Identifiable, Hashable {
+    let id: UUID
+    let name: String
+    let location: String
+    let phoneNumber: String
+    let bookingHint: String
 }
 
 final class AppViewModel: ObservableObject {
@@ -148,32 +255,47 @@ final class AppViewModel: ObservableObject {
 #endif
 
     @Published var isAuthenticated = false
+    @Published var isBootstrapping = true
     @Published var currentUser: User?
     @Published var users: [User]
     @Published var tournaments: [Tournament]
     @Published var createdGames: [CreatedGame] = []
     @Published var practices: [PracticeSession]
+    @Published var coachReviewsByCoach: [UUID: [CoachReview]] = [:]
+    @Published var clubs: [Club]
     @Published var authErrorMessage: String?
     @Published var tournamentActionMessage: String?
     @Published var adminActionMessage: String?
     private let matchStore: MatchLocalStore
+    private let supabaseEnvironment: SupabaseEnvironment
+    private let supabaseAuthService: SupabaseAuthService?
+    private let supabaseDataService: SupabaseDataService?
 
     init() {
         self.matchStore = UserDefaultsMatchLocalStore()
+        self.supabaseEnvironment = SupabaseEnvironment.shared
+        self.supabaseAuthService = supabaseEnvironment.authService
+        self.supabaseDataService = supabaseEnvironment.dataService
         let seededUsers = MockDataService.seedUsers()
         let now = Date()
         self.users = seededUsers
         self.tournaments = MockDataService.seedTournaments(availableUsers: seededUsers)
+        let coachOwner = seededUsers.first(where: { $0.isCoachActive })?.id
         self.practices = [
             PracticeSession(
                 id: UUID(),
                 title: "Finishing & Movement",
                 location: "Downtown Arena",
                 startDate: Calendar.current.date(byAdding: .day, value: 1, to: now) ?? now,
+                durationMinutes: 90,
                 numberOfPlayers: 12,
                 minElo: 1100,
                 maxElo: 1700,
                 isOpenJoin: true,
+                focusArea: "Finishing",
+                notes: "Bring cones and light bibs.",
+                ownerId: coachOwner,
+                organiserIds: coachOwner.map { [$0] } ?? [],
                 isDeleted: false
             ),
             PracticeSession(
@@ -181,10 +303,15 @@ final class AppViewModel: ObservableObject {
                 title: "Goalkeeper + Defense Clinic",
                 location: "North Sports Center",
                 startDate: Calendar.current.date(byAdding: .day, value: 3, to: now) ?? now,
+                durationMinutes: 90,
                 numberOfPlayers: 10,
                 minElo: 1200,
                 maxElo: 2000,
                 isOpenJoin: false,
+                focusArea: "Defensive shape",
+                notes: "Focus on 1v1 and transition defense.",
+                ownerId: coachOwner,
+                organiserIds: coachOwner.map { [$0] } ?? [],
                 isDeleted: false
             ),
             PracticeSession(
@@ -192,11 +319,56 @@ final class AppViewModel: ObservableObject {
                 title: "Small Sided Pressing Drills",
                 location: "Riverside Courts",
                 startDate: Calendar.current.date(byAdding: .day, value: 6, to: now) ?? now,
+                durationMinutes: 75,
                 numberOfPlayers: 14,
                 minElo: 1000,
                 maxElo: 1800,
                 isOpenJoin: true,
+                focusArea: "Pressing",
+                notes: "High-intensity, bring water.",
+                ownerId: coachOwner,
+                organiserIds: coachOwner.map { [$0] } ?? [],
                 isDeleted: false
+            )
+        ]
+        if let coachOwner {
+            self.coachReviewsByCoach = [
+                coachOwner: [
+                    CoachReview(
+                        id: UUID(),
+                        coachID: coachOwner,
+                        authorID: seededUsers.first(where: { $0.id != coachOwner })?.id ?? coachOwner,
+                        authorName: seededUsers.first(where: { $0.id != coachOwner })?.fullName ?? "Player",
+                        rating: 5,
+                        text: "Great session structure and clear feedback.",
+                        createdAt: now
+                    )
+                ]
+            ]
+        } else {
+            self.coachReviewsByCoach = [:]
+        }
+        self.clubs = [
+            Club(
+                id: UUID(),
+                name: "Downtown Arena",
+                location: "Austin, TX",
+                phoneNumber: "+1 (512) 555-0181",
+                bookingHint: "Booking will be connected later through Yclients or phone."
+            ),
+            Club(
+                id: UUID(),
+                name: "North Sports Center",
+                location: "Dallas, TX",
+                phoneNumber: "+1 (214) 555-0134",
+                bookingHint: "Booking will be connected later through Yclients or phone."
+            ),
+            Club(
+                id: UUID(),
+                name: "Riverside Courts",
+                location: "Houston, TX",
+                phoneNumber: "+1 (713) 555-0179",
+                bookingHint: "Booking will be connected later through Yclients or phone."
             )
         ]
 
@@ -213,8 +385,20 @@ final class AppViewModel: ObservableObject {
         tournaments.filter { !$0.isDeleted }
     }
 
+    var visibleTournamentDrafts: [Tournament] {
+        visibleTournaments
+            .filter { $0.status == .draft }
+            .sorted { $0.startDate < $1.startDate }
+    }
+
     var visibleCreatedGames: [CreatedGame] {
-        createdGames.filter { !$0.isDeleted }
+        createdGames.filter { !$0.isDeleted && !$0.isDraft }
+    }
+
+    var visibleGameDrafts: [CreatedGame] {
+        createdGames
+            .filter { !$0.isDeleted && $0.isDraft }
+            .sorted { $0.startAt < $1.startAt }
     }
 
     var upcomingCreatedGames: [CreatedGame] {
@@ -229,6 +413,20 @@ final class AppViewModel: ObservableObject {
                 persistedMatchStartTime(for: $0.id, fallback: $0.startAt)
                     < persistedMatchStartTime(for: $1.id, fallback: $1.startAt)
             }
+    }
+
+    var thisWeekQuickBookingGames: [CreatedGame] {
+        let calendar = Calendar.current
+        let now = Date()
+        guard let weekInterval = calendar.dateInterval(of: .weekOfYear, for: now) else {
+            return []
+        }
+
+        return discoverableUpcomingCreatedGames.filter { game in
+            let startTime = persistedMatchStartTime(for: game.id, fallback: game.startAt)
+            return startTime >= weekInterval.start
+                && startTime < weekInterval.end
+        }
     }
 
     var pastCreatedGames: [CreatedGame] {
@@ -248,8 +446,33 @@ final class AppViewModel: ObservableObject {
     }
 
     var currentUserUpcomingCreatedGames: [CreatedGame] {
-        guard let user = currentUser else { return [] }
-        return upcomingCreatedGames.filter { isUserParticipantOrOwner(userId: user.id, in: $0) }
+        guard currentUser != nil else { return [] }
+        return upcomingCreatedGames.filter { game in
+            currentUserRSVPStatus(in: game) == .going
+        }
+    }
+
+    var discoverableUpcomingCreatedGames: [CreatedGame] {
+        guard let user = currentUser else {
+            return upcomingCreatedGames
+        }
+
+        return upcomingCreatedGames.filter { game in
+            if game.ownerId == user.id {
+                return false
+            }
+
+            guard let status = currentUserRSVPStatus(in: game) else {
+                return true
+            }
+
+            switch status {
+            case .invited, .going, .maybe, .waitlisted:
+                return false
+            case .declined:
+                return true
+            }
+        }
     }
 
     var currentUserPastCreatedGames: [CreatedGame] {
@@ -257,13 +480,173 @@ final class AppViewModel: ObservableObject {
         return pastCreatedGames.filter { isUserParticipantOrOwner(userId: user.id, in: $0) }
     }
 
+    var currentUserUpcomingTournaments: [Tournament] {
+        guard let user = currentUser else { return [] }
+        return visibleTournaments
+            .filter { isUserInTournament(userId: user.id, in: $0) && !isTournamentPast($0) }
+            .sorted { $0.startDate < $1.startDate }
+    }
+
+    var currentUserPastTournaments: [Tournament] {
+        guard let user = currentUser else { return [] }
+        return visibleTournaments
+            .filter { isUserInTournament(userId: user.id, in: $0) && isTournamentPast($0) }
+            .sorted { $0.startDate > $1.startDate }
+    }
+
+    var canCurrentUserCreateTournamentFromCreateTab: Bool {
+        AccessPolicy.canCreateTournament(currentUser)
+    }
+
+    var canCurrentUserCreatePracticeFromCreateTab: Bool {
+        AccessPolicy.canCreateCoachSession(currentUser)
+    }
+
+    func user(with id: UUID) -> User? {
+        users.first(where: { $0.id == id })
+    }
+
+    func upcomingCreatedGames(for userID: UUID) -> [CreatedGame] {
+        upcomingCreatedGames.filter { isUserParticipantOrOwner(userId: userID, in: $0) }
+    }
+
+    func pastCreatedGames(for userID: UUID) -> [CreatedGame] {
+        pastCreatedGames.filter { isUserParticipantOrOwner(userId: userID, in: $0) }
+    }
+
+    func upcomingTournaments(for userID: UUID) -> [Tournament] {
+        visibleTournaments
+            .filter { isUserInTournament(userId: userID, in: $0) && !isTournamentPast($0) }
+            .sorted { $0.startDate < $1.startDate }
+    }
+
+    func pastTournaments(for userID: UUID) -> [Tournament] {
+        visibleTournaments
+            .filter { isUserInTournament(userId: userID, in: $0) && isTournamentPast($0) }
+            .sorted { $0.startDate > $1.startDate }
+    }
+
+    func partnersCount(for userID: UUID) -> Int {
+        var partners = Set<UUID>()
+
+        for game in visibleCreatedGames where isUserParticipantOrOwner(userId: userID, in: game) {
+            for player in game.players where player.id != userID {
+                partners.insert(player.id)
+            }
+        }
+
+        for tournament in visibleTournaments where isUserInTournament(userId: userID, in: tournament) {
+            for team in tournament.teams where team.members.contains(where: { $0.id == userID }) {
+                for member in team.members where member.id != userID {
+                    partners.insert(member.id)
+                }
+            }
+        }
+
+        return partners.count
+    }
+
     var visiblePractices: [PracticeSession] {
-        practices.filter { !$0.isDeleted }
+        practices.filter { !$0.isDeleted && !$0.isDraft }
+    }
+
+    var visiblePracticeDrafts: [PracticeSession] {
+        practices
+            .filter { !$0.isDeleted && $0.isDraft }
+            .sorted { $0.startDate < $1.startDate }
+    }
+
+    var currentUserTournamentDrafts: [Tournament] {
+        guard let user = currentUser else { return [] }
+        return visibleTournamentDrafts.filter {
+            $0.ownerId == user.id || $0.organiserIds.contains(user.id)
+        }
+    }
+
+    var currentUserPracticeDrafts: [PracticeSession] {
+        guard currentUser != nil else { return [] }
+        return visiblePracticeDrafts.filter { canCurrentUserEditPractice($0) }
+    }
+
+    var currentUserGameDrafts: [CreatedGame] {
+        guard let user = currentUser else { return [] }
+        return visibleGameDrafts.filter { $0.ownerId == user.id }
+    }
+
+    var canCurrentUserSeeTournamentDrafts: Bool {
+        canCurrentUserCreateTournamentFromCreateTab
+    }
+
+    var canCurrentUserSeePracticeDrafts: Bool {
+        canCurrentUserCreatePracticeFromCreateTab
+    }
+
+    var isUsingSupabase: Bool {
+        supabaseEnvironment.isConfigured
+    }
+
+    func bootstrap() async {
+        await MainActor.run {
+            isBootstrapping = true
+        }
+        defer {
+            Task { @MainActor in
+                self.isBootstrapping = false
+            }
+        }
+
+        guard isUsingSupabase, let supabaseAuthService else {
+            return
+        }
+        guard supabaseAuthService.hasSession else {
+            return
+        }
+
+        do {
+            let authUser = try await supabaseAuthService.currentUser()
+            try await syncFromBackend(currentUserID: authUser.id)
+            await MainActor.run {
+                isAuthenticated = true
+                authErrorMessage = nil
+            }
+        } catch {
+            await MainActor.run {
+                authErrorMessage = "Backend session expired. Please sign in again."
+                isAuthenticated = false
+                currentUser = nil
+            }
+        }
+    }
+
+    func makePlayerProfileRepository(for user: User) -> any PlayerProfileRepository {
+        if let supabaseDataService {
+            return SupabasePlayerProfileRepository(dataService: supabaseDataService, email: user.email)
+        }
+        return MockPlayerProfileRepository(seedPlayer: Player.from(user: user))
     }
 
     func signIn(email: String, password: String) {
         guard !email.isEmpty, !password.isEmpty else {
             authErrorMessage = "Please fill in email and password."
+            return
+        }
+
+        if let supabaseAuthService {
+            Task {
+                do {
+                    let session = try await supabaseAuthService.signIn(email: email, password: password)
+                    try await syncFromBackend(currentUserID: session.user.id)
+                    await MainActor.run {
+                        isAuthenticated = true
+                        authErrorMessage = nil
+                    }
+                } catch {
+                    await MainActor.run {
+                        authErrorMessage = error.localizedDescription
+                        isAuthenticated = false
+                    }
+                }
+            }
             return
         }
 
@@ -275,6 +658,9 @@ final class AppViewModel: ObservableObject {
             currentUser = existing
             isAuthenticated = true
             authErrorMessage = nil
+            if !isUsingSupabase {
+                seedLocalDemoCreatedGames(for: currentUser, users: users)
+            }
             return
         }
 
@@ -284,6 +670,45 @@ final class AppViewModel: ObservableObject {
     func register(name: String, email: String, city: String, favoritePosition: String, password: String) {
         guard !name.isEmpty, !email.isEmpty, !city.isEmpty, !favoritePosition.isEmpty, !password.isEmpty else {
             authErrorMessage = "All fields are required."
+            return
+        }
+
+        if let supabaseAuthService, let supabaseDataService {
+            Task {
+                do {
+                    let maybeSession = try await supabaseAuthService.signUp(email: email, password: password)
+                    guard let session = maybeSession else {
+                        await MainActor.run {
+                            authErrorMessage = "Registration submitted. Check your email to confirm your account."
+                        }
+                        return
+                    }
+
+                    let player = Player(
+                        id: session.user.id,
+                        name: name,
+                        avatarURL: "",
+                        avatarImageData: nil,
+                        positions: [favoritePosition],
+                        preferredPositions: [],
+                        preferredFoot: .right,
+                        skillLevel: 5,
+                        location: city,
+                        createdAt: Date()
+                    )
+                    try await supabaseDataService.saveProfile(player, email: email)
+                    try await syncFromBackend(currentUserID: session.user.id)
+                    await MainActor.run {
+                        isAuthenticated = true
+                        authErrorMessage = nil
+                    }
+                } catch {
+                    await MainActor.run {
+                        authErrorMessage = error.localizedDescription
+                        isAuthenticated = false
+                    }
+                }
+            }
             return
         }
 
@@ -308,58 +733,123 @@ final class AppViewModel: ObservableObject {
         currentUser = newUser
         isAuthenticated = true
         authErrorMessage = nil
+        if !isUsingSupabase {
+            seedLocalDemoCreatedGames(for: currentUser, users: users)
+        }
     }
 
     func signOut() {
+        if let supabaseAuthService {
+            Task {
+                await supabaseAuthService.signOut()
+            }
+        }
         currentUser = nil
         isAuthenticated = false
     }
 
 #if DEBUG
     var debugSwitchUserOptions: [DebugSwitchUserOption] {
-        let organiserIDs = Set(tournaments.flatMap { [$0.ownerId] + $0.organiserIds })
-
-        let admin = users.first(where: { $0.globalRole == .admin })
-        let organiser = users.first(where: { organiserIDs.contains($0.id) && $0.globalRole != .admin })
-        let player = users.first(where: { $0.globalRole == .player && !organiserIDs.contains($0.id) })
-
-        let options: [(User?, String)] = [
-            (player, "Player"),
-            (organiser, "Organiser"),
-            (admin, "Admin")
+        let options: [(User, String)] = [
+            (debugUser(for: "player"), "Player"),
+            (debugUser(for: "organizer"), "Organizer"),
+            (debugUser(for: "coach"), "Coach"),
+            (debugUser(for: "admin"), "Admin")
         ]
-
-        var seenEmails = Set<String>()
-        return options.compactMap { user, label in
-            guard let user else { return nil }
-            let key = user.email.lowercased()
-            guard !seenEmails.contains(key) else { return nil }
-            seenEmails.insert(key)
-            return DebugSwitchUserOption(user: user, label: label)
-        }
+        return options.map { DebugSwitchUserOption(user: $0.0, label: $0.1) }
     }
 
     func debugSwitchUser(to user: User) {
-        guard let existing = users.first(where: { $0.email.caseInsensitiveCompare(user.email) == .orderedSame }) else {
-            return
+        if let index = users.firstIndex(where: { $0.email.caseInsensitiveCompare(user.email) == .orderedSame }) {
+            users[index] = user
+            currentUser = users[index]
+        } else {
+            users.append(user)
+            currentUser = user
         }
-
-        currentUser = existing
         isAuthenticated = true
         authErrorMessage = nil
-        UserDefaults.standard.set(existing.email.lowercased(), forKey: Self.debugSelectedUserEmailKey)
+        if !isUsingSupabase {
+            seedLocalDemoCreatedGames(for: currentUser, users: users)
+        }
+        UserDefaults.standard.set(user.email.lowercased(), forKey: Self.debugSelectedUserEmailKey)
+    }
+
+    private func debugUser(for access: String) -> User {
+        let base = currentUser ?? users.first ?? User(
+            id: UUID(),
+            fullName: "Debug User",
+            email: "debug@local.app",
+            favoritePosition: "Midfielder",
+            city: "Debug City",
+            eloRating: 1400,
+            matchesPlayed: 0,
+            wins: 0,
+            globalRole: .player
+        )
+
+        let role: GlobalRole = access == "admin" ? .admin : .player
+        let coachEnds: Date? = access == "coach" ? Calendar.current.date(byAdding: .day, value: 30, to: Date()) : nil
+        let organizerEnds: Date? = access == "organizer" ? Calendar.current.date(byAdding: .day, value: 30, to: Date()) : nil
+
+        return User(
+            id: UUID(),
+            fullName: "Debug \(access.capitalized)",
+            email: "debug+\(access)@local.app",
+            avatarURL: base.avatarURL,
+            avatarImageData: base.avatarImageData,
+            favoritePosition: base.favoritePosition,
+            preferredPositions: base.preferredPositions,
+            city: base.city,
+            eloRating: base.eloRating,
+            matchesPlayed: base.matchesPlayed,
+            wins: base.wins,
+            draws: base.draws,
+            losses: base.losses,
+            globalRole: role,
+            coachSubscriptionEndsAt: coachEnds,
+            isCoachSubscriptionPaused: false,
+            organizerSubscriptionEndsAt: organizerEnds,
+            isOrganizerSubscriptionPaused: false,
+            isSuspended: false,
+            suspensionReason: nil
+        )
     }
 
     private func restoreDebugSelectedUserIfAvailable() {
         guard let savedEmail = UserDefaults.standard.string(forKey: Self.debugSelectedUserEmailKey) else {
             return
         }
-        guard let user = users.first(where: { $0.email.caseInsensitiveCompare(savedEmail) == .orderedSame }) else {
+        if let user = users.first(where: { $0.email.caseInsensitiveCompare(savedEmail) == .orderedSame }) {
+            guard !user.isSuspended else { return }
+            currentUser = user
+            isAuthenticated = true
+            if !isUsingSupabase {
+                seedLocalDemoCreatedGames(for: currentUser, users: users)
+            }
             return
         }
-        guard !user.isSuspended else { return }
-        currentUser = user
+
+        let savedAccess: String
+        if savedEmail.contains("debug+organizer@") {
+            savedAccess = "organizer"
+        } else if savedEmail.contains("debug+coach@") {
+            savedAccess = "coach"
+        } else if savedEmail.contains("debug+admin@") {
+            savedAccess = "admin"
+        } else if savedEmail.contains("debug+player@") {
+            savedAccess = "player"
+        } else {
+            return
+        }
+
+        let restored = debugUser(for: savedAccess)
+        users.append(restored)
+        currentUser = restored
         isAuthenticated = true
+        if !isUsingSupabase {
+            seedLocalDemoCreatedGames(for: currentUser, users: users)
+        }
     }
 #endif
 
@@ -372,7 +862,7 @@ final class AppViewModel: ObservableObject {
             return
         }
 
-        guard AccessPolicy.canEditTournament(currentUser, tournaments[index]) else {
+        guard AccessPolicy.canManageTournamentTeams(currentUser, tournaments[index]) else {
             tournamentActionMessage = AuthorizationUX.permissionDeniedMessage
             return
         }
@@ -386,11 +876,41 @@ final class AppViewModel: ObservableObject {
         }
 
         let team = Team(id: UUID(), name: teamName, members: [user], maxPlayers: 6)
+        let teamEntry = TournamentTeam(
+            id: team.id,
+            tournamentId: tournamentID,
+            name: teamName,
+            colorHex: "#2D6CC4",
+            createdAt: Date()
+        )
+        let teamMember = TournamentTeamMember(
+            teamId: team.id,
+            playerId: user.id,
+            positionGroup: .bench,
+            sortOrder: 0,
+            isCaptain: true
+        )
         guard tournaments[index].teams.count < tournaments[index].maxTeams else {
             return
         }
 
         tournaments[index].teams.append(team)
+        tournaments[index].teamEntries.append(teamEntry)
+        tournaments[index].teamMembers.append(teamMember)
+        tournamentActionMessage = "Team created."
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    try await supabaseDataService.createTournamentTeam(tournamentID: tournamentID, team: team)
+                    try await supabaseDataService.addTournamentTeamMember(tournamentID: tournamentID, teamID: team.id, userID: user.id)
+                } catch {
+                    await MainActor.run {
+                        tournamentActionMessage = "Team created locally, but backend sync failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
     }
 
     func joinTeam(tournamentID: UUID, teamID: UUID) {
@@ -421,6 +941,32 @@ final class AppViewModel: ObservableObject {
 
         team.members.append(user)
         tournaments[tournamentIndex].teams[teamIndex] = team
+        let nextOrder = tournaments[tournamentIndex].teamMembers
+            .filter { $0.teamId == teamID }
+            .map(\.sortOrder)
+            .max() ?? -1
+        tournaments[tournamentIndex].teamMembers.append(
+            TournamentTeamMember(
+                teamId: teamID,
+                playerId: user.id,
+                positionGroup: .bench,
+                sortOrder: nextOrder + 1,
+                isCaptain: false
+            )
+        )
+        tournamentActionMessage = "Joined team."
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    try await supabaseDataService.addTournamentTeamMember(tournamentID: tournamentID, teamID: teamID, userID: user.id)
+                } catch {
+                    await MainActor.run {
+                        tournamentActionMessage = error.localizedDescription
+                    }
+                }
+            }
+        }
     }
 
     func leaveTeam(tournamentID: UUID, teamID: UUID) {
@@ -442,11 +988,184 @@ final class AppViewModel: ObservableObject {
         }
 
         tournaments[tournamentIndex].teams[teamIndex].members.removeAll { $0.id == user.id }
+        tournaments[tournamentIndex].teamMembers.removeAll {
+            $0.teamId == teamID && $0.playerId == user.id
+        }
         tournamentActionMessage = "You left the team."
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    try await supabaseDataService.removeTournamentTeamMember(
+                        tournamentID: tournamentID,
+                        teamID: teamID,
+                        userID: user.id
+                    )
+                } catch {
+                    await MainActor.run {
+                        tournamentActionMessage = "Left team locally, but backend sync failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
+    }
+
+    func addPlayerToTournamentTeam(tournamentID: UUID, teamID: UUID, userID: UUID) {
+        guard let tournamentIndex = tournaments.firstIndex(where: { $0.id == tournamentID }) else { return }
+        guard AccessPolicy.canManageTournamentTeams(currentUser, tournaments[tournamentIndex]) else {
+            tournamentActionMessage = AuthorizationUX.permissionDeniedMessage
+            return
+        }
+        guard let teamIndex = tournaments[tournamentIndex].teams.firstIndex(where: { $0.id == teamID }) else { return }
+        guard let user = users.first(where: { $0.id == userID }) else { return }
+        guard !tournaments[tournamentIndex].teams.contains(where: { $0.members.contains(where: { $0.id == userID }) }) else {
+            tournamentActionMessage = "Player is already assigned to a team."
+            return
+        }
+        guard !tournaments[tournamentIndex].teams[teamIndex].isFull else {
+            tournamentActionMessage = "Team is full."
+            return
+        }
+
+        tournaments[tournamentIndex].teams[teamIndex].members.append(user)
+        let nextOrder = tournaments[tournamentIndex].teamMembers
+            .filter { $0.teamId == teamID }
+            .map(\.sortOrder)
+            .max() ?? -1
+        tournaments[tournamentIndex].teamMembers.append(
+            TournamentTeamMember(teamId: teamID, playerId: userID, positionGroup: .bench, sortOrder: nextOrder + 1, isCaptain: false)
+        )
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    try await supabaseDataService.addTournamentTeamMember(
+                        tournamentID: tournamentID,
+                        teamID: teamID,
+                        userID: userID,
+                        positionGroup: .bench,
+                        sortOrder: nextOrder + 1,
+                        isCaptain: false
+                    )
+                } catch {
+                    await MainActor.run {
+                        tournamentActionMessage = "Added locally, but backend sync failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
+    }
+
+    func removePlayerFromTournamentTeam(tournamentID: UUID, teamID: UUID, userID: UUID) {
+        guard let tournamentIndex = tournaments.firstIndex(where: { $0.id == tournamentID }) else { return }
+        guard AccessPolicy.canManageTournamentTeams(currentUser, tournaments[tournamentIndex]) else {
+            tournamentActionMessage = AuthorizationUX.permissionDeniedMessage
+            return
+        }
+        guard let teamIndex = tournaments[tournamentIndex].teams.firstIndex(where: { $0.id == teamID }) else { return }
+
+        tournaments[tournamentIndex].teams[teamIndex].members.removeAll { $0.id == userID }
+        tournaments[tournamentIndex].teamMembers.removeAll { $0.teamId == teamID && $0.playerId == userID }
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    try await supabaseDataService.removeTournamentTeamMember(
+                        tournamentID: tournamentID,
+                        teamID: teamID,
+                        userID: userID
+                    )
+                } catch {
+                    await MainActor.run {
+                        tournamentActionMessage = "Removed locally, but backend sync failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
+    }
+
+    func updateTournamentMemberPositionGroup(
+        tournamentID: UUID,
+        teamID: UUID,
+        userID: UUID,
+        group: PositionGroup
+    ) {
+        guard let tournamentIndex = tournaments.firstIndex(where: { $0.id == tournamentID }) else { return }
+        guard AccessPolicy.canManageTournamentTeams(currentUser, tournaments[tournamentIndex]) else {
+            tournamentActionMessage = AuthorizationUX.permissionDeniedMessage
+            return
+        }
+        guard let memberIndex = tournaments[tournamentIndex].teamMembers.firstIndex(where: { $0.teamId == teamID && $0.playerId == userID }) else { return }
+        tournaments[tournamentIndex].teamMembers[memberIndex].positionGroup = group
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    try await supabaseDataService.updateTournamentTeamMember(
+                        tournamentID: tournamentID,
+                        teamID: teamID,
+                        userID: userID,
+                        positionGroup: group,
+                        sortOrder: nil,
+                        isCaptain: nil
+                    )
+                } catch {
+                    await MainActor.run {
+                        tournamentActionMessage = "Saved locally, but backend sync failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
+    }
+
+    func setTournamentCaptain(tournamentID: UUID, teamID: UUID, userID: UUID) {
+        guard let tournamentIndex = tournaments.firstIndex(where: { $0.id == tournamentID }) else { return }
+        guard AccessPolicy.canManageTournamentTeams(currentUser, tournaments[tournamentIndex]) else {
+            tournamentActionMessage = AuthorizationUX.permissionDeniedMessage
+            return
+        }
+        let teamMemberIndices = tournaments[tournamentIndex].teamMembers.indices.filter {
+            tournaments[tournamentIndex].teamMembers[$0].teamId == teamID
+        }
+        guard !teamMemberIndices.isEmpty else { return }
+
+        for idx in teamMemberIndices {
+            tournaments[tournamentIndex].teamMembers[idx].isCaptain = tournaments[tournamentIndex].teamMembers[idx].playerId == userID
+        }
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    for idx in teamMemberIndices {
+                        let member = tournaments[tournamentIndex].teamMembers[idx]
+                        try await supabaseDataService.updateTournamentTeamMember(
+                            tournamentID: tournamentID,
+                            teamID: teamID,
+                            userID: member.playerId,
+                            positionGroup: nil,
+                            sortOrder: nil,
+                            isCaptain: member.playerId == userID
+                        )
+                    }
+                } catch {
+                    await MainActor.run {
+                        tournamentActionMessage = "Saved locally, but backend sync failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
     }
 
     func canCurrentUserEditTournament(_ tournament: Tournament) -> Bool {
         AccessPolicy.canEditTournament(currentUser, tournament)
+    }
+
+    func canCurrentUserManageTournamentTeams(_ tournament: Tournament) -> Bool {
+        AccessPolicy.canManageTournamentTeams(currentUser, tournament)
+    }
+
+    func canCurrentUserCreateTournamentMatch(_ tournament: Tournament) -> Bool {
+        AccessPolicy.canCreateTournamentMatch(currentUser, tournament)
     }
 
     func canCurrentUserEnterTournamentResult(_ tournament: Tournament) -> Bool {
@@ -474,15 +1193,35 @@ final class AppViewModel: ObservableObject {
         tournaments[index].startDate = startDate
         tournaments[index].format = format.trimmingCharacters(in: .whitespacesAndNewlines)
         tournaments[index].maxTeams = max(maxTeams, tournaments[index].teams.count)
+        let updatedTournament = tournaments[index]
         tournamentActionMessage = "Tournament details updated."
         AuditLogger.log(action: "tournament_updated", actorId: currentUser?.id, objectId: tournamentID)
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    try await supabaseDataService.updateTournamentDetails(
+                        tournamentID: tournamentID,
+                        title: updatedTournament.title,
+                        location: updatedTournament.location,
+                        startDate: updatedTournament.startDate,
+                        format: updatedTournament.format,
+                        maxTeams: updatedTournament.maxTeams
+                    )
+                } catch {
+                    await MainActor.run {
+                        tournamentActionMessage = "Updated locally, but backend sync failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
     }
 
     func addTeamToTournament(tournamentID: UUID, teamName: String) {
         guard let index = tournaments.firstIndex(where: { $0.id == tournamentID }) else {
             return
         }
-        guard AccessPolicy.canEditTournament(currentUser, tournaments[index]) else {
+        guard AccessPolicy.canManageTournamentTeams(currentUser, tournaments[index]) else {
             tournamentActionMessage = AuthorizationUX.permissionDeniedMessage
             return
         }
@@ -498,34 +1237,71 @@ final class AppViewModel: ObservableObject {
 
         let team = Team(id: UUID(), name: trimmedName, members: [], maxPlayers: 6)
         tournaments[index].teams.append(team)
+        tournaments[index].teamEntries.append(
+            TournamentTeam(
+                id: team.id,
+                tournamentId: tournamentID,
+                name: team.name,
+                colorHex: "#2D6CC4",
+                createdAt: Date()
+            )
+        )
         tournamentActionMessage = "Team added."
         AuditLogger.log(action: "tournament_team_added", actorId: currentUser?.id, objectId: tournamentID, metadata: ["teamName": trimmedName])
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    try await supabaseDataService.createTournamentTeam(tournamentID: tournamentID, team: team)
+                } catch {
+                    await MainActor.run {
+                        tournamentActionMessage = "Added locally, but backend sync failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
     }
 
     func removeTeamFromTournament(tournamentID: UUID, teamID: UUID) {
         guard let index = tournaments.firstIndex(where: { $0.id == tournamentID }) else {
             return
         }
-        guard AccessPolicy.canEditTournament(currentUser, tournaments[index]) else {
+        guard AccessPolicy.canManageTournamentTeams(currentUser, tournaments[index]) else {
             tournamentActionMessage = AuthorizationUX.permissionDeniedMessage
             return
         }
         tournaments[index].teams.removeAll { $0.id == teamID }
+        tournaments[index].teamEntries.removeAll { $0.id == teamID }
+        tournaments[index].teamMembers.removeAll { $0.teamId == teamID }
         tournaments[index].matches.removeAll { $0.homeTeamId == teamID || $0.awayTeamId == teamID }
         tournamentActionMessage = "Team removed."
         AuditLogger.log(action: "tournament_team_removed", actorId: currentUser?.id, objectId: tournamentID, metadata: ["teamId": teamID.uuidString])
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    try await supabaseDataService.deleteTournamentTeam(teamID: teamID)
+                } catch {
+                    await MainActor.run {
+                        tournamentActionMessage = "Removed locally, but backend sync failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
     }
 
     func createTournamentMatch(
         tournamentID: UUID,
         homeTeamID: UUID,
         awayTeamID: UUID,
-        startTime: Date
+        startTime: Date,
+        locationName: String,
+        matchday: Int?
     ) {
         guard let index = tournaments.firstIndex(where: { $0.id == tournamentID }) else {
             return
         }
-        guard AccessPolicy.canEditTournament(currentUser, tournaments[index]) else {
+        guard AccessPolicy.canCreateTournamentMatch(currentUser, tournaments[index]) else {
             tournamentActionMessage = AuthorizationUX.permissionDeniedMessage
             return
         }
@@ -533,20 +1309,67 @@ final class AppViewModel: ObservableObject {
             tournamentActionMessage = "Home and away team must be different."
             return
         }
+        let duplicateOnMatchday = tournaments[index].matches.contains {
+            $0.matchday == matchday && (($0.homeTeamId == homeTeamID && $0.awayTeamId == awayTeamID) || ($0.homeTeamId == awayTeamID && $0.awayTeamId == homeTeamID))
+        }
+        guard !duplicateOnMatchday else {
+            tournamentActionMessage = "Fixture already exists for this matchday."
+            return
+        }
 
-        let match = TournamentMatch(homeTeamId: homeTeamID, awayTeamId: awayTeamID, startTime: startTime)
+        let match = TournamentMatch(
+            tournamentId: tournamentID,
+            homeTeamId: homeTeamID,
+            awayTeamId: awayTeamID,
+            startTime: startTime,
+            locationName: locationName,
+            matchday: matchday,
+            status: .scheduled
+        )
         tournaments[index].matches.append(match)
         tournaments[index].matches.sort { $0.startTime < $1.startTime }
         upsertCreatedGameFromTournamentMatch(tournament: tournaments[index], match: match)
         tournamentActionMessage = "Tournament match scheduled."
         AuditLogger.log(action: "tournament_match_scheduled", actorId: currentUser?.id, objectId: tournamentID, metadata: ["matchId": match.id.uuidString])
+
+        if let supabaseDataService {
+            let tournament = tournaments[index]
+            Task {
+                do {
+                    let backendMatch = try await supabaseDataService.createTournamentMatch(
+                        tournamentID: tournamentID,
+                        ownerID: tournament.ownerId,
+                        organiserIDs: tournament.organiserIds,
+                        homeTeamID: homeTeamID,
+                        awayTeamID: awayTeamID,
+                        startTime: startTime,
+                        locationName: locationName,
+                        format: tournament.format,
+                        matchday: matchday
+                    )
+
+                    await MainActor.run {
+                        if let tournamentIndex = tournaments.firstIndex(where: { $0.id == tournamentID }),
+                           let localMatchIndex = tournaments[tournamentIndex].matches.firstIndex(where: { $0.id == match.id }) {
+                            tournaments[tournamentIndex].matches[localMatchIndex] = backendMatch
+                            upsertCreatedGameFromTournamentMatch(tournament: tournaments[tournamentIndex], match: backendMatch)
+                        }
+                    }
+                } catch {
+                    await MainActor.run {
+                        tournamentActionMessage = "Scheduled locally, but backend sync failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
     }
 
     func updateTournamentMatchResult(
         tournamentID: UUID,
         matchID: UUID,
         homeScore: Int,
-        awayScore: Int
+        awayScore: Int,
+        reason: String? = nil
     ) {
         guard let index = tournaments.firstIndex(where: { $0.id == tournamentID }) else {
             return
@@ -558,13 +1381,39 @@ final class AppViewModel: ObservableObject {
         guard let matchIndex = tournaments[index].matches.firstIndex(where: { $0.id == matchID }) else {
             return
         }
+        if tournaments[index].matches[matchIndex].status == .completed,
+           (reason?.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ?? true) {
+            tournamentActionMessage = "Reason is required to edit a completed result."
+            return
+        }
 
         tournaments[index].matches[matchIndex].homeScore = max(homeScore, 0)
         tournaments[index].matches[matchIndex].awayScore = max(awayScore, 0)
-        tournaments[index].matches[matchIndex].isCompleted = true
+        tournaments[index].matches[matchIndex].status = .completed
         syncCreatedGameCompletion(matchID: matchID, homeScore: homeScore, awayScore: awayScore)
         tournamentActionMessage = "Tournament result saved."
-        AuditLogger.log(action: "tournament_result_updated", actorId: currentUser?.id, objectId: tournamentID, metadata: ["matchId": matchID.uuidString, "home": "\(homeScore)", "away": "\(awayScore)"])
+        var metadata: [String: String] = ["matchId": matchID.uuidString, "home": "\(homeScore)", "away": "\(awayScore)"]
+        if let reason = reason?.trimmingCharacters(in: .whitespacesAndNewlines), !reason.isEmpty {
+            metadata["reason"] = reason
+        }
+        AuditLogger.log(action: "tournament_result_updated", actorId: currentUser?.id, objectId: tournamentID, metadata: metadata)
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    try await supabaseDataService.updateTournamentMatchResult(
+                        matchID: matchID,
+                        homeScore: max(homeScore, 0),
+                        awayScore: max(awayScore, 0),
+                        reason: reason
+                    )
+                } catch {
+                    await MainActor.run {
+                        tournamentActionMessage = "Saved locally, but backend sync failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
     }
 
     func resolveTournamentDispute(tournamentID: UUID, status: TournamentDisputeStatus) {
@@ -579,6 +1428,18 @@ final class AppViewModel: ObservableObject {
         tournaments[index].disputeStatus = status
         tournamentActionMessage = "Dispute status updated to \(status.rawValue)."
         AuditLogger.log(action: "tournament_dispute_status_updated", actorId: currentUser?.id, objectId: tournamentID, metadata: ["status": status.rawValue])
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    try await supabaseDataService.updateTournamentDispute(tournamentID: tournamentID, status: status)
+                } catch {
+                    await MainActor.run {
+                        tournamentActionMessage = "Updated locally, but backend sync failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
     }
 
     func simulateMatchResult(didWin: Bool, opponentAverageElo: Int) {
@@ -594,12 +1455,27 @@ final class AppViewModel: ObservableObject {
         user.matchesPlayed += 1
         if didWin {
             user.wins += 1
+        } else {
+            user.losses += 1
         }
 
         currentUser = user
 
         if let index = users.firstIndex(where: { $0.id == user.id }) {
             users[index] = user
+        }
+
+        if let supabaseDataService {
+            Task {
+                try? await supabaseDataService.updateUserStats(
+                    userID: user.id,
+                    eloRating: user.eloRating,
+                    matchesPlayed: user.matchesPlayed,
+                    wins: user.wins,
+                    draws: user.draws,
+                    losses: user.losses
+                )
+            }
         }
     }
 
@@ -619,12 +1495,15 @@ final class AppViewModel: ObservableObject {
         }
 
         updatedUser.avatarImageData = player.avatarImageData
+        if !player.avatarURL.isEmpty {
+            updatedUser.avatarURL = player.avatarURL
+        }
         updatedUser.preferredPositions = player.preferredPositions
 
-        if let firstPreferred = player.preferredPositions.first {
+        if let mainPosition = player.positions.first(where: { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) {
+            updatedUser.favoritePosition = mainPosition
+        } else if let firstPreferred = player.preferredPositions.first {
             updatedUser.favoritePosition = firstPreferred.rawValue
-        } else if let fallback = player.positions.first(where: { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }) {
-            updatedUser.favoritePosition = fallback
         }
 
         if let index = users.firstIndex(where: { $0.id == updatedUser.id }) {
@@ -687,6 +1566,7 @@ final class AppViewModel: ObservableObject {
         let game = CreatedGame(
             id: UUID(),
             ownerId: currentUser?.id ?? UUID(),
+            organiserIds: [currentUser?.id ?? UUID()],
             clubLocation: draft.clubLocation,
             startAt: draft.startAt,
             durationMinutes: draft.durationMinutes,
@@ -707,13 +1587,265 @@ final class AppViewModel: ObservableObject {
             createdBy: creatorName,
             inviteLink: inviteLink,
             players: selectedPlayers,
+            status: .scheduled,
+            isDraft: draft.isDraft,
+            finalHomeScore: nil,
+            finalAwayScore: nil,
             isDeleted: false,
             deletedAt: nil
         )
 
         createdGames.append(game)
         createdGames.sort { $0.scheduledDate < $1.scheduledDate }
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    try await supabaseDataService.createMatch(game: game)
+                } catch {
+                    await MainActor.run {
+                        authErrorMessage = "Game saved locally, but backend sync failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
+
         return .success(game)
+    }
+
+    func createTournament(from draft: TournamentDraft, now: Date = Date()) -> Result<Tournament, CreateTournamentValidationError> {
+        guard canCurrentUserCreateTournamentFromCreateTab, let user = currentUser else {
+            return .failure(.unauthorized)
+        }
+
+        let title = draft.title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !title.isEmpty else {
+            return .failure(.missingTitle)
+        }
+
+        let location = draft.location.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !location.isEmpty else {
+            return .failure(.missingLocation)
+        }
+
+        guard draft.startAt > now else {
+            return .failure(.startAtMustBeFuture)
+        }
+
+        if draft.hasEndDate {
+            guard draft.endAt >= draft.startAt else {
+                return .failure(.endBeforeStart)
+            }
+        }
+
+        guard draft.maxTeams >= 4 else {
+            return .failure(.maxTeamsTooLow)
+        }
+
+        let tournament = Tournament(
+            id: UUID(),
+            title: title,
+            location: location,
+            startDate: draft.startAt,
+            teams: [],
+            entryFee: max(draft.entryFee, 0),
+            maxTeams: draft.maxTeams,
+            format: draft.format.rawValue,
+            visibility: draft.visibility,
+            status: draft.status,
+            ownerId: user.id,
+            organiserIds: [user.id],
+            endDate: draft.hasEndDate ? draft.endAt : nil,
+            teamEntries: [],
+            teamMembers: [],
+            matches: [],
+            disputeStatus: .none,
+            isDeleted: false,
+            deletedAt: nil
+        )
+
+        tournaments.append(tournament)
+        tournaments.sort { $0.startDate < $1.startDate }
+        tournamentActionMessage = "Tournament created."
+        AuditLogger.log(action: "tournament_created", actorId: currentUser?.id, objectId: tournament.id)
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    let backendTournament = try await supabaseDataService.createTournament(
+                        title: title,
+                        location: location,
+                        startDate: draft.startAt,
+                        endDate: draft.hasEndDate ? draft.endAt : nil,
+                        visibility: draft.visibility,
+                        status: draft.status,
+                        entryFee: max(draft.entryFee, 0),
+                        maxTeams: draft.maxTeams,
+                        format: draft.format.rawValue,
+                        ownerID: user.id,
+                        organiserIDs: [user.id]
+                    )
+
+                    await MainActor.run {
+                        if let index = tournaments.firstIndex(where: { $0.id == tournament.id }) {
+                            tournaments[index] = backendTournament
+                        }
+                    }
+                } catch {
+                    await MainActor.run {
+                        tournamentActionMessage = "Tournament created locally, but backend sync failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
+
+        return .success(tournament)
+    }
+
+    func canCurrentUserEditPractice(_ session: PracticeSession) -> Bool {
+        let owner = session.ownerId ?? UUID()
+        return AccessPolicy.canEditCoachSession(
+            currentUser,
+            CoachSessionAccessTarget(ownerId: owner, organiserIds: session.organiserIds)
+        )
+    }
+
+    func createPractice(from draft: PracticeDraft, now: Date = Date()) -> Result<PracticeSession, CreatePracticeValidationError> {
+        guard AccessPolicy.canCreateCoachSession(currentUser), let user = currentUser else {
+            return .failure(.unauthorized)
+        }
+
+        let title = draft.title.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !title.isEmpty else { return .failure(.missingTitle) }
+        let location = draft.location.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !location.isEmpty else { return .failure(.missingLocation) }
+        guard draft.startAt > now else { return .failure(.startAtMustBeFuture) }
+        guard (2...60).contains(draft.numberOfPlayers) else { return .failure(.invalidCapacity) }
+
+        let practice = PracticeSession(
+            id: UUID(),
+            title: title,
+            location: location,
+            startDate: draft.startAt,
+            durationMinutes: draft.durationMinutes,
+            numberOfPlayers: draft.numberOfPlayers,
+            minElo: min(draft.minElo, draft.maxElo),
+            maxElo: max(draft.minElo, draft.maxElo),
+            isOpenJoin: draft.isOpenJoin,
+            focusArea: draft.focusArea.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "General" : draft.focusArea.trimmingCharacters(in: .whitespacesAndNewlines),
+            notes: draft.notes.trimmingCharacters(in: .whitespacesAndNewlines),
+            ownerId: user.id,
+            organiserIds: [user.id],
+            isDraft: draft.isDraft,
+            isDeleted: false,
+            deletedAt: nil
+        )
+
+        practices.append(practice)
+        practices.sort { $0.startDate < $1.startDate }
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    let backend = try await supabaseDataService.createPractice(session: practice)
+                    await MainActor.run {
+                        if let index = practices.firstIndex(where: { $0.id == practice.id }) {
+                            practices[index] = backend
+                        }
+                    }
+                } catch {
+                    await MainActor.run {
+                        authErrorMessage = "Practice created locally, but backend sync failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
+
+        return .success(practice)
+    }
+
+    func updatePractice(_ session: PracticeSession) {
+        guard let index = practices.firstIndex(where: { $0.id == session.id }) else { return }
+        guard canCurrentUserEditPractice(practices[index]) else {
+            authErrorMessage = AuthorizationUX.permissionDeniedMessage
+            return
+        }
+        practices[index] = session
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    try await supabaseDataService.updatePractice(session: session)
+                } catch {
+                    await MainActor.run {
+                        authErrorMessage = "Practice updated locally, but backend sync failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
+    }
+
+    func deletePractice(_ sessionID: UUID) {
+        guard let index = practices.firstIndex(where: { $0.id == sessionID }) else { return }
+        guard canCurrentUserEditPractice(practices[index]) else {
+            authErrorMessage = AuthorizationUX.permissionDeniedMessage
+            return
+        }
+        practices[index].isDeleted = true
+        practices[index].deletedAt = Date()
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    try await supabaseDataService.softDeletePractice(sessionID: sessionID)
+                } catch {
+                    await MainActor.run {
+                        authErrorMessage = "Practice deleted locally, but backend sync failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
+    }
+
+    func reviews(for coachID: UUID) -> [CoachReview] {
+        (coachReviewsByCoach[coachID] ?? []).sorted { $0.createdAt > $1.createdAt }
+    }
+
+    func addReview(to coachID: UUID, rating: Int, text: String) {
+        guard let author = currentUser else { return }
+        guard let coach = users.first(where: { $0.id == coachID }), coach.isCoachActive else { return }
+        guard author.id != coachID else { return }
+        let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !trimmed.isEmpty else { return }
+
+        let review = CoachReview(
+            id: UUID(),
+            coachID: coachID,
+            authorID: author.id,
+            authorName: author.fullName,
+            rating: min(max(rating, 1), 5),
+            text: trimmed,
+            createdAt: Date()
+        )
+        coachReviewsByCoach[coachID, default: []].append(review)
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    try await supabaseDataService.addCoachReview(review)
+                    let refreshed = try await supabaseDataService.fetchCoachReviews()
+                    let grouped = Dictionary(grouping: refreshed, by: \.coachID)
+                    await MainActor.run {
+                        coachReviewsByCoach = grouped
+                    }
+                } catch {
+                    await MainActor.run {
+                        coachReviewsByCoach[coachID]?.removeAll { $0.id == review.id }
+                        authErrorMessage = "Failed to save review: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
     }
 
     func adminUpdateUserRole(userId: UUID, role: GlobalRole) {
@@ -730,6 +1862,18 @@ final class AppViewModel: ObservableObject {
         }
         adminActionMessage = "User role updated."
         AuditLogger.log(action: "admin_user_role_changed", actorId: currentUser?.id, objectId: userId, metadata: ["role": role.rawValue])
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    try await supabaseDataService.updateUserRole(userID: userId, role: role)
+                } catch {
+                    await MainActor.run {
+                        adminActionMessage = "Role updated locally, but backend sync failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
     }
 
     func adminSetSuspended(userId: UUID, isSuspended: Bool, reason: String?) {
@@ -752,6 +1896,91 @@ final class AppViewModel: ObservableObject {
             objectId: userId,
             metadata: ["reason": users[index].suspensionReason ?? ""]
         )
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    try await supabaseDataService.setUserSuspended(
+                        userID: userId,
+                        isSuspended: isSuspended,
+                        reason: users[index].suspensionReason
+                    )
+                } catch {
+                    await MainActor.run {
+                        adminActionMessage = "Suspension updated locally, but backend sync failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
+    }
+
+    func adminSetOrganizerAccess(userId: UUID, isActive: Bool) {
+        guard AccessPolicy.canManageUsersAsAdmin(currentUser) else {
+            adminActionMessage = AuthorizationUX.permissionDeniedMessage
+            return
+        }
+        guard let index = users.firstIndex(where: { $0.id == userId }) else {
+            return
+        }
+
+        let newEndsAt: Date? = isActive ? Calendar.current.date(byAdding: .day, value: 30, to: Date()) : nil
+        users[index].organizerSubscriptionEndsAt = newEndsAt
+        users[index].isOrganizerSubscriptionPaused = false
+
+        if currentUser?.id == userId {
+            currentUser = users[index]
+        }
+
+        adminActionMessage = isActive ? "Organizer access granted for 30 days." : "Organizer access revoked."
+        AuditLogger.log(
+            action: isActive ? "admin_organizer_subscription_granted" : "admin_organizer_subscription_revoked",
+            actorId: currentUser?.id,
+            objectId: userId,
+            metadata: ["ends_at": newEndsAt?.description ?? ""]
+        )
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    try await supabaseDataService.setOrganizerSubscription(
+                        userID: userId,
+                        endsAt: newEndsAt,
+                        isPaused: false
+                    )
+                } catch {
+                    await MainActor.run {
+                        adminActionMessage = "Organizer access updated locally, but backend sync failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
+    }
+
+    func adminPrepareInvestorDemoData() {
+        guard AccessPolicy.canManageUsersAsAdmin(currentUser) else {
+            adminActionMessage = AuthorizationUX.permissionDeniedMessage
+            return
+        }
+
+        let demo = buildInvestorDemoData()
+        users = demo.users
+        tournaments = demo.tournaments
+        createdGames = demo.games
+        practices = demo.practices
+        coachReviewsByCoach = demo.coachReviewsByCoach
+        clubs = demo.clubs
+
+        if let adminUser = users.first(where: \.isAdmin) {
+            currentUser = adminUser
+        }
+
+        refreshGameLists()
+        adminActionMessage = "Investor demo data prepared (local)."
+        AuditLogger.log(
+            action: "admin_investor_demo_seeded",
+            actorId: currentUser?.id,
+            objectId: currentUser?.id ?? users.first?.id ?? UUID()
+        )
     }
 
     func adminDeleteMatch(gameId: UUID) {
@@ -764,8 +1993,12 @@ final class AppViewModel: ObservableObject {
         }
         createdGames[index].isDeleted = true
         createdGames[index].deletedAt = Date()
+        createdGames[index].status = .cancelled
         adminActionMessage = "Match deleted (soft)."
         AuditLogger.log(action: "admin_match_deleted", actorId: currentUser?.id, objectId: gameId)
+        if let supabaseDataService {
+            Task { try? await supabaseDataService.softDeleteMatch(matchID: gameId) }
+        }
     }
 
     @discardableResult
@@ -783,7 +2016,11 @@ final class AppViewModel: ObservableObject {
 
         createdGames[index].isDeleted = true
         createdGames[index].deletedAt = Date()
+        createdGames[index].status = .cancelled
         AuditLogger.log(action: "match_deleted", actorId: user.id, objectId: gameId)
+        if let supabaseDataService {
+            Task { try? await supabaseDataService.softDeleteMatch(matchID: gameId) }
+        }
         return true
     }
 
@@ -799,6 +2036,18 @@ final class AppViewModel: ObservableObject {
         tournaments[index].deletedAt = Date()
         adminActionMessage = "Tournament deleted (soft)."
         AuditLogger.log(action: "admin_tournament_deleted", actorId: currentUser?.id, objectId: tournamentId)
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    try await supabaseDataService.softDeleteTournament(tournamentID: tournamentId)
+                } catch {
+                    await MainActor.run {
+                        adminActionMessage = "Tournament deleted locally, but backend sync failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
     }
 
     func adminDeleteSession(sessionId: UUID) {
@@ -813,10 +2062,33 @@ final class AppViewModel: ObservableObject {
         practices[index].deletedAt = Date()
         adminActionMessage = "Session deleted (soft)."
         AuditLogger.log(action: "admin_session_deleted", actorId: currentUser?.id, objectId: sessionId)
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    try await supabaseDataService.softDeletePractice(sessionID: sessionId)
+                } catch {
+                    await MainActor.run {
+                        adminActionMessage = "Session deleted locally, but backend sync failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
     }
 
     func refreshGameLists() {
         objectWillChange.send()
+    }
+
+    func refreshFromBackendIfAvailable() async {
+        guard isUsingSupabase, let userId = currentUser?.id else { return }
+        do {
+            try await syncFromBackend(currentUserID: userId)
+        } catch {
+            await MainActor.run {
+                authErrorMessage = "Failed to refresh backend data: \(error.localizedDescription)"
+            }
+        }
     }
 
     func createdGame(for id: UUID) -> CreatedGame? {
@@ -831,7 +2103,10 @@ final class AppViewModel: ObservableObject {
     }
 
     private func persistedMatchStatus(for matchId: UUID) -> MatchStatus {
-        matchStore.load(matchId: matchId)?.status ?? .scheduled
+        if let persisted = matchStore.load(matchId: matchId)?.status {
+            return persisted
+        }
+        return createdGames.first(where: { $0.id == matchId })?.status ?? .scheduled
     }
 
     private func persistedMatchStartTime(for matchId: UUID, fallback: Date) -> Date {
@@ -840,6 +2115,40 @@ final class AppViewModel: ObservableObject {
 
     private func isUserParticipantOrOwner(userId: UUID, in game: CreatedGame) -> Bool {
         game.ownerId == userId || game.players.contains(where: { $0.id == userId })
+    }
+
+    private func isUserInTournament(userId: UUID, in tournament: Tournament) -> Bool {
+        if tournament.ownerId == userId || tournament.organiserIds.contains(userId) {
+            return true
+        }
+        return tournament.teams.contains { team in
+            team.members.contains(where: { $0.id == userId })
+        }
+    }
+
+    private func isTournamentPast(_ tournament: Tournament) -> Bool {
+        if tournament.matches.contains(where: { !$0.isCompleted }) {
+            return tournament.startDate < Date()
+        }
+        if !tournament.matches.isEmpty {
+            return true
+        }
+        return tournament.startDate < Date()
+    }
+
+    private func currentUserRSVPStatus(in game: CreatedGame) -> RSVPStatus? {
+        guard let userId = currentUser?.id else { return nil }
+
+        if let persistedState = matchStore.load(matchId: game.id),
+           let participant = persistedState.participants.first(where: { $0.id == userId }) {
+            return participant.rsvpStatus
+        }
+
+        if game.ownerId == userId {
+            return .going
+        }
+
+        return nil
     }
 
     private func upsertCreatedGameFromTournamentMatch(tournament: Tournament, match: TournamentMatch) {
@@ -856,11 +2165,12 @@ final class AppViewModel: ObservableObject {
         let game = CreatedGame(
             id: match.id,
             ownerId: tournament.ownerId,
+            organiserIds: tournament.organiserIds,
             clubLocation: .cityFiveLeagueHub,
             startAt: match.startTime,
             durationMinutes: 90,
             format: format,
-            locationName: tournament.location,
+            locationName: match.locationName ?? tournament.location,
             address: "",
             maxPlayers: inferredMaxPlayers,
             isPrivateGame: false,
@@ -876,6 +2186,10 @@ final class AppViewModel: ObservableObject {
             createdBy: createdBy,
             inviteLink: nil,
             players: players,
+            status: match.status == .completed ? .completed : (match.status == .cancelled ? .cancelled : .scheduled),
+            isDraft: false,
+            finalHomeScore: match.homeScore,
+            finalAwayScore: match.awayScore,
             isDeleted: false,
             deletedAt: nil
         )
@@ -891,6 +2205,11 @@ final class AppViewModel: ObservableObject {
 
     private func syncCreatedGameCompletion(matchID: UUID, homeScore: Int, awayScore: Int) {
         guard let game = createdGames.first(where: { $0.id == matchID }) else { return }
+        if let index = createdGames.firstIndex(where: { $0.id == matchID }) {
+            createdGames[index].status = .completed
+            createdGames[index].finalHomeScore = homeScore
+            createdGames[index].finalAwayScore = awayScore
+        }
         let existingState = matchStore.load(matchId: matchID)
         let state = MatchLocalState(
             participants: existingState?.participants ?? [],
@@ -914,5 +2233,540 @@ final class AppViewModel: ObservableObject {
         return users.filter { user in
             seen.insert(user.id).inserted
         }
+    }
+
+    private struct InvestorDemoData {
+        let users: [User]
+        let tournaments: [Tournament]
+        let games: [CreatedGame]
+        let practices: [PracticeSession]
+        let coachReviewsByCoach: [UUID: [CoachReview]]
+        let clubs: [Club]
+    }
+
+    private func buildInvestorDemoData() -> InvestorDemoData {
+        let now = Date()
+        let plus: (Int) -> Date = { Calendar.current.date(byAdding: .day, value: $0, to: now) ?? now }
+        let plusHours: (Int) -> Date = { Calendar.current.date(byAdding: .hour, value: $0, to: now) ?? now }
+
+        let admin = User(
+            id: UUID(),
+            fullName: "Demo Admin",
+            email: "demo+admin@local.app",
+            favoritePosition: "Midfielder",
+            city: "Austin",
+            eloRating: 1580,
+            matchesPlayed: 40,
+            wins: 24,
+            draws: 6,
+            losses: 10,
+            globalRole: .admin
+        )
+
+        let organizer = User(
+            id: UUID(),
+            fullName: "Demo Organizer",
+            email: "demo+organizer@local.app",
+            favoritePosition: "Defender",
+            city: "Dallas",
+            eloRating: 1520,
+            matchesPlayed: 34,
+            wins: 18,
+            draws: 7,
+            losses: 9,
+            globalRole: .player,
+            organizerSubscriptionEndsAt: Calendar.current.date(byAdding: .day, value: 60, to: now),
+            isOrganizerSubscriptionPaused: false
+        )
+
+        let coach = User(
+            id: UUID(),
+            fullName: "Demo Coach",
+            email: "demo+coach@local.app",
+            favoritePosition: "Forward",
+            city: "Houston",
+            eloRating: 1605,
+            matchesPlayed: 28,
+            wins: 17,
+            draws: 5,
+            losses: 6,
+            globalRole: .player,
+            coachSubscriptionEndsAt: Calendar.current.date(byAdding: .day, value: 60, to: now),
+            isCoachSubscriptionPaused: false
+        )
+
+        let p1 = User(id: UUID(), fullName: "Liam Stone", email: "demo+p1@local.app", favoritePosition: "Goalkeeper", city: "Austin", eloRating: 1450, matchesPlayed: 12, wins: 7, draws: 2, losses: 3, globalRole: .player)
+        let p2 = User(id: UUID(), fullName: "Noah Green", email: "demo+p2@local.app", favoritePosition: "Defender", city: "Dallas", eloRating: 1480, matchesPlayed: 15, wins: 8, draws: 3, losses: 4, globalRole: .player)
+        let p3 = User(id: UUID(), fullName: "Mia White", email: "demo+p3@local.app", favoritePosition: "Midfielder", city: "Houston", eloRating: 1510, matchesPlayed: 20, wins: 11, draws: 4, losses: 5, globalRole: .player)
+        let p4 = User(id: UUID(), fullName: "Emma Black", email: "demo+p4@local.app", favoritePosition: "Forward", city: "Miami", eloRating: 1430, matchesPlayed: 10, wins: 5, draws: 2, losses: 3, globalRole: .player)
+        let p5 = User(id: UUID(), fullName: "Ava Hill", email: "demo+p5@local.app", favoritePosition: "Midfielder", city: "Austin", eloRating: 1475, matchesPlayed: 14, wins: 8, draws: 1, losses: 5, globalRole: .player)
+
+        let users = [admin, organizer, coach, p1, p2, p3, p4, p5]
+
+        let games: [CreatedGame] = [
+            CreatedGame(
+                id: UUID(),
+                ownerId: organizer.id,
+                organiserIds: [organizer.id],
+                clubLocation: .downtownArena,
+                startAt: plusHours(4),
+                durationMinutes: 90,
+                format: .fiveVFive,
+                locationName: "Downtown Arena",
+                address: "Austin, TX",
+                maxPlayers: 10,
+                isPrivateGame: false,
+                hasCourtBooked: true,
+                minElo: 1200,
+                maxElo: 1800,
+                iAmPlaying: false,
+                isRatingGame: true,
+                anyoneCanInvite: true,
+                anyPlayerCanInputResults: false,
+                entranceWithoutConfirmation: false,
+                notes: "Investor demo quick booking game",
+                createdBy: organizer.fullName,
+                inviteLink: "https://sportapp.local/invite/demo-quick",
+                players: [organizer, p1, p2, p3],
+                status: .scheduled,
+                isDraft: false,
+                finalHomeScore: nil,
+                finalAwayScore: nil,
+                isDeleted: false,
+                deletedAt: nil
+            ),
+            CreatedGame(
+                id: UUID(),
+                ownerId: p1.id,
+                organiserIds: [p1.id],
+                clubLocation: .northSportsCenter,
+                startAt: plus(2),
+                durationMinutes: 90,
+                format: .fiveVFive,
+                locationName: "North Sports Center",
+                address: "Dallas, TX",
+                maxPlayers: 10,
+                isPrivateGame: false,
+                hasCourtBooked: false,
+                minElo: 1000,
+                maxElo: 2000,
+                iAmPlaying: true,
+                isRatingGame: true,
+                anyoneCanInvite: true,
+                anyPlayerCanInputResults: false,
+                entranceWithoutConfirmation: true,
+                notes: "Community evening game",
+                createdBy: p1.fullName,
+                inviteLink: "https://sportapp.local/invite/demo-upcoming",
+                players: [p1, p4, p5],
+                status: .scheduled,
+                isDraft: false,
+                finalHomeScore: nil,
+                finalAwayScore: nil,
+                isDeleted: false,
+                deletedAt: nil
+            ),
+            CreatedGame(
+                id: UUID(),
+                ownerId: organizer.id,
+                organiserIds: [organizer.id],
+                clubLocation: .riversideCourts,
+                startAt: plus(-3),
+                durationMinutes: 90,
+                format: .fiveVFive,
+                locationName: "Riverside Courts",
+                address: "Houston, TX",
+                maxPlayers: 10,
+                isPrivateGame: false,
+                hasCourtBooked: true,
+                minElo: 1000,
+                maxElo: 2200,
+                iAmPlaying: true,
+                isRatingGame: true,
+                anyoneCanInvite: false,
+                anyPlayerCanInputResults: false,
+                entranceWithoutConfirmation: false,
+                notes: "Completed showcase game",
+                createdBy: organizer.fullName,
+                inviteLink: nil,
+                players: [organizer, p2, p3, p4],
+                status: .completed,
+                isDraft: false,
+                finalHomeScore: 4,
+                finalAwayScore: 2,
+                isDeleted: false,
+                deletedAt: nil
+            ),
+            CreatedGame(
+                id: UUID(),
+                ownerId: organizer.id,
+                organiserIds: [organizer.id],
+                clubLocation: .cityFiveLeagueHub,
+                startAt: plus(6),
+                durationMinutes: 90,
+                format: .sevenVSeven,
+                locationName: "City Five League Hub",
+                address: "Austin, TX",
+                maxPlayers: 14,
+                isPrivateGame: true,
+                hasCourtBooked: false,
+                minElo: 1200,
+                maxElo: 2000,
+                iAmPlaying: true,
+                isRatingGame: false,
+                anyoneCanInvite: false,
+                anyPlayerCanInputResults: false,
+                entranceWithoutConfirmation: false,
+                notes: "Draft game for later publishing",
+                createdBy: organizer.fullName,
+                inviteLink: nil,
+                players: [organizer, p5],
+                status: .scheduled,
+                isDraft: true,
+                finalHomeScore: nil,
+                finalAwayScore: nil,
+                isDeleted: false,
+                deletedAt: nil
+            )
+        ]
+
+        let teamA = Team(id: UUID(), name: "Downtown Falcons", members: [p1, p2], maxPlayers: 6)
+        let teamB = Team(id: UUID(), name: "North Titans", members: [p3, p4], maxPlayers: 6)
+        let teamC = Team(id: UUID(), name: "River Wolves", members: [p5, organizer], maxPlayers: 6)
+        let teamD = Team(id: UUID(), name: "City Comets", members: [admin], maxPlayers: 6)
+        let teams = [teamA, teamB, teamC, teamD]
+
+        let tournamentId = UUID()
+        let teamEntries = teams.map {
+            TournamentTeam(id: $0.id, tournamentId: tournamentId, name: $0.name, colorHex: "#2D6CC4", createdAt: now)
+        }
+        let teamMembers = teams.flatMap { team in
+            team.members.enumerated().map { index, member in
+                TournamentTeamMember(
+                    teamId: team.id,
+                    playerId: member.id,
+                    positionGroup: .bench,
+                    sortOrder: index,
+                    isCaptain: index == 0
+                )
+            }
+        }
+        let tournamentMatches = [
+            TournamentMatch(
+                id: UUID(),
+                tournamentId: tournamentId,
+                homeTeamId: teamA.id,
+                awayTeamId: teamB.id,
+                startTime: plus(-1),
+                locationName: "Downtown Arena",
+                matchday: 1,
+                homeScore: 2,
+                awayScore: 2,
+                status: .completed
+            ),
+            TournamentMatch(
+                id: UUID(),
+                tournamentId: tournamentId,
+                homeTeamId: teamC.id,
+                awayTeamId: teamD.id,
+                startTime: plus(1),
+                locationName: "North Sports Center",
+                matchday: 1,
+                homeScore: nil,
+                awayScore: nil,
+                status: .scheduled
+            )
+        ]
+
+        let tournament = Tournament(
+            id: tournamentId,
+            title: "Investor League Showcase",
+            location: "Austin",
+            startDate: plus(-1),
+            teams: teams,
+            entryFee: 25,
+            maxTeams: 8,
+            format: MatchFormat.fiveVFive.rawValue,
+            visibility: .public,
+            status: .published,
+            ownerId: organizer.id,
+            organiserIds: [organizer.id],
+            endDate: plus(7),
+            teamEntries: teamEntries,
+            teamMembers: teamMembers,
+            matches: tournamentMatches,
+            disputeStatus: .none,
+            isDeleted: false,
+            deletedAt: nil
+        )
+
+        let tournamentDraft = Tournament(
+            id: UUID(),
+            title: "Summer Cup Draft",
+            location: "Houston",
+            startDate: plus(20),
+            teams: [],
+            entryFee: 35,
+            maxTeams: 12,
+            format: MatchFormat.sevenVSeven.rawValue,
+            visibility: .public,
+            status: .draft,
+            ownerId: organizer.id,
+            organiserIds: [organizer.id],
+            endDate: nil,
+            teamEntries: [],
+            teamMembers: [],
+            matches: [],
+            disputeStatus: .none,
+            isDeleted: false,
+            deletedAt: nil
+        )
+
+        let practices = [
+            PracticeSession(
+                id: UUID(),
+                title: "Tactical Shape Practice",
+                location: "Riverside Courts",
+                startDate: plus(2),
+                durationMinutes: 90,
+                numberOfPlayers: 12,
+                minElo: 1100,
+                maxElo: 1800,
+                isOpenJoin: true,
+                focusArea: "Positioning",
+                notes: "Bring cones and bibs.",
+                ownerId: coach.id,
+                organiserIds: [coach.id],
+                isDraft: false,
+                isDeleted: false
+            ),
+            PracticeSession(
+                id: UUID(),
+                title: "Finishing Session Draft",
+                location: "Downtown Arena",
+                startDate: plus(5),
+                durationMinutes: 75,
+                numberOfPlayers: 10,
+                minElo: 1000,
+                maxElo: 2000,
+                isOpenJoin: false,
+                focusArea: "Finishing",
+                notes: "Draft practice",
+                ownerId: coach.id,
+                organiserIds: [coach.id],
+                isDraft: true,
+                isDeleted: false
+            )
+        ]
+
+        let reviewsByCoach: [UUID: [CoachReview]] = [
+            coach.id: [
+                CoachReview(
+                    id: UUID(),
+                    coachID: coach.id,
+                    authorID: p1.id,
+                    authorName: p1.fullName,
+                    rating: 5,
+                    text: "Very clear drills and great communication.",
+                    createdAt: plus(-2)
+                ),
+                CoachReview(
+                    id: UUID(),
+                    coachID: coach.id,
+                    authorID: p3.id,
+                    authorName: p3.fullName,
+                    rating: 4,
+                    text: "Helpful feedback and good pace.",
+                    createdAt: plus(-1)
+                )
+            ]
+        ]
+
+        let clubs = [
+            Club(id: UUID(), name: "Downtown Arena", location: "Austin, TX", phoneNumber: "+1 (512) 555-0181", bookingHint: "Booking via phone (placeholder)."),
+            Club(id: UUID(), name: "North Sports Center", location: "Dallas, TX", phoneNumber: "+1 (214) 555-0134", bookingHint: "Booking via phone (placeholder)."),
+            Club(id: UUID(), name: "Riverside Courts", location: "Houston, TX", phoneNumber: "+1 (713) 555-0179", bookingHint: "Booking via phone (placeholder).")
+        ]
+
+        return InvestorDemoData(
+            users: users,
+            tournaments: [tournament, tournamentDraft],
+            games: games.sorted { $0.startAt < $1.startAt },
+            practices: practices,
+            coachReviewsByCoach: reviewsByCoach,
+            clubs: clubs
+        )
+    }
+
+    private func syncFromBackend(currentUserID: UUID) async throws {
+        guard let supabaseDataService else { return }
+
+        async let usersTask = supabaseDataService.fetchProfiles()
+        async let clubsTask = supabaseDataService.fetchClubs()
+        let fetchedUsers = try await usersTask
+        let fetchedClubs = try await clubsTask
+        let usersByID = Dictionary(
+            fetchedUsers.map { ($0.id, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
+        async let fetchedGamesTask = supabaseDataService.fetchCreatedGames(usersById: usersByID)
+        async let fetchedTournamentsTask = supabaseDataService.fetchTournaments(usersById: usersByID)
+        async let fetchedPracticesTask = supabaseDataService.fetchPractices()
+        async let fetchedCoachReviewsTask = supabaseDataService.fetchCoachReviews()
+        var fetchedGames = try await fetchedGamesTask
+        var fetchedTournaments = try await fetchedTournamentsTask
+        let fetchedPractices = (try? await fetchedPracticesTask) ?? practices
+        let fetchedCoachReviews = (try? await fetchedCoachReviewsTask) ?? []
+        let reviewsByCoach = Dictionary(grouping: fetchedCoachReviews, by: \.coachID)
+        let currentUser = fetchedUsers.first(where: { $0.id == currentUserID })
+
+        if fetchedGames.isEmpty, let currentUser {
+            try? await seedBackendDemoCreatedGames(for: currentUser, users: fetchedUsers, dataService: supabaseDataService)
+            fetchedGames = (try? await supabaseDataService.fetchCreatedGames(usersById: usersByID)) ?? fetchedGames
+        }
+
+        if fetchedTournaments.isEmpty, let currentUser {
+            try? await supabaseDataService.seedExampleTournament(for: currentUser, users: fetchedUsers)
+            fetchedTournaments = (try? await supabaseDataService.fetchTournaments(usersById: usersByID)) ?? fetchedTournaments
+            fetchedGames = (try? await supabaseDataService.fetchCreatedGames(usersById: usersByID)) ?? fetchedGames
+        }
+
+        await MainActor.run {
+            users = fetchedUsers
+            clubs = fetchedClubs.isEmpty ? clubs : fetchedClubs
+            createdGames = fetchedGames
+            tournaments = fetchedTournaments
+            practices = fetchedPractices
+            coachReviewsByCoach = reviewsByCoach
+            self.currentUser = currentUser
+            isAuthenticated = self.currentUser != nil
+        }
+    }
+
+    private func seedLocalDemoCreatedGames(for user: User?, users: [User]) {
+        guard let user else {
+            createdGames = []
+            return
+        }
+
+        createdGames = buildDemoCreatedGames(for: user, users: users)
+        refreshGameLists()
+    }
+
+    private func seedBackendDemoCreatedGames(
+        for user: User,
+        users: [User],
+        dataService: SupabaseDataService
+    ) async throws {
+        let demoGames = buildDemoCreatedGames(for: user, users: users)
+        for game in demoGames {
+            try await dataService.createMatch(game: game)
+        }
+    }
+
+    private func buildDemoCreatedGames(for user: User, users: [User]) -> [CreatedGame] {
+        let otherUsers = users.filter { $0.id != user.id }
+        let organiser = otherUsers.first ?? user
+        let thirdPlayer = otherUsers.dropFirst().first ?? organiser
+        let now = Date()
+
+        let quickBookingGame = CreatedGame(
+            id: UUID(),
+            ownerId: organiser.id,
+            organiserIds: [organiser.id],
+            clubLocation: .downtownArena,
+            startAt: Calendar.current.date(byAdding: .hour, value: 3, to: now) ?? now,
+            durationMinutes: 90,
+            format: .fiveVFive,
+            locationName: "Downtown Arena",
+            address: "Austin, TX",
+            maxPlayers: 10,
+            isPrivateGame: false,
+            hasCourtBooked: true,
+            minElo: 1000,
+            maxElo: 2500,
+            iAmPlaying: false,
+            isRatingGame: true,
+            anyoneCanInvite: true,
+            anyPlayerCanInputResults: false,
+            entranceWithoutConfirmation: false,
+            notes: "Quick booking sample",
+            createdBy: organiser.fullName,
+            inviteLink: "https://sportapp.local/invite/\(UUID().uuidString)",
+            players: [organiser, thirdPlayer],
+            status: .scheduled,
+            isDraft: false,
+            finalHomeScore: nil,
+            finalAwayScore: nil,
+            isDeleted: false,
+            deletedAt: nil
+        )
+
+        let upcomingGame = CreatedGame(
+            id: UUID(),
+            ownerId: user.id,
+            organiserIds: [user.id],
+            clubLocation: .northSportsCenter,
+            startAt: Calendar.current.date(byAdding: .day, value: 1, to: now) ?? now,
+            durationMinutes: 90,
+            format: .fiveVFive,
+            locationName: "North Sports Center",
+            address: "Dallas, TX",
+            maxPlayers: 10,
+            isPrivateGame: false,
+            hasCourtBooked: true,
+            minElo: 1000,
+            maxElo: 2500,
+            iAmPlaying: true,
+            isRatingGame: true,
+            anyoneCanInvite: true,
+            anyPlayerCanInputResults: false,
+            entranceWithoutConfirmation: false,
+            notes: "Upcoming game sample",
+            createdBy: user.fullName,
+            inviteLink: "https://sportapp.local/invite/\(UUID().uuidString)",
+            players: [user, organiser],
+            status: .scheduled,
+            isDraft: false,
+            finalHomeScore: nil,
+            finalAwayScore: nil,
+            isDeleted: false,
+            deletedAt: nil
+        )
+
+        let pastGame = CreatedGame(
+            id: UUID(),
+            ownerId: user.id,
+            organiserIds: [user.id],
+            clubLocation: .riversideCourts,
+            startAt: Calendar.current.date(byAdding: .day, value: -2, to: now) ?? now,
+            durationMinutes: 90,
+            format: .fiveVFive,
+            locationName: "Riverside Courts",
+            address: "Houston, TX",
+            maxPlayers: 10,
+            isPrivateGame: false,
+            hasCourtBooked: true,
+            minElo: 1000,
+            maxElo: 2500,
+            iAmPlaying: true,
+            isRatingGame: true,
+            anyoneCanInvite: false,
+            anyPlayerCanInputResults: false,
+            entranceWithoutConfirmation: false,
+            notes: "Past game sample",
+            createdBy: user.fullName,
+            inviteLink: nil,
+            players: [user, thirdPlayer],
+            status: .completed,
+            isDraft: false,
+            finalHomeScore: 3,
+            finalAwayScore: 2,
+            isDeleted: false,
+            deletedAt: nil
+        )
+
+        return [quickBookingGame, upcomingGame, pastGame]
+            .sorted { $0.startAt < $1.startAt }
     }
 }

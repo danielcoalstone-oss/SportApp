@@ -194,7 +194,10 @@ struct Match: Identifiable, Hashable {
             return (finalHomeScore, finalAwayScore)
         }
 
-        let participantsByID = Dictionary(uniqueKeysWithValues: participants.map { ($0.id, $0) })
+        let participantsByID = Dictionary(
+            participants.map { ($0.id, $0) },
+            uniquingKeysWith: { first, _ in first }
+        )
         let goals = events.filter { $0.type == .goal }
 
         var homeGoals = 0

@@ -37,7 +37,7 @@ struct RoleBadge: View {
         if !tags.isEmpty {
             HStack(spacing: 6) {
                 ForEach(tags, id: \.self) { tag in
-                    Text(tag)
+                    Text(localizedTag(tag))
                         .font(size.font)
                         .padding(.horizontal, size.horizontalPadding)
                         .padding(.vertical, size.verticalPadding)
@@ -46,7 +46,7 @@ struct RoleBadge: View {
                 }
             }
             .accessibilityElement(children: .combine)
-            .accessibilityLabel(tags.joined(separator: ", "))
+            .accessibilityLabel(tags.map(localizedTag).joined(separator: ", "))
         }
     }
 
@@ -58,6 +58,17 @@ struct RoleBadge: View {
             return (.orange, .black)
         default:
             return (.blue, .white)
+        }
+    }
+
+    private func localizedTag(_ tag: String) -> String {
+        switch tag.uppercased() {
+        case "ADMIN":
+            return "АДМИН"
+        case "ORGANIZER", "ORGANISER":
+            return "ОРГАНИЗАТОР"
+        default:
+            return "ИГРОК"
         }
     }
 }

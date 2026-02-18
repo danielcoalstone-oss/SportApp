@@ -1,5 +1,5 @@
 import Foundation
 
 enum AuthorizationUX {
-    static let permissionDeniedMessage = "You don't have permission"
+    static let permissionDeniedMessage = "У вас нет прав для этого действия"
 }

@@ -12,11 +12,11 @@ struct MatchDetailsView: View {
 
         var title: String {
             switch self {
-            case .going: return "Going"
-            case .maybe: return "Maybe"
-            case .invited: return "Invited"
-            case .waitlist: return "Waitlist"
-            case .declined: return "Declined"
+            case .going: return "Иду"
+            case .maybe: return "Возможно"
+            case .invited: return "Приглашен"
+            case .waitlist: return "Лист ожидания"
+            case .declined: return "Отказался"
             }
         }
 
@@ -58,6 +58,14 @@ struct MatchDetailsView: View {
         return RoleTagProvider.tags(for: currentUser, in: viewModel.match)
     }
 
+    private var localizedMatchStatus: String {
+        switch viewModel.match.status {
+        case .scheduled: return "Запланирован"
+        case .completed: return "Завершен"
+        case .cancelled: return "Отменен"
+        }
+    }
+
     var body: some View {
         Group {
             if viewModel.isDeleted {
@@ -65,9 +73,9 @@ struct MatchDetailsView: View {
                     Image(systemName: "trash")
                         .font(.system(size: 28))
                         .foregroundStyle(.secondary)
-                    Text("Match Deleted")
+                    Text("Матч удален")
                         .font(.headline)
-                    Text("This match has been cancelled and removed.")
+                    Text("Этот матч был отменен и удален.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
@@ -86,7 +94,7 @@ struct MatchDetailsView: View {
                             MatchSummaryView(match: viewModel.match)
                         } label: {
                             HStack {
-                                Text("Open Match Summary")
+                                Text("Открыть сводку матча")
                                     .font(.headline)
                                 Spacer()
                                 Image(systemName: "chevron.right")
@@ -101,7 +109,7 @@ struct MatchDetailsView: View {
                                 .environmentObject(appViewModel)
                         } label: {
                             HStack {
-                                Text("Open Teams")
+                                Text("Открыть команды")
                                     .font(.headline)
                                 Spacer()
                                 Image(systemName: "chevron.right")
@@ -112,20 +120,20 @@ struct MatchDetailsView: View {
                         .buttonStyle(.plain)
 
                         HStack {
-                            Text("Events Timeline")
+                            Text("Лента событий")
                                 .font(.title3.bold())
                             Spacer()
                             Button {
                                 isAddEventSheetPresented = true
                             } label: {
-                                Label("Add Event", systemImage: "plus.circle.fill")
+                                Label("Добавить событие", systemImage: "plus.circle.fill")
                             }
                             .buttonStyle(.borderedProminent)
                             .disabled(!viewModel.canCurrentUserEnterMatchResult)
                         }
 
                         if !viewModel.canCurrentUserEnterMatchResult {
-                            Text("Only admins or match organisers can enter match results.")
+                            Text("Только админы и организаторы матча могут вносить результат.")
                                 .font(.footnote)
                                 .foregroundStyle(.secondary)
                         }
@@ -136,7 +144,7 @@ struct MatchDetailsView: View {
                 .padding()
             }
         }
-        .navigationTitle("Match Details")
+        .navigationTitle("Детали матча")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $isAddEventSheetPresented) {
             AddEventSheet(participants: viewModel.match.participants) { newEvent in
@@ -171,19 +179,19 @@ struct MatchDetailsView: View {
         .onChange(of: viewModel.match.status) { _ in
             appViewModel.refreshGameLists()
         }
-        .alert("RSVP Update", isPresented: messageBinding) {
-            Button("OK", role: .cancel) {}
+        .alert("Обновление RSVP", isPresented: messageBinding) {
+            Button("ОК", role: .cancel) {}
         } message: {
             Text(viewModel.toastMessage ?? "")
         }
-        .alert("Cancel Match", isPresented: $isCancelMatchConfirmationPresented) {
-            Button("Keep Match", role: .cancel) {}
-            Button("Delete Match", role: .destructive) {
+        .alert("Отмена матча", isPresented: $isCancelMatchConfirmationPresented) {
+            Button("Оставить матч", role: .cancel) {}
+            Button("Удалить матч", role: .destructive) {
                 viewModel.cancelMatch()
                 _ = appViewModel.deleteGameAsOrganiserOrAdmin(gameId: viewModel.match.id)
             }
         } message: {
-            Text("Are you sure you want to cancel Match?")
+            Text("Вы уверены, что хотите отменить матч?")
         }
         .permissionDeniedAlert(message: $viewModel.toastMessage)
     }
@@ -226,12 +234,12 @@ struct MatchDetailsView: View {
         VStack(alignment: .leading, spacing: 8) {
             Label(DateFormatterService.tournamentDateTime.string(from: viewModel.match.startTime), systemImage: "clock")
             Label(viewModel.match.location, systemImage: "mappin.and.ellipse")
-            Label(viewModel.match.isRatingGame ? "Rating match" : "Not rating match", systemImage: "chart.line.uptrend.xyaxis")
-            Label(viewModel.match.isFieldBooked ? "Field booked" : "Field not booked", systemImage: "sportscourt")
-            Label("Format: \(viewModel.match.format)", systemImage: "rectangle.3.group")
-            Label("Status: \(viewModel.match.status.rawValue.capitalized)", systemImage: "flag")
-            Label("Spots left: \(viewModel.spotsLeft)", systemImage: "person.badge.plus")
-            Label("Waitlist: \(viewModel.waitlistCount)", systemImage: "clock.badge.exclamationmark")
+            Label(viewModel.match.isRatingGame ? "Рейтинговый матч" : "Не рейтинговый матч", systemImage: "chart.line.uptrend.xyaxis")
+            Label(viewModel.match.isFieldBooked ? "Поле забронировано" : "Поле не забронировано", systemImage: "sportscourt")
+            Label("Формат: \(viewModel.match.format)", systemImage: "rectangle.3.group")
+            Label("Статус: \(localizedMatchStatus)", systemImage: "flag")
+            Label("Свободных мест: \(viewModel.spotsLeft)", systemImage: "person.badge.plus")
+            Label("Лист ожидания: \(viewModel.waitlistCount)", systemImage: "clock.badge.exclamationmark")
             if !viewModel.match.notes.isEmpty {
                 Label(viewModel.match.notes, systemImage: "note.text")
             }
@@ -244,27 +252,27 @@ struct MatchDetailsView: View {
 
     private var rsvpActionsCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Your RSVP")
+            Text("Ваш RSVP")
                 .font(.headline)
 
-            Text("Current: \(currentUserStatus?.title ?? "Not invited")")
+            Text("Текущий: \(currentUserStatus?.title ?? "Не приглашен")")
                 .font(.footnote)
                 .foregroundStyle(.secondary)
 
             HStack(spacing: 8) {
-                Button("I'm going") {
+                Button("Я иду") {
                     updateCurrentUserRSVP(to: .going)
                 }
                 .buttonStyle(.borderedProminent)
                 .disabled(appViewModel.currentUser == nil)
 
-                Button("Maybe") {
+                Button("Возможно") {
                     updateCurrentUserRSVP(to: .maybe)
                 }
                 .buttonStyle(.bordered)
                 .disabled(appViewModel.currentUser == nil)
 
-                Button("Decline") {
+                Button("Отказаться") {
                     updateCurrentUserRSVP(to: .declined)
                 }
                 .buttonStyle(.bordered)
@@ -273,7 +281,7 @@ struct MatchDetailsView: View {
             }
 
             if appViewModel.currentUser == nil {
-                Text("Sign in to RSVP.")
+                Text("Войдите, чтобы ответить на приглашение.")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             }
@@ -285,7 +293,7 @@ struct MatchDetailsView: View {
 
     private var participantsCard: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Participants")
+            Text("Участники")
                 .font(.headline)
 
             Picker("RSVP", selection: $selectedSection) {
@@ -298,7 +306,7 @@ struct MatchDetailsView: View {
             let filteredParticipants = viewModel.participants(for: selectedSection.status)
 
             if filteredParticipants.isEmpty {
-                Text("No players in \(selectedSection.title.lowercased())")
+                Text("Нет игроков в \(selectedSection.title.lowercased())")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
                     .padding(.vertical, 4)
@@ -329,19 +337,19 @@ struct MatchDetailsView: View {
         Group {
             if viewModel.canCurrentUserEditMatch || viewModel.canCurrentUserInviteToMatch || viewModel.canCurrentUserEnterMatchResult {
                 VStack(alignment: .leading, spacing: 10) {
-                    Text("Organiser Tools")
+                    Text("Инструменты организатора")
                         .font(.headline)
 
                     HStack(spacing: 8) {
                         if viewModel.canCurrentUserEditMatch {
-                            Button("Edit Match") {
+                            Button("Редактировать матч") {
                                 isEditSheetPresented = true
                             }
                             .buttonStyle(.borderedProminent)
                         }
 
                         if viewModel.canCurrentUserInviteToMatch {
-                            Button("Invite/Share") {
+                            Button("Пригласить/Поделиться") {
                                 isInviteSheetPresented = true
                             }
                             .buttonStyle(.bordered)
@@ -349,7 +357,7 @@ struct MatchDetailsView: View {
                     }
 
                     if viewModel.canCurrentUserEditMatch {
-                        Text("Manage Participants")
+                        Text("Управление участниками")
                             .font(.subheadline.bold())
 
                         ForEach(viewModel.match.participants) { participant in
@@ -362,12 +370,12 @@ struct MatchDetailsView: View {
                                 Text(participant.name)
                                     .lineLimit(1)
                                 Spacer()
-                                Button("Waitlist") {
+                                Button("Лист ожидания") {
                                     viewModel.moveParticipantToWaitlist(participantId: participant.id)
                                 }
                                 .buttonStyle(.bordered)
 
-                                Button("Remove", role: .destructive) {
+                                Button("Удалить", role: .destructive) {
                                     viewModel.removeParticipant(participantId: participant.id)
                                 }
                                 .buttonStyle(.bordered)
@@ -377,14 +385,14 @@ struct MatchDetailsView: View {
 
                     HStack(spacing: 8) {
                         if viewModel.canCurrentUserEditMatch {
-                            Button("Cancel Match", role: .destructive) {
+                            Button("Отмена матча", role: .destructive) {
                                 isCancelMatchConfirmationPresented = true
                             }
                             .buttonStyle(.bordered)
                         }
 
                         if viewModel.canCurrentUserEnterMatchResult {
-                            Button("Final Score") {
+                            Button("Финальный счет") {
                                 isFinalScoreSheetPresented = true
                             }
                             .buttonStyle(.borderedProminent)
@@ -444,21 +452,21 @@ private struct MatchEditSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                DatePicker("Start time", selection: $startAt, displayedComponents: [.date, .hourAndMinute])
-                TextField("Location", text: $location)
-                TextField("Format", text: $format)
-                Stepper("Max players: \(maxPlayers)", value: $maxPlayers, in: 1...40)
-                TextField("Notes", text: $notes, axis: .vertical)
+                DatePicker("Время начала", selection: $startAt, displayedComponents: [.date, .hourAndMinute])
+                TextField("Локация", text: $location)
+                TextField("Формат", text: $format)
+                Stepper("Макс. игроков: \(maxPlayers)", value: $maxPlayers, in: 1...40)
+                TextField("Заметки", text: $notes, axis: .vertical)
                     .lineLimit(3...6)
             }
-            .navigationTitle("Edit Match")
+            .navigationTitle("Редактировать матч")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Отмена") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
+                    Button("Сохранить") {
                         onSave(startAt, location, format, maxPlayers, notes)
                         dismiss()
                     }
@@ -480,28 +488,28 @@ private struct InvitePlayerSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Share Invite Link") {
+                Section("Поделиться ссылкой") {
                     Text(inviteLink)
                         .font(.footnote)
                         .textSelection(.enabled)
                     ShareLink(item: inviteLink) {
-                        Label("Share Invite Link", systemImage: "square.and.arrow.up")
+                        Label("Поделиться ссылкой", systemImage: "square.and.arrow.up")
                     }
                 }
 
-                Section("Invite Player") {
-                    TextField("Player name", text: $playerName)
+                Section("Пригласить игрока") {
+                    TextField("Имя игрока", text: $playerName)
                     Stepper("Elo: \(elo)", value: $elo, in: 800...3000, step: 25)
                 }
             }
-            .navigationTitle("Invite Players")
+            .navigationTitle("Приглашение игроков")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Close") { dismiss() }
+                    Button("Закрыть") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Invite") {
+                    Button("Пригласить") {
                         onInvite(playerName, elo)
                         dismiss()
                     }
@@ -521,17 +529,17 @@ private struct FinalScoreSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Stepper("Home score: \(homeScore)", value: $homeScore, in: 0...50)
-                Stepper("Away score: \(awayScore)", value: $awayScore, in: 0...50)
+                Stepper("Счет хозяев: \(homeScore)", value: $homeScore, in: 0...50)
+                Stepper("Счет гостей: \(awayScore)", value: $awayScore, in: 0...50)
             }
-            .navigationTitle("Final Score")
+            .navigationTitle("Финальный счет")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Отмена") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
+                    Button("Сохранить") {
                         onSave(homeScore, awayScore)
                         dismiss()
                     }
@@ -548,7 +556,7 @@ struct EventsTimeline: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             if events.isEmpty {
-                Text("No events yet")
+                Text("Пока нет событий")
                     .foregroundStyle(.secondary)
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
@@ -568,7 +576,7 @@ struct EventsTimeline: View {
                         VStack(alignment: .leading, spacing: 2) {
                             Text(event.type.title)
                                 .font(.subheadline.bold())
-                            Text(participantsByID[event.playerId]?.name ?? "Unknown Player")
+                            Text(participantsByID[event.playerId]?.name ?? "Неизвестный игрок")
                                 .font(.footnote)
                                 .foregroundStyle(.secondary)
                         }
@@ -612,41 +620,41 @@ struct AddEventSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Event") {
-                    Picker("Type", selection: $type) {
+                Section("Событие") {
+                    Picker("Тип", selection: $type) {
                         ForEach(MatchEventType.allCases) { eventType in
                             Text(eventType.title).tag(eventType)
                         }
                     }
 
-                    Stepper("Minute: \(minute)", value: $minute, in: 1...120)
+                    Stepper("Минута: \(minute)", value: $minute, in: 1...120)
                 }
 
-                Section("Players") {
-                    Picker("Player", selection: playerSelectionBinding) {
+                Section("Игроки") {
+                    Picker("Игрок", selection: playerSelectionBinding) {
                         ForEach(participants) { participant in
                             Text(participant.name).tag(Optional(participant.id))
                         }
                     }
 
-                    Picker("Created by", selection: createdBySelectionBinding) {
+                    Picker("Создано", selection: createdBySelectionBinding) {
                         ForEach(participants) { participant in
                             Text(participant.name).tag(Optional(participant.id))
                         }
                     }
                 }
             }
-            .navigationTitle("Add Match Event")
+            .navigationTitle("Добавить событие матча")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") {
+                    Button("Отмена") {
                         dismiss()
                     }
                 }
 
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
+                    Button("Сохранить") {
                         guard let playerId, let createdById else { return }
                         onAdd(
                             MatchEvent(
@@ -708,7 +716,7 @@ struct MatchSummaryView: View {
             }
             .padding(.vertical, 4)
         }
-        .navigationTitle("Match Summary")
+        .navigationTitle("Сводка матча")
     }
 
     private func statBadge(label: String, value: Int, color: Color) -> some View {

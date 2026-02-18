@@ -26,7 +26,7 @@ struct PositionPickerView: View {
                 }
             }
         }
-        .navigationTitle("Preferred Position")
+        .navigationTitle("Предпочитаемая позиция")
         .navigationBarTitleDisplayMode(.inline)
     }
 

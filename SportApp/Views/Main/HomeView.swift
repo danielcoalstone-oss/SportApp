@@ -8,13 +8,13 @@ struct HomeView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
                     if let user = appViewModel.currentUser {
-                        Text("Hi, \(user.fullName)")
+                        Text("Привет, \(user.fullName)")
                             .font(.title2.bold())
 
                         VStack(alignment: .leading, spacing: 8) {
-                            Label("Current Elo: \(user.eloRating)", systemImage: "chart.line.uptrend.xyaxis")
-                            Label("Matches: \(user.matchesPlayed)", systemImage: "figure.soccer")
-                            Label("Win rate: \(Int(user.winRate * 100))%", systemImage: "trophy")
+                            Label("Текущий Elo: \(user.eloRating)", systemImage: "chart.line.uptrend.xyaxis")
+                            Label("Матчи: \(user.matchesPlayed)", systemImage: "figure.soccer")
+                            Label("Процент побед: \(Int(user.winRate * 100))%", systemImage: "trophy")
                         }
                         .font(.subheadline)
                         .padding()
@@ -22,7 +22,7 @@ struct HomeView: View {
                         .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
                     }
 
-                    Text("Quick Booking")
+                    Text("Быстрая запись")
                         .font(.headline)
 
                     ForEach(appViewModel.visibleTournaments.prefix(3)) { tournament in
@@ -47,7 +47,7 @@ struct HomeView: View {
                     }
 
                     if !appViewModel.upcomingCreatedGames.isEmpty {
-                        Text("Upcoming Matches")
+                        Text("Ближайшие матчи")
                             .font(.headline)
 
                         ForEach(appViewModel.upcomingCreatedGames.prefix(3)) { game in
@@ -60,14 +60,14 @@ struct HomeView: View {
                                             .font(.headline)
                                             .foregroundStyle(.primary)
                                         Spacer()
-                                        Text(game.isPrivateGame ? "Private" : "Public")
+                                        Text(game.isPrivateGame ? "Приватный" : "Публичный")
                                             .font(.caption)
                                             .foregroundStyle(.secondary)
                                     }
                                     Text(DateFormatterService.tournamentDateTime.string(from: game.scheduledDate))
                                         .font(.subheadline)
                                         .foregroundStyle(.secondary)
-                                    Text("Players: \(game.players.count)/\(game.numberOfPlayers) • Avg Elo: \(game.averageElo)")
+                                    Text("Игроки: \(game.players.count)/\(game.numberOfPlayers) • Ср. Elo: \(game.averageElo)")
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
                                 }
@@ -79,7 +79,7 @@ struct HomeView: View {
                     }
 
                     if !appViewModel.pastCreatedGames.isEmpty {
-                        Text("Past Matches")
+                        Text("Прошедшие матчи")
                             .font(.headline)
 
                         ForEach(appViewModel.pastCreatedGames.prefix(3)) { game in
@@ -92,14 +92,14 @@ struct HomeView: View {
                                             .font(.headline)
                                             .foregroundStyle(.primary)
                                         Spacer()
-                                        Text("Past")
+                                        Text("Прошедший")
                                             .font(.caption)
                                             .foregroundStyle(.secondary)
                                     }
                                     Text(DateFormatterService.tournamentDateTime.string(from: game.scheduledDate))
                                         .font(.subheadline)
                                         .foregroundStyle(.secondary)
-                                    Text("Players: \(game.players.count)/\(game.numberOfPlayers) • Avg Elo: \(game.averageElo)")
+                                    Text("Игроки: \(game.players.count)/\(game.numberOfPlayers) • Ср. Elo: \(game.averageElo)")
                                         .font(.caption)
                                         .foregroundStyle(.secondary)
                                 }
@@ -110,19 +110,19 @@ struct HomeView: View {
                         }
                     }
 
-                    Button("Simulate Win (+ Elo)") {
+                    Button("Симулировать победу (+ Elo)") {
                         appViewModel.simulateMatchResult(didWin: true, opponentAverageElo: 1500)
                     }
                     .buttonStyle(.borderedProminent)
 
-                    Button("Simulate Loss (- Elo)") {
+                    Button("Симулировать поражение (- Elo)") {
                         appViewModel.simulateMatchResult(didWin: false, opponentAverageElo: 1500)
                     }
                     .buttonStyle(.bordered)
                 }
                 .padding()
             }
-            .navigationTitle("Main")
+            .navigationTitle("Главная")
         }
     }
 }

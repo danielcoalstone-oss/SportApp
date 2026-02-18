@@ -17,14 +17,14 @@ struct ProfileView: View {
                         Image(systemName: "person.crop.circle.badge.exclamationmark")
                             .font(.system(size: 32))
                             .foregroundStyle(.secondary)
-                        Text("No profile loaded")
+                        Text("Профиль не загружен")
                             .font(.headline)
                             .foregroundStyle(.secondary)
                     }
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                 }
             }
-            .navigationTitle("Profile")
+            .navigationTitle("Профиль")
         }
     }
 }
@@ -52,7 +52,7 @@ private struct PlayerProfileEditorView: View {
 
     var body: some View {
         List {
-            Section("Player Profile") {
+            Section("Профиль игрока") {
                 RoleBadge(
                     tags: RoleTagProvider.tags(for: user, tournaments: appViewModel.visibleTournaments),
                     size: .medium
@@ -65,13 +65,13 @@ private struct PlayerProfileEditorView: View {
                     )
 
                     PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
-                        Label("Upload Image", systemImage: "photo.on.rectangle")
+                        Label("Загрузить изображение", systemImage: "photo.on.rectangle")
                     }
                     .buttonStyle(.bordered)
                 }
-                TextField("Name", text: $viewModel.name)
-                TextField("Positions (comma separated)", text: $viewModel.positionsText)
-                TextField("Location", text: $viewModel.location)
+                TextField("Имя", text: $viewModel.name)
+                TextField("Позиции (через запятую)", text: $viewModel.positionsText)
+                TextField("Локация", text: $viewModel.location)
 
                 NavigationLink {
                     PositionPickerView(selectedPositions: $viewModel.preferredPositions) { _ in
@@ -79,7 +79,7 @@ private struct PlayerProfileEditorView: View {
                     }
                 } label: {
                     HStack {
-                        Text("Preferred Position")
+                        Text("Предпочитаемая позиция")
                         Spacer()
                         Text(preferredPositionsSummary)
                             .foregroundStyle(.secondary)
@@ -102,9 +102,9 @@ private struct PlayerProfileEditorView: View {
                     }
                 }
 
-                Picker("Preferred foot", selection: $viewModel.preferredFoot) {
+                Picker("Ведущая нога", selection: $viewModel.preferredFoot) {
                     ForEach(PreferredFoot.allCases) { foot in
-                        Text(foot.rawValue).tag(foot)
+                        Text(localizedFoot(foot)).tag(foot)
                     }
                 }
 
@@ -116,7 +116,7 @@ private struct PlayerProfileEditorView: View {
                 }
 
                 HStack {
-                    Text("Created")
+                    Text("Создан")
                     Spacer()
                     Text(DateFormatterService.tournamentDateTime.string(from: viewModel.createdAt))
                         .foregroundStyle(.secondary)
@@ -124,30 +124,30 @@ private struct PlayerProfileEditorView: View {
                 }
             }
 
-            Section("Mini Stats") {
-                statRow(title: "Matches Played", value: "\(viewModel.completedMatchesPlayed)")
-                statRow(title: "Wins", value: "\(viewModel.winsCount)")
-                statRow(title: "Draws", value: "\(viewModel.drawsCount)")
-                statRow(title: "Losses", value: "\(viewModel.lossesCount)")
+            Section("Мини-статистика") {
+                statRow(title: "Матчей сыграно", value: "\(viewModel.completedMatchesPlayed)")
+                statRow(title: "Победы", value: "\(viewModel.winsCount)")
+                statRow(title: "Ничьи", value: "\(viewModel.drawsCount)")
+                statRow(title: "Поражения", value: "\(viewModel.lossesCount)")
             }
 
-            Section("My Matches") {
+            Section("Мои матчи") {
                 if viewModel.matchHistory.isEmpty {
-                    Text(viewModel.isLoading ? "Loading matches..." : "No matches yet")
+                    Text(viewModel.isLoading ? "Загрузка матчей..." : "Пока нет матчей")
                         .foregroundStyle(.secondary)
                 } else {
-                    matchSubsection(title: "Upcoming", matches: viewModel.upcomingMatches)
-                    matchSubsection(title: "Past", matches: viewModel.pastMatches)
+                    matchSubsection(title: "Предстоящие", matches: viewModel.upcomingMatches)
+                    matchSubsection(title: "Прошедшие", matches: viewModel.pastMatches)
                 }
             }
 
-            Section("Game Matches") {
+            Section("Игры") {
                 if appViewModel.currentUserUpcomingCreatedGames.isEmpty && appViewModel.currentUserPastCreatedGames.isEmpty {
-                    Text("No game matches yet")
+                    Text("Пока нет игр")
                         .foregroundStyle(.secondary)
                 } else {
-                    createdGameSubsection(title: "Upcoming", games: appViewModel.currentUserUpcomingCreatedGames)
-                    createdGameSubsection(title: "Past", games: appViewModel.currentUserPastCreatedGames)
+                    createdGameSubsection(title: "Предстоящие", games: appViewModel.currentUserUpcomingCreatedGames)
+                    createdGameSubsection(title: "Прошедшие", games: appViewModel.currentUserPastCreatedGames)
                 }
             }
 
@@ -169,13 +169,13 @@ private struct PlayerProfileEditorView: View {
                         ProgressView()
                             .frame(maxWidth: .infinity)
                     } else {
-                        Text("Save Profile")
+                        Text("Сохранить профиль")
                             .frame(maxWidth: .infinity)
                     }
                 }
                 .buttonStyle(.borderedProminent)
 
-                Button("Sign Out", role: .destructive) {
+                Button("Выйти", role: .destructive) {
                     onSignOut()
                 }
             }
@@ -241,7 +241,15 @@ private struct PlayerProfileEditorView: View {
 
     private var preferredPositionsSummary: String {
         let selected = viewModel.preferredPositions.map(\.rawValue)
-        return selected.isEmpty ? "None" : selected.joined(separator: " • ")
+        return selected.isEmpty ? "Нет" : selected.joined(separator: " • ")
+    }
+
+    private func localizedFoot(_ foot: PreferredFoot) -> String {
+        switch foot {
+        case .left: return "Левая"
+        case .right: return "Правая"
+        case .both: return "Обе"
+        }
     }
 
     private func matchSubsection(title: String, matches: [PlayerMatch]) -> some View {
@@ -251,7 +259,7 @@ private struct PlayerProfileEditorView: View {
                 .padding(.top, 2)
 
             if matches.isEmpty {
-                Text("No \(title.lowercased()) matches")
+                Text("Нет матчей")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             } else {
@@ -265,7 +273,7 @@ private struct PlayerProfileEditorView: View {
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
-                        Text("vs \(match.opponent)")
+                        Text("против \(match.opponent)")
                             .font(.subheadline)
                         Text(DateFormatterService.tournamentDateTime.string(from: match.date))
                             .font(.caption)
@@ -285,7 +293,7 @@ private struct PlayerProfileEditorView: View {
                 .padding(.top, 2)
 
             if games.isEmpty {
-                Text("No \(title.lowercased()) game matches")
+                Text("Нет игр")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
             } else {
@@ -295,14 +303,14 @@ private struct PlayerProfileEditorView: View {
                             Text(game.locationName)
                                 .font(.headline)
                             Spacer()
-                            Text("Avg Elo \(game.averageElo)")
+                            Text("Ср. Elo \(game.averageElo)")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
                         Text(DateFormatterService.tournamentDateTime.string(from: game.startAt))
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
-                        Text("Players: \(game.players.count)/\(game.maxPlayers)")
+                        Text("Игроки: \(game.players.count)/\(game.maxPlayers)")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
@@ -344,15 +352,15 @@ struct ProfileView_Previews: PreviewProvider {
 
         return ProfileView()
             .environmentObject(appViewModel)
-            .previewDisplayName("Profile")
+            .previewDisplayName("Профиль")
     }
 
     private static var profileEditorPreview: some View {
         let user = MockDataService.seedUsers().first ?? User(
             id: UUID(),
-            fullName: "Preview Player",
+            fullName: "Тестовый игрок",
             email: "preview@sportapp.test",
-            favoritePosition: "Winger",
+            favoritePosition: "Вингер",
             city: "Austin",
             eloRating: 1500,
             matchesPlayed: 0,
@@ -364,8 +372,8 @@ struct ProfileView_Previews: PreviewProvider {
                 user: user,
                 repository: MockPlayerProfileRepository(seedPlayer: Player.from(user: user))
             ) {}
-            .navigationTitle("Profile")
+            .navigationTitle("Профиль")
         }
-        .previewDisplayName("Profile Editor")
+        .previewDisplayName("Редактор профиля")
     }
 }

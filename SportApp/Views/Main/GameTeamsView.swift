@@ -12,7 +12,7 @@ struct GameTeamsView: View {
             }
             .padding()
         }
-        .navigationTitle("Teams")
+        .navigationTitle("Команды")
         .navigationBarTitleDisplayMode(.inline)
         .permissionDeniedAlert(message: $viewModel.toastMessage)
     }
@@ -30,7 +30,7 @@ struct GameTeamsView: View {
                         .foregroundStyle(.secondary)
 
                     if groupedPlayers.isEmpty {
-                        Text("No players")
+                        Text("Нет игроков")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     } else {
@@ -42,7 +42,7 @@ struct GameTeamsView: View {
                                     size: 24
                                 )
                                 Menu {
-                                    Button("Move to \(teamName(for: otherTeamId))") {
+                                    Button("Переместить в \(teamName(for: otherTeamId))") {
                                         viewModel.moveParticipant(participantId: participant.id, toTeamId: otherTeamId)
                                     }
                                     Divider()

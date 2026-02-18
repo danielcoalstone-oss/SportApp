@@ -33,7 +33,7 @@ struct LeaderboardView: View {
                 }
                 .padding(.vertical, 4)
             }
-            .navigationTitle("Elo Leaderboard")
+            .navigationTitle("Рейтинг Elo")
         }
     }
 }

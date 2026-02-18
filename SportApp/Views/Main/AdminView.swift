@@ -16,13 +16,13 @@ struct AdminView: View {
                     }
                     .padding()
                 }
-                .navigationTitle("Admin")
+                .navigationTitle("Админ")
             } else {
                 PermissionDeniedView()
             }
         }
-        .alert("Admin Action", isPresented: adminActionBinding) {
-            Button("OK", role: .cancel) {}
+        .alert("Действие админа", isPresented: adminActionBinding) {
+            Button("ОК", role: .cancel) {}
         } message: {
             Text(appViewModel.adminActionMessage ?? "")
         }
@@ -31,7 +31,7 @@ struct AdminView: View {
 
     private var usersBlock: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Users")
+            Text("Пользователи")
                 .font(.title3.bold())
 
             ForEach(appViewModel.users) { user in
@@ -52,17 +52,17 @@ struct AdminView: View {
                     }
 
                     HStack(spacing: 8) {
-                        Button("Set Player") {
+                        Button("Сделать игроком") {
                             appViewModel.adminUpdateUserRole(userId: user.id, role: .player)
                         }
                         .buttonStyle(.bordered)
 
-                        Button("Set Admin") {
+                        Button("Сделать админом") {
                             appViewModel.adminUpdateUserRole(userId: user.id, role: .admin)
                         }
                         .buttonStyle(.bordered)
 
-                        Button(user.isSuspended ? "Unsuspend" : "Suspend") {
+                        Button(user.isSuspended ? "Снять блок" : "Заблокировать") {
                             selectedUserId = user.id
                             if user.isSuspended {
                                 appViewModel.adminSetSuspended(userId: user.id, isSuspended: false, reason: nil)
@@ -73,15 +73,15 @@ struct AdminView: View {
                     }
 
                     if user.isSuspended, let reason = user.suspensionReason, !reason.isEmpty {
-                        Text("Reason: \(reason)")
+                        Text("Причина: \(reason)")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                     }
 
                     if selectedUserId == user.id && !user.isSuspended {
-                        TextField("Suspension reason", text: $suspensionReason)
+                        TextField("Причина блокировки", text: $suspensionReason)
                             .textFieldStyle(.roundedBorder)
-                        Button("Confirm Suspend", role: .destructive) {
+                        Button("Подтвердить блокировку", role: .destructive) {
                             appViewModel.adminSetSuspended(
                                 userId: user.id,
                                 isSuspended: true,
@@ -101,21 +101,21 @@ struct AdminView: View {
 
     private var deletionBlock: some View {
         VStack(alignment: .leading, spacing: 10) {
-            Text("Soft Delete")
+            Text("Мягкое удаление")
                 .font(.title3.bold())
 
             if appViewModel.visibleCreatedGames.isEmpty,
                appViewModel.visibleTournaments.isEmpty,
                appViewModel.visiblePractices.isEmpty {
-                Text("No active records to delete")
+                Text("Нет активных записей для удаления")
                     .foregroundStyle(.secondary)
             }
 
             ForEach(appViewModel.visibleCreatedGames) { game in
                 HStack {
-                    Text("Match: \(game.locationName)")
+                    Text("Матч: \(game.locationName)")
                     Spacer()
-                    Button("Delete", role: .destructive) {
+                    Button("Удалить", role: .destructive) {
                         appViewModel.adminDeleteMatch(gameId: game.id)
                     }
                     .buttonStyle(.bordered)
@@ -124,9 +124,9 @@ struct AdminView: View {
 
             ForEach(appViewModel.visibleTournaments) { tournament in
                 HStack {
-                    Text("Tournament: \(tournament.title)")
+                    Text("Турнир: \(tournament.title)")
                     Spacer()
-                    Button("Delete", role: .destructive) {
+                    Button("Удалить", role: .destructive) {
                         appViewModel.adminDeleteTournament(tournamentId: tournament.id)
                     }
                     .buttonStyle(.bordered)
@@ -135,9 +135,9 @@ struct AdminView: View {
 
             ForEach(appViewModel.visiblePractices) { session in
                 HStack {
-                    Text("Session: \(session.title)")
+                    Text("Сессия: \(session.title)")
                     Spacer()
-                    Button("Delete", role: .destructive) {
+                    Button("Удалить", role: .destructive) {
                         appViewModel.adminDeleteSession(sessionId: session.id)
                     }
                     .buttonStyle(.bordered)

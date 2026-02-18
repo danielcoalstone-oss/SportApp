@@ -2,9 +2,9 @@ import SwiftUI
 
 struct TournamentDetailView: View {
     private enum TournamentTab: String, CaseIterable, Identifiable {
-        case standings = "Standings"
-        case matches = "Matches"
-        case teams = "Teams"
+        case standings = "Таблица"
+        case matches = "Матчи"
+        case teams = "Команды"
 
         var id: String { rawValue }
     }
@@ -34,19 +34,19 @@ struct TournamentDetailView: View {
                         VStack(alignment: .leading, spacing: 8) {
                             Label(tournament.location, systemImage: "mappin")
                             Label(DateFormatterService.tournamentDateTime.string(from: tournament.startDate), systemImage: "calendar")
-                            Label("Format: \(tournament.format)", systemImage: "list.bullet.rectangle")
-                            Label("Entry fee: $\(Int(tournament.entryFee))", systemImage: "creditcard")
+                            Label("Формат: \(tournament.format)", systemImage: "list.bullet.rectangle")
+                            Label("Взнос: $\(Int(tournament.entryFee))", systemImage: "creditcard")
                         }
                         .font(.subheadline)
 
                         if appViewModel.canCurrentUserEditTournament(tournament) {
                             VStack(alignment: .leading, spacing: 10) {
-                                Text("Create Team & Book")
+                                Text("Создать команду и записаться")
                                     .font(.headline)
-                                TextField("Team name", text: $teamName)
+                                TextField("Название команды", text: $teamName)
                                     .textFieldStyle(.roundedBorder)
 
-                                Button("Create Team") {
+                                Button("Создать команду") {
                                     appViewModel.createTeamAndJoinTournament(tournamentID: tournament.id, teamName: teamName)
                                     teamName = ""
                                 }
@@ -54,7 +54,7 @@ struct TournamentDetailView: View {
                             }
                         }
 
-                        Picker("Tournament section", selection: $selectedTab) {
+                        Picker("Раздел турнира", selection: $selectedTab) {
                             ForEach(TournamentTab.allCases) { tab in
                                 Text(tab.rawValue).tag(tab)
                             }
@@ -79,14 +79,14 @@ struct TournamentDetailView: View {
                     Image(systemName: "exclamationmark.triangle")
                         .font(.system(size: 32))
                         .foregroundStyle(.secondary)
-                    Text("Tournament not found")
+                    Text("Турнир не найден")
                         .font(.headline)
                         .foregroundStyle(.secondary)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
-        .navigationTitle("Booking")
+        .navigationTitle("Запись")
         .navigationBarTitleDisplayMode(.inline)
         .sheet(isPresented: $isEditDetailsSheetPresented) {
             if let tournament {
@@ -124,8 +124,8 @@ struct TournamentDetailView: View {
                 )
             }
         }
-        .alert("Tournament Action", isPresented: tournamentActionAlertBinding) {
-            Button("OK", role: .cancel) {}
+        .alert("Действие турнира", isPresented: tournamentActionAlertBinding) {
+            Button("ОК", role: .cancel) {}
         } message: {
             Text(appViewModel.tournamentActionMessage ?? "")
         }
@@ -139,20 +139,20 @@ struct TournamentDetailView: View {
     private func organiserToolsSection(_ tournament: Tournament) -> some View {
         if appViewModel.canCurrentUserEditTournament(tournament) || appViewModel.canCurrentUserEnterTournamentResult(tournament) {
             VStack(alignment: .leading, spacing: 10) {
-                Text("Organiser Tools")
+                Text("Инструменты организатора")
                     .font(.headline)
 
                 if appViewModel.canCurrentUserEditTournament(tournament) {
-                    Button("Edit Tournament Details") {
+                    Button("Редактировать турнир") {
                         isEditDetailsSheetPresented = true
                     }
                     .buttonStyle(.borderedProminent)
 
                     HStack(spacing: 8) {
-                        TextField("Add team name", text: $organiserTeamName)
+                        TextField("Название новой команды", text: $organiserTeamName)
                             .textFieldStyle(.roundedBorder)
 
-                        Button("Add") {
+                        Button("Добавить") {
                             appViewModel.addTeamToTournament(tournamentID: tournament.id, teamName: organiserTeamName)
                             organiserTeamName = ""
                         }
@@ -164,7 +164,7 @@ struct TournamentDetailView: View {
                             HStack {
                                 Text(team.name)
                                 Spacer()
-                                Button("Remove", role: .destructive) {
+                                Button("Удалить", role: .destructive) {
                                     appViewModel.removeTeamFromTournament(tournamentID: tournament.id, teamID: team.id)
                                 }
                                 .buttonStyle(.bordered)
@@ -172,17 +172,17 @@ struct TournamentDetailView: View {
                         }
                     }
 
-                    Button("Create / Edit Schedule") {
+                    Button("Создать / изменить расписание") {
                         isScheduleSheetPresented = true
                     }
                     .buttonStyle(.bordered)
 
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("Resolve Disputes (stub)")
+                        Text("Разрешение споров (заглушка)")
                             .font(.subheadline.bold())
-                        Picker("Dispute status", selection: disputeStatusBinding(for: tournament)) {
+                        Picker("Статус спора", selection: disputeStatusBinding(for: tournament)) {
                             ForEach(TournamentDisputeStatus.allCases, id: \.self) { status in
-                                Text(status.rawValue.capitalized).tag(status)
+                                Text(localizedDisputeStatus(status)).tag(status)
                             }
                         }
                         .pickerStyle(.segmented)
@@ -199,7 +199,7 @@ struct TournamentDetailView: View {
         let standings = TournamentStandingsService.standings(for: tournament)
 
         return VStack(alignment: .leading, spacing: 8) {
-            Text("Standings")
+            Text("Таблица")
                 .font(.headline)
 
             ForEach(Array(standings.enumerated()), id: \.element.id) { index, row in
@@ -210,13 +210,13 @@ struct TournamentDetailView: View {
                     Text(row.teamName)
                         .font(.subheadline.bold())
                     Spacer()
-                    Text("P \(row.played)")
+                    Text("И \(row.played)")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text("GD \(row.goalDifference)")
+                    Text("РМ \(row.goalDifference)")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                    Text("\(row.points) pts")
+                    Text("\(row.points) очк")
                         .font(.caption.bold())
                 }
                 .padding()
@@ -228,25 +228,25 @@ struct TournamentDetailView: View {
 
     private func matchesSection(_ tournament: Tournament) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Matches")
+            Text("Матчи")
                 .font(.headline)
 
             if tournament.matches.isEmpty {
-                Text("No matches scheduled yet")
+                Text("Матчи пока не запланированы")
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(tournament.matches) { match in
                     VStack(alignment: .leading, spacing: 6) {
-                        Text("\(teamName(for: match.homeTeamId, in: tournament)) vs \(teamName(for: match.awayTeamId, in: tournament))")
+                        Text("\(teamName(for: match.homeTeamId, in: tournament)) против \(teamName(for: match.awayTeamId, in: tournament))")
                             .font(.subheadline.bold())
                         Text(DateFormatterService.tournamentDateTime.string(from: match.startTime))
                             .font(.caption)
                             .foregroundStyle(.secondary)
                         if match.isCompleted, let home = match.homeScore, let away = match.awayScore {
-                            Text("Result: \(home) - \(away)")
+                            Text("Результат: \(home) - \(away)")
                                 .font(.caption)
                         } else {
-                            Text("Result: Pending")
+                            Text("Результат: Ожидается")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
@@ -254,12 +254,12 @@ struct TournamentDetailView: View {
                             NavigationLink {
                                 GameDetailView(game: game)
                             } label: {
-                                Text("Open Game Screen")
+                                Text("Открыть экран игры")
                             }
                             .buttonStyle(.borderedProminent)
                         }
                         if appViewModel.canCurrentUserEnterTournamentResult(tournament) {
-                            Button("Enter / Edit Result") {
+                            Button("Внести / изменить результат") {
                                 selectedMatchForResult = match
                             }
                             .buttonStyle(.bordered)
@@ -275,11 +275,11 @@ struct TournamentDetailView: View {
 
     private func teamsSection(_ tournament: Tournament) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text("Teams")
+            Text("Команды")
                 .font(.headline)
 
             if tournament.teams.count < 4 {
-                Text("League MVP works best with 4+ teams.")
+                Text("Для лиги рекомендуется минимум 4 команды.")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -303,7 +303,7 @@ struct TournamentDetailView: View {
                                 .foregroundStyle(.secondary)
 
                             if members.isEmpty {
-                                Text("No players")
+                                Text("Нет игроков")
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
                             } else {
@@ -364,7 +364,7 @@ struct TournamentDetailView: View {
     }
 
     private func teamName(for teamID: UUID, in tournament: Tournament) -> String {
-        tournament.teams.first(where: { $0.id == teamID })?.name ?? "Unknown Team"
+        tournament.teams.first(where: { $0.id == teamID })?.name ?? "Неизвестная команда"
     }
 
     private func isCurrentUserInDifferentTeam(teamID: UUID, tournament: Tournament) -> Bool {
@@ -374,6 +374,14 @@ struct TournamentDetailView: View {
 
         return tournament.teams.contains { team in
             team.id != teamID && team.members.contains(where: { $0.id == currentUserID })
+        }
+    }
+
+    private func localizedDisputeStatus(_ status: TournamentDisputeStatus) -> String {
+        switch status {
+        case .none: return "Нет"
+        case .open: return "Открыт"
+        case .resolved: return "Решен"
         }
     }
 
@@ -389,9 +397,9 @@ struct TournamentDetailView: View {
 
     private func teamActionTitle(for team: Team, in tournament: Tournament) -> String {
         if isCurrentUserInTeam(teamID: team.id, tournament: tournament) {
-            return "Leave Team"
+            return "Покинуть команду"
         }
-        return team.isFull ? "Team Full" : "Join Team"
+        return team.isFull ? "Команда заполнена" : "Вступить в команду"
     }
 
     private func isTeamActionDisabled(for team: Team, in tournament: Tournament) -> Bool {
@@ -444,20 +452,20 @@ private struct EditTournamentDetailsSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Title", text: $title)
-                TextField("Location", text: $location)
-                DatePicker("Start Date", selection: $startDate, displayedComponents: [.date, .hourAndMinute])
-                TextField("Format", text: $format)
-                Stepper("Max Teams: \(maxTeams)", value: $maxTeams, in: 2...64)
+                TextField("Название", text: $title)
+                TextField("Локация", text: $location)
+                DatePicker("Дата начала", selection: $startDate, displayedComponents: [.date, .hourAndMinute])
+                TextField("Формат", text: $format)
+                Stepper("Макс. команд: \(maxTeams)", value: $maxTeams, in: 2...64)
             }
-            .navigationTitle("Edit Tournament")
+            .navigationTitle("Редактировать турнир")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Отмена") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
+                    Button("Сохранить") {
                         onSave(title, location, startDate, format, maxTeams)
                         dismiss()
                     }
@@ -480,26 +488,26 @@ private struct ScheduleTournamentMatchSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Picker("Home Team", selection: $homeTeamId) {
+                Picker("Домашняя команда", selection: $homeTeamId) {
                     ForEach(tournament.teams) { team in
                         Text(team.name).tag(Optional(team.id))
                     }
                 }
-                Picker("Away Team", selection: $awayTeamId) {
+                Picker("Гостевая команда", selection: $awayTeamId) {
                     ForEach(tournament.teams) { team in
                         Text(team.name).tag(Optional(team.id))
                     }
                 }
-                DatePicker("Match Start", selection: $startTime, displayedComponents: [.date, .hourAndMinute])
+                DatePicker("Начало матча", selection: $startTime, displayedComponents: [.date, .hourAndMinute])
             }
-            .navigationTitle("Schedule Match")
+            .navigationTitle("Запланировать матч")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Отмена") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
+                    Button("Сохранить") {
                         guard let homeTeamId, let awayTeamId else { return }
                         onSave(homeTeamId, awayTeamId, startTime)
                         dismiss()
@@ -534,17 +542,17 @@ private struct EnterTournamentResultSheet: View {
     var body: some View {
         NavigationStack {
             Form {
-                Stepper("Home Score: \(homeScore)", value: $homeScore, in: 0...50)
-                Stepper("Away Score: \(awayScore)", value: $awayScore, in: 0...50)
+                Stepper("Счет хозяев: \(homeScore)", value: $homeScore, in: 0...50)
+                Stepper("Счет гостей: \(awayScore)", value: $awayScore, in: 0...50)
             }
-            .navigationTitle("Enter Result")
+            .navigationTitle("Внести результат")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Cancel") { dismiss() }
+                    Button("Отмена") { dismiss() }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
+                    Button("Сохранить") {
                         onSave(homeScore, awayScore)
                         dismiss()
                     }

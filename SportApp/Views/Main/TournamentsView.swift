@@ -14,14 +14,14 @@ struct TournamentsView: View {
             VStack(spacing: 0) {
                 HStack(spacing: 10) {
                     filterButton(
-                        title: "Games/Tournaments",
+                        title: "Игры/Турниры",
                         isSelected: selectedFilter == .gamesAndTournaments
                     ) {
                         selectedFilter = .gamesAndTournaments
                     }
 
                     filterButton(
-                        title: "Practices",
+                        title: "Тренировки",
                         isSelected: selectedFilter == .practices
                     ) {
                         selectedFilter = .practices
@@ -34,7 +34,7 @@ struct TournamentsView: View {
                 if selectedFilter == .gamesAndTournaments {
                     List {
                         if !appViewModel.upcomingCreatedGames.isEmpty {
-                            Section("Created Games") {
+                            Section("Созданные игры") {
                                 ForEach(appViewModel.upcomingCreatedGames) { game in
                                     NavigationLink {
                                         GameDetailView(game: game)
@@ -44,14 +44,14 @@ struct TournamentsView: View {
                                                 Text(game.locationName)
                                                     .font(.headline)
                                                 Spacer()
-                                                Text(game.isPrivateGame ? "Private" : "Public")
+                                                Text(game.isPrivateGame ? "Приватный" : "Публичный")
                                                     .font(.caption)
                                                     .foregroundStyle(.secondary)
                                             }
                                             Text(DateFormatterService.tournamentDateTime.string(from: game.scheduledDate))
                                                 .font(.subheadline)
                                                 .foregroundStyle(.secondary)
-                                            Text("Players: \(game.players.count)/\(game.numberOfPlayers) • Avg Elo: \(game.averageElo)")
+                                            Text("Игроки: \(game.players.count)/\(game.numberOfPlayers) • Ср. Elo: \(game.averageElo)")
                                                 .font(.caption)
                                                 .foregroundStyle(.secondary)
                                         }
@@ -61,7 +61,7 @@ struct TournamentsView: View {
                         }
 
                         if !appViewModel.pastCreatedGames.isEmpty {
-                            Section("Past Matches") {
+                            Section("Прошедшие матчи") {
                                 ForEach(appViewModel.pastCreatedGames) { game in
                                     NavigationLink {
                                         GameDetailView(game: game)
@@ -71,14 +71,14 @@ struct TournamentsView: View {
                                                 Text(game.locationName)
                                                     .font(.headline)
                                                 Spacer()
-                                                Text("Past")
+                                                Text("Прошедший")
                                                     .font(.caption)
                                                     .foregroundStyle(.secondary)
                                             }
                                             Text(DateFormatterService.tournamentDateTime.string(from: game.scheduledDate))
                                                 .font(.subheadline)
                                                 .foregroundStyle(.secondary)
-                                            Text("Players: \(game.players.count)/\(game.numberOfPlayers) • Avg Elo: \(game.averageElo)")
+                                            Text("Игроки: \(game.players.count)/\(game.numberOfPlayers) • Ср. Elo: \(game.averageElo)")
                                                 .font(.caption)
                                                 .foregroundStyle(.secondary)
                                         }
@@ -87,7 +87,7 @@ struct TournamentsView: View {
                             }
                         }
 
-                        Section("Tournaments") {
+                        Section("Турниры") {
                             ForEach(appViewModel.visibleTournaments) { tournament in
                                 NavigationLink {
                                     TournamentDetailView(tournamentID: tournament.id)
@@ -98,7 +98,7 @@ struct TournamentsView: View {
                                         Text(DateFormatterService.tournamentDateTime.string(from: tournament.startDate))
                                             .font(.subheadline)
                                             .foregroundStyle(.secondary)
-                                        Text("Open team slots: \(tournament.openSpots)")
+                                        Text("Свободных мест в командах: \(tournament.openSpots)")
                                             .font(.caption)
                                             .foregroundStyle(.secondary)
                                     }
@@ -113,14 +113,14 @@ struct TournamentsView: View {
                                 Text(practice.title)
                                     .font(.headline)
                                 Spacer()
-                                Text(practice.isOpenJoin ? "Open Join" : "Approval Needed")
+                                Text(practice.isOpenJoin ? "Свободный вход" : "Нужно подтверждение")
                                     .font(.caption)
                                     .foregroundStyle(.secondary)
                             }
                             Text(DateFormatterService.tournamentDateTime.string(from: practice.startDate))
                                 .font(.subheadline)
                                 .foregroundStyle(.secondary)
-                            Text("\(practice.location) • Players: \(practice.numberOfPlayers)")
+                            Text("\(practice.location) • Игроки: \(practice.numberOfPlayers)")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                             Text("Elo: \(practice.minElo)-\(practice.maxElo)")
@@ -130,7 +130,7 @@ struct TournamentsView: View {
                     }
                 }
             }
-            .navigationTitle("Play")
+            .navigationTitle("Играть")
         }
     }
 
@@ -170,10 +170,10 @@ struct GameDetailView: View {
                 VStack(alignment: .leading, spacing: 10) {
                     Label(DateFormatterService.tournamentDateTime.string(from: game.scheduledDate), systemImage: "clock.fill")
                     Label(addressText, systemImage: "mappin.and.ellipse")
-                    Label("Duration: \(game.durationMinutes) min • \(game.format.rawValue)", systemImage: "timer")
-                    Label(game.hasCourtBooked ? "Field booked" : "Field not booked", systemImage: "sportscourt.fill")
-                    Label(game.isRatingGame ? "Rating game" : "Not rating game", systemImage: "chart.bar.fill")
-                    Label("Average Elo: \(game.averageElo)", systemImage: "gauge.with.dots.needle.67percent")
+                    Label("Длительность: \(game.durationMinutes) мин • \(game.format.rawValue)", systemImage: "timer")
+                    Label(game.hasCourtBooked ? "Поле забронировано" : "Поле не забронировано", systemImage: "sportscourt.fill")
+                    Label(game.isRatingGame ? "Рейтинговая игра" : "Не рейтинговая игра", systemImage: "chart.bar.fill")
+                    Label("Средний Elo: \(game.averageElo)", systemImage: "gauge.with.dots.needle.67percent")
                 }
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(.white)
@@ -189,7 +189,7 @@ struct GameDetailView: View {
                 )
 
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Players: \(game.players.count)/\(game.numberOfPlayers)")
+                    Text("Игроки: \(game.players.count)/\(game.numberOfPlayers)")
                         .font(.title3.bold())
 
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 4), spacing: 14) {
@@ -210,7 +210,7 @@ struct GameDetailView: View {
                     MatchDetailsView(match: makeMatch())
                 } label: {
                     HStack {
-                        Text("Open Match Details")
+                        Text("Открыть детали матча")
                             .font(.headline)
                         Spacer()
                         Image(systemName: "chevron.right")
@@ -223,7 +223,7 @@ struct GameDetailView: View {
             }
             .padding()
         }
-        .navigationTitle("Game")
+        .navigationTitle("Игра")
         .navigationBarTitleDisplayMode(.inline)
     }
 
@@ -235,14 +235,14 @@ struct GameDetailView: View {
 
         let homeTeam = Team(
             id: UUID(),
-            name: "Home Team",
+            name: "Домашняя команда",
             members: homePlayers,
             maxPlayers: max(game.numberOfPlayers / 2, 1)
         )
 
         let awayTeam = Team(
             id: UUID(),
-            name: "Away Team",
+            name: "Гостевая команда",
             members: awayPlayers,
             maxPlayers: max(game.numberOfPlayers / 2, 1)
         )
@@ -356,7 +356,7 @@ private struct EmptySlotView: View {
                         .foregroundStyle(.secondary)
                 )
 
-            Text("Invite")
+            Text("Пригласить")
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }

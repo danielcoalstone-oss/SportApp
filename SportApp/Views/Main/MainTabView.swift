@@ -7,33 +7,33 @@ struct MainTabView: View {
         TabView {
             HomeView()
                 .tabItem {
-                    Label("Home", systemImage: "house")
+                    Label("Главная", systemImage: "house")
                 }
 
             TournamentsView()
                 .tabItem {
-                    Label("Play", systemImage: "sportscourt")
+                    Label("Играть", systemImage: "sportscourt")
                 }
 
             LeaderboardView()
                 .tabItem {
-                    Label("Ratings", systemImage: "list.number")
+                    Label("Рейтинг", systemImage: "list.number")
                 }
 
             CreateGameView()
                 .tabItem {
-                    Label("Create", systemImage: "plus.circle")
+                    Label("Создать", systemImage: "plus.circle")
                 }
 
             ProfileView()
                 .tabItem {
-                    Label("Profile", systemImage: "person")
+                    Label("Профиль", systemImage: "person")
                 }
 
             if appViewModel.currentUser?.isAdmin == true {
                 AdminView()
                     .tabItem {
-                        Label("Admin", systemImage: "lock.shield")
+                        Label("Админ", systemImage: "lock.shield")
                     }
             }
         }
@@ -53,58 +53,58 @@ struct CreateGameView: View {
     var body: some View {
         NavigationStack {
             Form {
-                Section("Game Creation") {
-                    Picker("Club location", selection: $draft.clubLocation) {
+                Section("Создание игры") {
+                    Picker("Клуб", selection: $draft.clubLocation) {
                         ForEach(ClubLocation.allCases) { location in
                             Text(location.rawValue).tag(location)
                         }
                     }
                     .pickerStyle(.menu)
-                    .accessibilityLabel("Club location")
+                    .accessibilityLabel("Клуб")
 
-                    Toggle("Private game (invite link only)", isOn: $draft.isPrivateGame)
-                    Toggle("Court already booked", isOn: $draft.hasCourtBooked)
+                    Toggle("Приватная игра (только по ссылке)", isOn: $draft.isPrivateGame)
+                    Toggle("Поле уже забронировано", isOn: $draft.hasCourtBooked)
                 }
 
-                Section("Details") {
+                Section("Детали") {
                     DatePicker(
-                        "Start at",
+                        "Начало",
                         selection: $draft.startAt,
                         displayedComponents: [.date, .hourAndMinute]
                     )
-                    .accessibilityLabel("Start at")
+                    .accessibilityLabel("Начало")
 
-                    Stepper("Duration: \(draft.durationMinutes) min", value: $draft.durationMinutes, in: 30...240, step: 15)
-                        .accessibilityHint("Adjust match duration in minutes")
+                    Stepper("Длительность: \(draft.durationMinutes) мин", value: $draft.durationMinutes, in: 30...240, step: 15)
+                        .accessibilityHint("Измените длительность матча в минутах")
 
-                    Picker("Format", selection: $draft.format) {
+                    Picker("Формат", selection: $draft.format) {
                         ForEach(MatchFormat.allCases) { format in
                             Text(format.rawValue).tag(format)
                         }
                     }
-                    .accessibilityLabel("Match format")
+                    .accessibilityLabel("Формат матча")
 
-                    TextField("Location name", text: $draft.locationName)
-                        .accessibilityLabel("Location name")
+                    TextField("Название локации", text: $draft.locationName)
+                        .accessibilityLabel("Название локации")
 
-                    TextField("Address (optional)", text: $draft.address)
-                        .accessibilityLabel("Address")
+                    TextField("Адрес (необязательно)", text: $draft.address)
+                        .accessibilityLabel("Адрес")
 
                     Stepper(
-                        "Max players: \(draft.maxPlayers)",
+                        "Макс. игроков: \(draft.maxPlayers)",
                         value: $draft.maxPlayers,
                         in: draft.format.requiredPlayers...40
                     )
-                    .accessibilityHint("Must be at least \(draft.format.requiredPlayers) for \(draft.format.rawValue)")
+                    .accessibilityHint("Минимум \(draft.format.requiredPlayers) для \(draft.format.rawValue)")
                 }
 
-                Section("Game Details") {
+                Section("Детали игры") {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("Player rating range: \(draft.minElo) - \(draft.maxElo) Elo")
+                        Text("Диапазон рейтинга игроков: \(draft.minElo) - \(draft.maxElo) ELO")
                             .font(.subheadline)
 
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Min Elo")
+                            Text("Мин. ELO")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                             Slider(
@@ -118,7 +118,7 @@ struct CreateGameView: View {
                         }
 
                         VStack(alignment: .leading, spacing: 4) {
-                            Text("Max Elo")
+                            Text("Макс. ELO")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                             Slider(
@@ -132,30 +132,30 @@ struct CreateGameView: View {
                         }
                     }
 
-                    Toggle("I am a player in this game", isOn: $draft.iAmPlaying)
-                    Toggle("Rating game (affects Elo)", isOn: $draft.isRatingGame)
+                    Toggle("Я играю в этой игре", isOn: $draft.iAmPlaying)
+                    Toggle("Рейтинговая игра (влияет на ELO)", isOn: $draft.isRatingGame)
                 }
 
-                Section("Game Management") {
-                    Toggle("Anyone can invite players", isOn: $draft.anyoneCanInvite)
-                    Toggle("Any player can input results", isOn: $draft.anyPlayerCanInputResults)
-                    Toggle("Entrance without confirmation", isOn: $draft.entranceWithoutConfirmation)
+                Section("Управление игрой") {
+                    Toggle("Любой может приглашать игроков", isOn: $draft.anyoneCanInvite)
+                    Toggle("Любой игрок может вносить результат", isOn: $draft.anyPlayerCanInputResults)
+                    Toggle("Вход без подтверждения", isOn: $draft.entranceWithoutConfirmation)
                 }
 
-                Section("Additional Comments") {
+                Section("Дополнительные комментарии") {
                     TextEditor(text: $draft.notes)
                         .frame(minHeight: 110)
-                        .accessibilityLabel("Notes")
-                        .accessibilityHint("Add what to bring and any game rules")
+                        .accessibilityLabel("Заметки")
+                        .accessibilityHint("Укажите, что взять с собой и правила игры")
                 }
 
                 Section {
                     Button {
                         switch appViewModel.createGame(from: draft) {
                         case .success(let created):
-                            createdMessage = "Game created at \(created.locationName) on \(DateFormatterService.tournamentDateTime.string(from: created.startAt))."
+                            createdMessage = "Игра создана в \(created.locationName) на \(DateFormatterService.tournamentDateTime.string(from: created.startAt))."
                             if let inviteLink = created.inviteLink {
-                                createdMessage += "\nInvite link: \(inviteLink)"
+                                createdMessage += "\nСсылка-приглашение: \(inviteLink)"
                             }
                             showCreatedAlert = true
                             draft = GameDraft()
@@ -168,24 +168,24 @@ struct CreateGameView: View {
                             }
                         }
                     } label: {
-                        Text("Create Game")
+                        Text("Создать игру")
                             .frame(maxWidth: .infinity)
                     }
                     .buttonStyle(.borderedProminent)
                 }
             }
-            .navigationTitle("+ New Game")
+            .navigationTitle("+ Новая игра")
             .scrollDismissesKeyboard(.interactively)
             .onChange(of: draft.format) { format in
                 draft.maxPlayers = format.defaultMaxPlayers
             }
-            .alert("Game Created", isPresented: $showCreatedAlert) {
-                Button("OK", role: .cancel) {}
+            .alert("Игра создана", isPresented: $showCreatedAlert) {
+                Button("ОК", role: .cancel) {}
             } message: {
                 Text(createdMessage)
             }
-            .alert("Cannot Create Game", isPresented: $showErrorAlert) {
-                Button("OK", role: .cancel) {}
+            .alert("Не удалось создать игру", isPresented: $showErrorAlert) {
+                Button("ОК", role: .cancel) {}
             } message: {
                 Text(errorMessage)
             }

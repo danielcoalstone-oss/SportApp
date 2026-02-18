@@ -14,33 +14,33 @@ struct AuthView: View {
         NavigationStack {
             ScrollView {
                 VStack(spacing: 16) {
-                    Text("Mini Football Tournaments")
+                    Text("Турниры по мини-футболу")
                         .font(.title.bold())
                         .multilineTextAlignment(.center)
 
-                    Text(isRegisterMode ? "Create your account" : "Sign in to manage bookings")
+                    Text(isRegisterMode ? "Создайте аккаунт" : "Войдите, чтобы управлять бронированиями")
                         .foregroundStyle(.secondary)
 
                     VStack(spacing: 12) {
                         if isRegisterMode {
-                            TextField("Full name", text: $name)
+                            TextField("Полное имя", text: $name)
                                 .textContentType(.name)
                                 .textFieldStyle(.roundedBorder)
 
-                            TextField("City", text: $city)
+                            TextField("Город", text: $city)
                                 .textFieldStyle(.roundedBorder)
 
-                            TextField("Favorite position", text: $favoritePosition)
+                            TextField("Основная позиция", text: $favoritePosition)
                                 .textFieldStyle(.roundedBorder)
                         }
 
-                        TextField("Email", text: $email)
+                        TextField("Эл. почта", text: $email)
                             .keyboardType(.emailAddress)
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
                             .textFieldStyle(.roundedBorder)
 
-                        SecureField("Password", text: $password)
+                        SecureField("Пароль", text: $password)
                             .textFieldStyle(.roundedBorder)
                     }
 
@@ -51,13 +51,13 @@ struct AuthView: View {
                     }
 
                     Button(action: submit) {
-                        Text(isRegisterMode ? "Register" : "Sign In")
+                        Text(isRegisterMode ? "Регистрация" : "Войти")
                             .frame(maxWidth: .infinity)
                             .padding(.vertical, 12)
                     }
                     .buttonStyle(.borderedProminent)
 
-                    Button(isRegisterMode ? "Already have an account? Sign In" : "Need an account? Register") {
+                    Button(isRegisterMode ? "Уже есть аккаунт? Войти" : "Нет аккаунта? Зарегистрироваться") {
                         appViewModel.authErrorMessage = nil
                         isRegisterMode.toggle()
                     }
@@ -65,7 +65,7 @@ struct AuthView: View {
                 }
                 .padding()
             }
-            .navigationTitle("Welcome")
+            .navigationTitle("Добро пожаловать")
         }
     }
 

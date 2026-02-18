@@ -40,11 +40,11 @@ struct DebugSwitchUserView: View {
                 }
                 .buttonStyle(.plain)
             }
-            .navigationTitle("Switch User")
+            .navigationTitle("Смена пользователя")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("Close") { dismiss() }
+                    Button("Закрыть") { dismiss() }
                 }
             }
         }

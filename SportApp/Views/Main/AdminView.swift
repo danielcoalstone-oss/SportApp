@@ -34,6 +34,16 @@ struct AdminView: View {
             Text("Users")
                 .font(.title3.bold())
 
+            Button("Prepare Investor Demo Data") {
+                appViewModel.adminPrepareInvestorDemoData()
+            }
+            .buttonStyle(.borderedProminent)
+
+            Button("Seed Shared Demo Data To DB") {
+                appViewModel.adminSeedSharedDemoDataToBackend()
+            }
+            .buttonStyle(.bordered)
+
             ForEach(appViewModel.users) { user in
                 VStack(alignment: .leading, spacing: 8) {
                     HStack {

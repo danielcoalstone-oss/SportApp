@@ -1,0 +1,30 @@
+{
+  "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/SportApp/ViewModels/AppViewModel.swift" : {
+    "const-values" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/AppViewModel.swiftconstvalues",
+    "dependencies" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/AppViewModel.d",
+    "diagnostics" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/AppViewModel.dia",
+    "object" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/AppViewModel.o",
+    "swift-dependencies" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/AppViewModel.swiftdeps"
+  },
+  "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/SportApp/Views/Auth/AuthView.swift" : {
+    "const-values" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/AuthView.swiftconstvalues",
+    "dependencies" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/AuthView.d",
+    "diagnostics" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/AuthView.dia",
+    "object" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/AuthView.o",
+    "swift-dependencies" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/AuthView.swiftdeps"
+  },
+  "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/SportApp/Views/Main/HomeView.swift" : {
+    "const-values" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/HomeView.swiftconstvalues",
+    "dependencies" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/HomeView.d",
+    "diagnostics" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/HomeView.dia",
+    "object" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/HomeView.o",
+    "swift-dependencies" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/HomeView.swiftdeps"
+  },
+  "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/SportApp/Views/Main/MainTabView.swift" : {
+    "const-values" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/MainTabView.swiftconstvalues",
+    "dependencies" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/MainTabView.d",
+    "diagnostics" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/MainTabView.dia",
+    "object" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/MainTabView.o",
+    "swift-dependencies" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/MainTabView.swiftdeps"
+  }
+}

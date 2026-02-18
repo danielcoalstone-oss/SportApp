@@ -1,0 +1,23 @@
+{
+  "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/SportApp/Services/SupabaseAuthService.swift" : {
+    "const-values" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/SupabaseAuthService.swiftconstvalues",
+    "dependencies" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/SupabaseAuthService.d",
+    "diagnostics" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/SupabaseAuthService.dia",
+    "object" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/SupabaseAuthService.o",
+    "swift-dependencies" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/SupabaseAuthService.swiftdeps"
+  },
+  "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/SportApp/Services/SupabaseDataService.swift" : {
+    "const-values" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/SupabaseDataService.swiftconstvalues",
+    "dependencies" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/SupabaseDataService.d",
+    "diagnostics" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/SupabaseDataService.dia",
+    "object" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/SupabaseDataService.o",
+    "swift-dependencies" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/SupabaseDataService.swiftdeps"
+  },
+  "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/SportApp/Services/SupabaseRESTClient.swift" : {
+    "const-values" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/SupabaseRESTClient.swiftconstvalues",
+    "dependencies" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/SupabaseRESTClient.d",
+    "diagnostics" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/SupabaseRESTClient.dia",
+    "object" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/SupabaseRESTClient.o",
+    "swift-dependencies" : "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/.DerivedDataCodex/Build/Intermediates.noindex/SportApp.build/Debug-iphoneos/SportApp.build/Objects-normal/arm64/SupabaseRESTClient.swiftdeps"
+  }
+}

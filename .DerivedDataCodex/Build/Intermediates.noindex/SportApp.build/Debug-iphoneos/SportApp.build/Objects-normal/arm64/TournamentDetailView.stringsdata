@@ -1,0 +1,432 @@
+{
+  "source": "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/SportApp/Views/Main/TournamentDetailView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Booking",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 100
+        }
+      },
+      {
+        "comment": "",
+        "key": "Tournament Action",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 140
+        }
+      },
+      {
+        "comment": "",
+        "key": "Tournament section",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 66
+        }
+      },
+      {
+        "comment": "",
+        "key": "Format: %@",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 46
+        }
+      },
+      {
+        "comment": "",
+        "key": "Entry fee: $%lld",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 47
+        }
+      },
+      {
+        "comment": "",
+        "key": "Create Team & Book",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 53
+        }
+      },
+      {
+        "comment": "",
+        "key": "Team name",
+        "location": {
+          "startingColumn": 43,
+          "startingLine": 55
+        }
+      },
+      {
+        "comment": "",
+        "key": "Create Team",
+        "location": {
+          "startingColumn": 40,
+          "startingLine": 58
+        }
+      },
+      {
+        "comment": "",
+        "key": "Tournament not found",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 93
+        }
+      },
+      {
+        "comment": "",
+        "key": "OK",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 141
+        }
+      },
+      {
+        "comment": "",
+        "key": "Organiser Tools",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 155
+        }
+      },
+      {
+        "comment": "",
+        "key": "Edit Tournament Details",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 159
+        }
+      },
+      {
+        "comment": "",
+        "key": "Create / Edit Schedule",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 188
+        }
+      },
+      {
+        "comment": "",
+        "key": "Add team name",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 165
+        }
+      },
+      {
+        "comment": "",
+        "key": "Add",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 168
+        }
+      },
+      {
+        "comment": "",
+        "key": "Remove",
+        "location": {
+          "startingColumn": 40,
+          "startingLine": 180
+        }
+      },
+      {
+        "comment": "",
+        "key": "Resolve Disputes (stub)",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 194
+        }
+      },
+      {
+        "comment": "",
+        "key": "Dispute status",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 196
+        }
+      },
+      {
+        "comment": "",
+        "key": "Standings",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 215
+        }
+      },
+      {
+        "comment": "",
+        "key": "#%lld",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 220
+        }
+      },
+      {
+        "comment": "",
+        "key": "P %lld",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 226
+        }
+      },
+      {
+        "comment": "",
+        "key": "GD %lld",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 229
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld pts",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 232
+        }
+      },
+      {
+        "comment": "",
+        "key": "Matches",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 244
+        }
+      },
+      {
+        "comment": "",
+        "key": "No matches scheduled yet",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 248
+        }
+      },
+      {
+        "comment": "",
+        "key": "%@ vs %@",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 253
+        }
+      },
+      {
+        "comment": "",
+        "key": "Result: %lld - %lld",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 259
+        }
+      },
+      {
+        "comment": "",
+        "key": "Result: Pending",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 262
+        }
+      },
+      {
+        "comment": "",
+        "key": "Enter / Edit Result",
+        "location": {
+          "startingColumn": 36,
+          "startingLine": 275
+        }
+      },
+      {
+        "comment": "",
+        "key": "Open Game Screen",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 270
+        }
+      },
+      {
+        "comment": "",
+        "key": "Teams",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 291
+        }
+      },
+      {
+        "comment": "",
+        "key": "League MVP works best with 4+ teams.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 295
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld/%lld",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 306
+        }
+      },
+      {
+        "comment": "",
+        "key": "No players",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 319
+        }
+      },
+      {
+        "comment": "",
+        "key": "Edit Tournament",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 466
+        }
+      },
+      {
+        "comment": "",
+        "key": "Title",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 460
+        }
+      },
+      {
+        "comment": "",
+        "key": "Location",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 461
+        }
+      },
+      {
+        "comment": "",
+        "key": "Start Date",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 462
+        }
+      },
+      {
+        "comment": "",
+        "key": "Format",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 463
+        }
+      },
+      {
+        "comment": "",
+        "key": "Max Teams: %lld",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 464
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cancel",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 470
+        }
+      },
+      {
+        "comment": "",
+        "key": "Save",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 473
+        }
+      },
+      {
+        "comment": "",
+        "key": "Schedule Match",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 508
+        }
+      },
+      {
+        "comment": "",
+        "key": "Home Team",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 496
+        }
+      },
+      {
+        "comment": "",
+        "key": "Away Team",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 501
+        }
+      },
+      {
+        "comment": "",
+        "key": "Match Start",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 506
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cancel",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 512
+        }
+      },
+      {
+        "comment": "",
+        "key": "Save",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 515
+        }
+      },
+      {
+        "comment": "",
+        "key": "Enter Result",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 553
+        }
+      },
+      {
+        "comment": "",
+        "key": "Home Score: %lld",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 550
+        }
+      },
+      {
+        "comment": "",
+        "key": "Away Score: %lld",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 551
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cancel",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 557
+        }
+      },
+      {
+        "comment": "",
+        "key": "Save",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 560
+        }
+      }
+    ]
+  },
+  "version": 1
+}

@@ -1,0 +1,640 @@
+{
+  "source": "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/SportApp/Views/Main/MatchDetailsView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Match Details",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 152
+        }
+      },
+      {
+        "comment": "",
+        "key": "RSVP Update",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 187
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cancel Match",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 192
+        }
+      },
+      {
+        "comment": "",
+        "key": "Match Deleted",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 72
+        }
+      },
+      {
+        "comment": "",
+        "key": "This match has been cancelled and removed.",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 74
+        }
+      },
+      {
+        "comment": "",
+        "key": "Match completed: RSVP, participants and organiser tools are hidden. Statistics input remains available.",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 135
+        }
+      },
+      {
+        "comment": "",
+        "key": "Only admins or match organisers can enter match results.",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 141
+        }
+      },
+      {
+        "comment": "",
+        "key": "Open Match Summary",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 96
+        }
+      },
+      {
+        "comment": "",
+        "key": "Open Teams",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 111
+        }
+      },
+      {
+        "comment": "",
+        "key": "Events Timeline",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 122
+        }
+      },
+      {
+        "comment": "",
+        "key": "Add Event",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 128
+        }
+      },
+      {
+        "comment": "",
+        "key": "OK",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 188
+        }
+      },
+      {
+        "comment": "",
+        "key": "Keep Match",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 193
+        }
+      },
+      {
+        "comment": "",
+        "key": "Delete Match",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 194
+        }
+      },
+      {
+        "comment": "",
+        "key": "Are you sure you want to cancel Match?",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 199
+        }
+      },
+      {
+        "comment": "",
+        "key": ":",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 220
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 214
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 229
+        }
+      },
+      {
+        "comment": "",
+        "key": "Rating match",
+        "location": {
+          "startingColumn": 50,
+          "startingLine": 242
+        }
+      },
+      {
+        "comment": "",
+        "key": "Not rating match",
+        "location": {
+          "startingColumn": 67,
+          "startingLine": 242
+        }
+      },
+      {
+        "comment": "",
+        "key": "Field booked",
+        "location": {
+          "startingColumn": 51,
+          "startingLine": 243
+        }
+      },
+      {
+        "comment": "",
+        "key": "Field not booked",
+        "location": {
+          "startingColumn": 68,
+          "startingLine": 243
+        }
+      },
+      {
+        "comment": "",
+        "key": "Format: %@",
+        "location": {
+          "startingColumn": 19,
+          "startingLine": 244
+        }
+      },
+      {
+        "comment": "",
+        "key": "Status: %@",
+        "location": {
+          "startingColumn": 19,
+          "startingLine": 245
+        }
+      },
+      {
+        "comment": "",
+        "key": "Spots left: %lld",
+        "location": {
+          "startingColumn": 19,
+          "startingLine": 246
+        }
+      },
+      {
+        "comment": "",
+        "key": "Waitlist: %lld",
+        "location": {
+          "startingColumn": 19,
+          "startingLine": 247
+        }
+      },
+      {
+        "comment": "",
+        "key": "Your RSVP",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 260
+        }
+      },
+      {
+        "comment": "",
+        "key": "Current: %@",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 263
+        }
+      },
+      {
+        "comment": "",
+        "key": "Sign in to RSVP.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 289
+        }
+      },
+      {
+        "comment": "",
+        "key": "I'm going",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 268
+        }
+      },
+      {
+        "comment": "",
+        "key": "Maybe",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 274
+        }
+      },
+      {
+        "comment": "",
+        "key": "Decline",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 280
+        }
+      },
+      {
+        "comment": "",
+        "key": "Participants",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 301
+        }
+      },
+      {
+        "comment": "",
+        "key": "No players in %@",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 314
+        }
+      },
+      {
+        "comment": "",
+        "key": "RSVP",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 304
+        }
+      },
+      {
+        "comment": "",
+        "key": "Elo %lld",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 331
+        }
+      },
+      {
+        "comment": "",
+        "key": "Organiser Tools",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 350
+        }
+      },
+      {
+        "comment": "",
+        "key": "Manage Participants",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 370
+        }
+      },
+      {
+        "comment": "",
+        "key": "Edit Match",
+        "location": {
+          "startingColumn": 36,
+          "startingLine": 355
+        }
+      },
+      {
+        "comment": "",
+        "key": "Invite/Share",
+        "location": {
+          "startingColumn": 36,
+          "startingLine": 362
+        }
+      },
+      {
+        "comment": "",
+        "key": "Waitlist",
+        "location": {
+          "startingColumn": 40,
+          "startingLine": 383
+        }
+      },
+      {
+        "comment": "",
+        "key": "Remove",
+        "location": {
+          "startingColumn": 40,
+          "startingLine": 388
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cancel Match",
+        "location": {
+          "startingColumn": 36,
+          "startingLine": 398
+        }
+      },
+      {
+        "comment": "",
+        "key": "Final Score",
+        "location": {
+          "startingColumn": 36,
+          "startingLine": 405
+        }
+      },
+      {
+        "comment": "",
+        "key": "Edit Match",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 472
+        }
+      },
+      {
+        "comment": "",
+        "key": "Start time",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 465
+        }
+      },
+      {
+        "comment": "",
+        "key": "Location",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 466
+        }
+      },
+      {
+        "comment": "",
+        "key": "Format",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 467
+        }
+      },
+      {
+        "comment": "",
+        "key": "Max players: %lld",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 468
+        }
+      },
+      {
+        "comment": "",
+        "key": "Notes",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 469
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cancel",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 476
+        }
+      },
+      {
+        "comment": "",
+        "key": "Save",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 479
+        }
+      },
+      {
+        "comment": "",
+        "key": "Invite Players",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 515
+        }
+      },
+      {
+        "comment": "",
+        "key": "Share Invite Link",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 501
+        }
+      },
+      {
+        "comment": "",
+        "key": "Invite Player",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 510
+        }
+      },
+      {
+        "comment": "",
+        "key": "Share Invite Link",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 506
+        }
+      },
+      {
+        "comment": "",
+        "key": "Player name",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 511
+        }
+      },
+      {
+        "comment": "",
+        "key": "Elo: %lld",
+        "location": {
+          "startingColumn": 29,
+          "startingLine": 512
+        }
+      },
+      {
+        "comment": "",
+        "key": "Close",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 519
+        }
+      },
+      {
+        "comment": "",
+        "key": "Invite",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 522
+        }
+      },
+      {
+        "comment": "",
+        "key": "Final Score",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 545
+        }
+      },
+      {
+        "comment": "",
+        "key": "Home score: %lld",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 542
+        }
+      },
+      {
+        "comment": "",
+        "key": "Away score: %lld",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 543
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cancel",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 549
+        }
+      },
+      {
+        "comment": "",
+        "key": "Save",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 552
+        }
+      },
+      {
+        "comment": "",
+        "key": "No events yet",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 569
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld'",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 577
+        }
+      },
+      {
+        "comment": "",
+        "key": "Add Match Event",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 657
+        }
+      },
+      {
+        "comment": "",
+        "key": "Event",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 633
+        }
+      },
+      {
+        "comment": "",
+        "key": "Players",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 643
+        }
+      },
+      {
+        "comment": "",
+        "key": "Type",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 634
+        }
+      },
+      {
+        "comment": "",
+        "key": "Minute: %lld",
+        "location": {
+          "startingColumn": 29,
+          "startingLine": 640
+        }
+      },
+      {
+        "comment": "",
+        "key": "Player",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 644
+        }
+      },
+      {
+        "comment": "",
+        "key": "Created by",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 650
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cancel",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 661
+        }
+      },
+      {
+        "comment": "",
+        "key": "Save",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 667
+        }
+      },
+      {
+        "comment": "",
+        "key": "Match Summary",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 729
+        }
+      },
+      {
+        "comment": "",
+        "key": "Elo %lld",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 714
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 736
+        }
+      }
+    ]
+  },
+  "version": 1
+}

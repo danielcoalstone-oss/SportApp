@@ -121,6 +121,16 @@ final class MatchDetailsViewModel: ObservableObject {
             return
         }
 
+        if desiredStatus == .going,
+           match.isPrivateGame,
+           !AccessPolicy.canInviteToMatch(currentUser, match) {
+            let alreadyInvited = match.participants.contains(where: { $0.id == userId })
+            if !alreadyInvited {
+                toastMessage = "This is a private game. Join via invite link."
+                return
+            }
+        }
+
         var participants = match.participants
         if participants.first(where: { $0.id == userId }) == nil, isSelfUpdate {
             participants.append(

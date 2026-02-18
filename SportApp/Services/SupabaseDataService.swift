@@ -26,7 +26,7 @@ final class SupabaseDataService {
             )
         }
         let rows = try SupabaseJSON.decoder().decode([ProfileRow].self, from: data)
-        return rows.map { $0.toUser() }
+        return await hydrateUsers(from: rows)
     }
 
     func fetchClubs() async throws -> [Club] {
@@ -69,6 +69,37 @@ final class SupabaseDataService {
                 deletedAt: row.deletedAt
             )
         }
+    }
+
+    func fetchJoinedPracticeIDs(userID: UUID) async throws -> Set<UUID> {
+        let data = try await client.requestPostgrest(
+            pathAndQuery: "practice_participants?select=practice_id&user_id=eq.\(userID.uuidString)"
+        )
+        let rows = try SupabaseJSON.decoder().decode([PracticeParticipantRow].self, from: data)
+        return Set(rows.map(\.practiceID))
+    }
+
+    func joinPractice(practiceID: UUID, userID: UUID) async throws {
+        let payload: [String: Any] = [
+            "practice_id": practiceID.uuidString,
+            "user_id": userID.uuidString
+        ]
+        let body = try JSONSerialization.data(withJSONObject: payload)
+        _ = try await client.requestPostgrest(
+            pathAndQuery: "practice_participants",
+            method: "POST",
+            body: body,
+            extraHeaders: ["Prefer": "resolution=merge-duplicates,return=representation"]
+        )
+    }
+
+    func leavePractice(practiceID: UUID, userID: UUID) async throws {
+        _ = try await client.requestPostgrest(
+            pathAndQuery: "practice_participants?practice_id=eq.\(practiceID.uuidString)&user_id=eq.\(userID.uuidString)",
+            method: "DELETE",
+            body: nil,
+            extraHeaders: ["Prefer": "return=representation"]
+        )
     }
 
     func fetchCreatedGames(usersById: [UUID: User]) async throws -> [CreatedGame] {
@@ -455,6 +486,49 @@ final class SupabaseDataService {
         )
     }
 
+    func updateCreatedGame(_ game: CreatedGame) async throws {
+        let payload: [String: Any] = [
+            "club_location": game.clubLocation.rawValue,
+            "start_at": Self.iso8601WithFractional.string(from: game.startAt),
+            "duration_minutes": game.durationMinutes,
+            "format": game.format.rawValue,
+            "location_name": game.locationName,
+            "address": game.address,
+            "notes": game.notes,
+            "max_players": game.maxPlayers,
+            "is_private_game": game.isPrivateGame,
+            "has_court_booked": game.hasCourtBooked,
+            "is_rating_game": game.isRatingGame,
+            "min_elo": game.minElo,
+            "max_elo": game.maxElo,
+            "anyone_can_invite": game.anyoneCanInvite,
+            "any_player_can_input_results": game.anyPlayerCanInputResults,
+            "entrance_without_confirmation": game.entranceWithoutConfirmation,
+            "invite_link": game.inviteLink as Any,
+            "is_draft": game.isDraft
+        ]
+
+        do {
+            let body = try JSONSerialization.data(withJSONObject: payload)
+            _ = try await client.requestPostgrest(
+                pathAndQuery: "matches?id=eq.\(game.id.uuidString)",
+                method: "PATCH",
+                body: body,
+                extraHeaders: ["Prefer": "return=representation"]
+            )
+        } catch {
+            var fallbackPayload = payload
+            fallbackPayload.removeValue(forKey: "is_draft")
+            let fallbackBody = try JSONSerialization.data(withJSONObject: fallbackPayload)
+            _ = try await client.requestPostgrest(
+                pathAndQuery: "matches?id=eq.\(game.id.uuidString)",
+                method: "PATCH",
+                body: fallbackBody,
+                extraHeaders: ["Prefer": "return=representation"]
+            )
+        }
+    }
+
     func addMatchEvent(matchID: UUID, event: MatchEvent) async throws {
         let payload: [String: Any] = [
             "id": event.id.uuidString,
@@ -709,6 +783,27 @@ final class SupabaseDataService {
         let body = try JSONSerialization.data(withJSONObject: payload)
         _ = try await client.requestPostgrest(
             pathAndQuery: "tournaments?id=eq.\(tournamentID.uuidString)",
+            method: "PATCH",
+            body: body,
+            extraHeaders: ["Prefer": "return=representation"]
+        )
+    }
+
+    func updateTournamentDraft(_ tournament: Tournament) async throws {
+        let payload: [String: Any] = [
+            "title": tournament.title,
+            "location": tournament.location,
+            "start_date": Self.iso8601WithFractional.string(from: tournament.startDate),
+            "end_date": tournament.endDate.map { Self.iso8601WithFractional.string(from: $0) } as Any,
+            "visibility": tournament.visibility.rawValue,
+            "status": tournament.status.rawValue,
+            "entry_fee": tournament.entryFee,
+            "max_teams": tournament.maxTeams,
+            "format": tournament.format
+        ]
+        let body = try JSONSerialization.data(withJSONObject: payload)
+        _ = try await client.requestPostgrest(
+            pathAndQuery: "tournaments?id=eq.\(tournament.id.uuidString)",
             method: "PATCH",
             body: body,
             extraHeaders: ["Prefer": "return=representation"]
@@ -1412,7 +1507,7 @@ final class SupabaseDataService {
 
     func fetchMatchDetails(matchID: UUID) async throws -> Match? {
         let matchData = try await client.requestPostgrest(
-            pathAndQuery: "matches?select=id,owner_id,organiser_ids,location_name,start_at,format,notes,max_players,is_rating_game,has_court_booked,status,final_home_score,final_away_score,is_deleted&id=eq.\(matchID.uuidString)&limit=1"
+            pathAndQuery: "matches?select=id,owner_id,organiser_ids,location_name,start_at,format,notes,max_players,is_rating_game,has_court_booked,is_private_game,status,final_home_score,final_away_score,is_deleted&id=eq.\(matchID.uuidString)&limit=1"
         )
         let matches = try SupabaseJSON.decoder().decode([MatchDetailsRow].self, from: matchData)
         guard let row = matches.first, !row.isDeleted else { return nil }
@@ -1485,6 +1580,7 @@ final class SupabaseDataService {
             notes: row.notes,
             isRatingGame: row.isRatingGame,
             isFieldBooked: row.hasCourtBooked,
+            isPrivateGame: row.isPrivateGame,
             maxPlayers: row.maxPlayers,
             status: row.status,
             finalHomeScore: row.finalHomeScore,
@@ -2280,6 +2376,7 @@ private struct MatchDetailsRow: Decodable {
     let maxPlayers: Int
     let isRatingGame: Bool
     let hasCourtBooked: Bool
+    let isPrivateGame: Bool
     let status: MatchStatus
     let finalHomeScore: Int?
     let finalAwayScore: Int?
@@ -2296,10 +2393,19 @@ private struct MatchDetailsRow: Decodable {
         case maxPlayers = "max_players"
         case isRatingGame = "is_rating_game"
         case hasCourtBooked = "has_court_booked"
+        case isPrivateGame = "is_private_game"
         case status
         case finalHomeScore = "final_home_score"
         case finalAwayScore = "final_away_score"
         case isDeleted = "is_deleted"
+    }
+}
+
+private struct PracticeParticipantRow: Decodable {
+    let practiceID: UUID
+
+    enum CodingKeys: String, CodingKey {
+        case practiceID = "practice_id"
     }
 }
 

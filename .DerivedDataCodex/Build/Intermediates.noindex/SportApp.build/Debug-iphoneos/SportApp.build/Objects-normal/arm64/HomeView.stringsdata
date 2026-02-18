@@ -1,0 +1,192 @@
+{
+  "source": "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/SportApp/Views/Main/HomeView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Main",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 133
+        }
+      },
+      {
+        "comment": "",
+        "key": "Hi, %@",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 11
+        }
+      },
+      {
+        "comment": "",
+        "key": "Quick Booking (Next 24h)",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 25
+        }
+      },
+      {
+        "comment": "",
+        "key": "No quick booking games in the next 24 hours.",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 29
+        }
+      },
+      {
+        "comment": "",
+        "key": "Upcoming Matches",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 62
+        }
+      },
+      {
+        "comment": "",
+        "key": "Clubs",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 94
+        }
+      },
+      {
+        "comment": "",
+        "key": "Simulate Win (+ Elo)",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 121
+        }
+      },
+      {
+        "comment": "",
+        "key": "Simulate Loss (- Elo)",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 126
+        }
+      },
+      {
+        "comment": "",
+        "key": "Current Elo: %lld",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 15
+        }
+      },
+      {
+        "comment": "",
+        "key": "Matches: %lld",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 16
+        }
+      },
+      {
+        "comment": "",
+        "key": "Win rate: %lld%%",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 17
+        }
+      },
+      {
+        "comment": "",
+        "key": "Players: %lld/%lld • Avg Elo: %lld",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 50
+        }
+      },
+      {
+        "comment": "",
+        "key": "Private",
+        "location": {
+          "startingColumn": 67,
+          "startingLine": 43
+        }
+      },
+      {
+        "comment": "",
+        "key": "Public",
+        "location": {
+          "startingColumn": 79,
+          "startingLine": 43
+        }
+      },
+      {
+        "comment": "",
+        "key": "Players: %lld/%lld • Avg Elo: %lld",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 82
+        }
+      },
+      {
+        "comment": "",
+        "key": "Private",
+        "location": {
+          "startingColumn": 67,
+          "startingLine": 75
+        }
+      },
+      {
+        "comment": "",
+        "key": "Public",
+        "location": {
+          "startingColumn": 79,
+          "startingLine": 75
+        }
+      },
+      {
+        "comment": "",
+        "key": "Club",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 215
+        }
+      },
+      {
+        "comment": "",
+        "key": "Info",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 217
+        }
+      },
+      {
+        "comment": "",
+        "key": "Club features:",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 166
+        }
+      },
+      {
+        "comment": "",
+        "key": "Book Club",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 206
+        }
+      },
+      {
+        "comment": "",
+        "key": "OK",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 223
+        }
+      },
+      {
+        "comment": "",
+        "key": "•",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 231
+        }
+      }
+    ]
+  },
+  "version": 1
+}

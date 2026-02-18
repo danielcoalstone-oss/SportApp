@@ -1,0 +1,376 @@
+{
+  "source": "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/SportApp/Views/Main/TournamentsView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Play",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 206
+        }
+      },
+      {
+        "comment": "",
+        "key": "No upcoming games from other players.",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 50
+        }
+      },
+      {
+        "comment": "",
+        "key": "Upcoming Games",
+        "location": {
+          "startingColumn": 37,
+          "startingLine": 53
+        }
+      },
+      {
+        "comment": "",
+        "key": "Players: %lld/%lld • Avg Elo: %lld",
+        "location": {
+          "startingColumn": 46,
+          "startingLine": 67
+        }
+      },
+      {
+        "comment": "",
+        "key": "Private",
+        "location": {
+          "startingColumn": 71,
+          "startingLine": 60
+        }
+      },
+      {
+        "comment": "",
+        "key": "Public",
+        "location": {
+          "startingColumn": 83,
+          "startingLine": 60
+        }
+      },
+      {
+        "comment": "",
+        "key": "Leave Game",
+        "location": {
+          "startingColumn": 65,
+          "startingLine": 79
+        }
+      },
+      {
+        "comment": "",
+        "key": "Join Game",
+        "location": {
+          "startingColumn": 80,
+          "startingLine": 79
+        }
+      },
+      {
+        "comment": "",
+        "key": "Open",
+        "location": {
+          "startingColumn": 54,
+          "startingLine": 73
+        }
+      },
+      {
+        "comment": "",
+        "key": "No upcoming tournaments.",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 104
+        }
+      },
+      {
+        "comment": "",
+        "key": "Upcoming Tournaments",
+        "location": {
+          "startingColumn": 37,
+          "startingLine": 107
+        }
+      },
+      {
+        "comment": "",
+        "key": "Open team slots: %lld",
+        "location": {
+          "startingColumn": 50,
+          "startingLine": 118
+        }
+      },
+      {
+        "comment": "",
+        "key": "No upcoming practices.",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 134
+        }
+      },
+      {
+        "comment": "",
+        "key": "%@ • Players: %lld",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 167
+        }
+      },
+      {
+        "comment": "",
+        "key": "Elo: %lld-%lld",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 170
+        }
+      },
+      {
+        "comment": "",
+        "key": "Open",
+        "location": {
+          "startingColumn": 68,
+          "startingLine": 160
+        }
+      },
+      {
+        "comment": "",
+        "key": "Private",
+        "location": {
+          "startingColumn": 77,
+          "startingLine": 160
+        }
+      },
+      {
+        "comment": "",
+        "key": "Private practice (invite link)",
+        "location": {
+          "startingColumn": 54,
+          "startingLine": 194
+        }
+      },
+      {
+        "comment": "",
+        "key": "Leave Practice",
+        "location": {
+          "startingColumn": 65,
+          "startingLine": 185
+        }
+      },
+      {
+        "comment": "",
+        "key": "Join Practice",
+        "location": {
+          "startingColumn": 84,
+          "startingLine": 185
+        }
+      },
+      {
+        "comment": "",
+        "key": "Open",
+        "location": {
+          "startingColumn": 54,
+          "startingLine": 180
+        }
+      },
+      {
+        "comment": "",
+        "key": "Game not found",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 213
+        }
+      },
+      {
+        "comment": "",
+        "key": "Game",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 327
+        }
+      },
+      {
+        "comment": "",
+        "key": "Leave Game",
+        "location": {
+          "startingColumn": 52,
+          "startingLine": 300
+        }
+      },
+      {
+        "comment": "",
+        "key": "Join Game",
+        "location": {
+          "startingColumn": 67,
+          "startingLine": 300
+        }
+      },
+      {
+        "comment": "",
+        "key": "Duration: %lld min • %@",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 263
+        }
+      },
+      {
+        "comment": "",
+        "key": "Field booked",
+        "location": {
+          "startingColumn": 49,
+          "startingLine": 264
+        }
+      },
+      {
+        "comment": "",
+        "key": "Field not booked",
+        "location": {
+          "startingColumn": 66,
+          "startingLine": 264
+        }
+      },
+      {
+        "comment": "",
+        "key": "Rating game",
+        "location": {
+          "startingColumn": 47,
+          "startingLine": 265
+        }
+      },
+      {
+        "comment": "",
+        "key": "Not rating game",
+        "location": {
+          "startingColumn": 63,
+          "startingLine": 265
+        }
+      },
+      {
+        "comment": "",
+        "key": "Average Elo: %lld",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 266
+        }
+      },
+      {
+        "comment": "",
+        "key": "Players: %lld/%lld",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 282
+        }
+      },
+      {
+        "comment": "",
+        "key": "Open Match Details",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 314
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 432
+        }
+      },
+      {
+        "comment": "",
+        "key": "Invite",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 461
+        }
+      },
+      {
+        "comment": "",
+        "key": "Practice",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 527
+        }
+      },
+      {
+        "comment": "",
+        "key": "Practice not found",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 523
+        }
+      },
+      {
+        "comment": "",
+        "key": "Focus: %@",
+        "location": {
+          "startingColumn": 19,
+          "startingLine": 556
+        }
+      },
+      {
+        "comment": "",
+        "key": "Open entry",
+        "location": {
+          "startingColumn": 41,
+          "startingLine": 557
+        }
+      },
+      {
+        "comment": "",
+        "key": "Private (invite link)",
+        "location": {
+          "startingColumn": 56,
+          "startingLine": 557
+        }
+      },
+      {
+        "comment": "",
+        "key": "Organiser",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 542
+        }
+      },
+      {
+        "comment": "",
+        "key": "Players: %lld/%lld",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 599
+        }
+      },
+      {
+        "comment": "",
+        "key": "Free",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 624
+        }
+      },
+      {
+        "comment": "",
+        "key": "Private practice. Join via invite link.",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 657
+        }
+      },
+      {
+        "comment": "",
+        "key": "Leave Practice",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 639
+        }
+      },
+      {
+        "comment": "",
+        "key": "Join Practice",
+        "location": {
+          "startingColumn": 54,
+          "startingLine": 639
+        }
+      }
+    ]
+  },
+  "version": 1
+}

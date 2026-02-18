@@ -1,0 +1,344 @@
+{
+  "source": "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/SportApp/Views/Main/ProfileView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Profile",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 27
+        }
+      },
+      {
+        "comment": "",
+        "key": "No profile loaded",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 20
+        }
+      },
+      {
+        "comment": "",
+        "key": "Player Profile",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 54
+        }
+      },
+      {
+        "comment": "",
+        "key": "Mini Stats",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 129
+        }
+      },
+      {
+        "comment": "",
+        "key": "Upcoming",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 136
+        }
+      },
+      {
+        "comment": "",
+        "key": "Past",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 146
+        }
+      },
+      {
+        "comment": "",
+        "key": "Coach Access",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 157
+        }
+      },
+      {
+        "comment": "",
+        "key": "Name",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 55
+        }
+      },
+      {
+        "comment": "",
+        "key": "Main Position",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 70
+        }
+      },
+      {
+        "comment": "",
+        "key": "Location",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 76
+        }
+      },
+      {
+        "comment": "",
+        "key": "Preferred foot",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 105
+        }
+      },
+      {
+        "comment": "",
+        "key": "Upload Image",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 65
+        }
+      },
+      {
+        "comment": "",
+        "key": "Preferred Position",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 82
+        }
+      },
+      {
+        "comment": "",
+        "key": "Save Profile",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 122
+        }
+      },
+      {
+        "comment": "",
+        "key": "No upcoming matches or tournaments",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 138
+        }
+      },
+      {
+        "comment": "",
+        "key": "No past matches or tournaments",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 148
+        }
+      },
+      {
+        "comment": "",
+        "key": "Sign Out",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 172
+        }
+      },
+      {
+        "comment": "",
+        "key": "No %@ game matches",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 244
+        }
+      },
+      {
+        "comment": "",
+        "key": "Players: %lld/%lld",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 264
+        }
+      },
+      {
+        "comment": "",
+        "key": "Avg Elo %lld",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 257
+        }
+      },
+      {
+        "comment": "",
+        "key": "No %@ tournaments",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 284
+        }
+      },
+      {
+        "comment": "",
+        "key": "Teams: %lld/%lld",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 304
+        }
+      },
+      {
+        "comment": "",
+        "key": "No practices",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 342
+        }
+      },
+      {
+        "comment": "",
+        "key": "Players: %lld • Elo: %lld-%lld",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 359
+        }
+      },
+      {
+        "comment": "",
+        "key": "Profile",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 412
+        }
+      },
+      {
+        "comment": "",
+        "key": "Profile not found",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 440
+        }
+      },
+      {
+        "comment": "",
+        "key": "W/D/L: %lld/%lld/%lld",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 512
+        }
+      },
+      {
+        "comment": "",
+        "key": "ELO",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 504
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 507
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 546
+        }
+      },
+      {
+        "comment": "",
+        "key": "No matches",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 559
+        }
+      },
+      {
+        "comment": "",
+        "key": "No tournaments",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 582
+        }
+      },
+      {
+        "comment": "",
+        "key": "Leave Review",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 642
+        }
+      },
+      {
+        "comment": "",
+        "key": "Reviews",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 663
+        }
+      },
+      {
+        "comment": "",
+        "key": "Practices",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 688
+        }
+      },
+      {
+        "comment": "",
+        "key": "Rating",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 643
+        }
+      },
+      {
+        "comment": "",
+        "key": "Submit Review",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 653
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld ★",
+        "location": {
+          "startingColumn": 34,
+          "startingLine": 645
+        }
+      },
+      {
+        "comment": "",
+        "key": "No reviews yet",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 665
+        }
+      },
+      {
+        "comment": "",
+        "key": "%lld",
+        "location": {
+          "startingColumn": 18,
+          "startingLine": 739
+        }
+      },
+      {
+        "comment": "",
+        "key": "No practices",
+        "location": {
+          "startingColumn": 22,
+          "startingLine": 773
+        }
+      },
+      {
+        "comment": "",
+        "key": "Players: %lld • Elo: %lld-%lld",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 789
+        }
+      }
+    ]
+  },
+  "version": 1
+}

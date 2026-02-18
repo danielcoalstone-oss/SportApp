@@ -1,0 +1,1176 @@
+{
+  "source": "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/SportApp/Views/Main/MainTabView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Home",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 10
+        }
+      },
+      {
+        "comment": "",
+        "key": "Play",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 15
+        }
+      },
+      {
+        "comment": "",
+        "key": "Ratings",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 20
+        }
+      },
+      {
+        "comment": "",
+        "key": "Create",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 25
+        }
+      },
+      {
+        "comment": "",
+        "key": "Profile",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 30
+        }
+      },
+      {
+        "comment": "",
+        "key": "Admin",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 36
+        }
+      },
+      {
+        "comment": "",
+        "key": "Create",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 93
+        }
+      },
+      {
+        "comment": "",
+        "key": "Create",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 71
+        }
+      },
+      {
+        "comment": "",
+        "key": "Saved",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 242
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cannot Create Game",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 247
+        }
+      },
+      {
+        "comment": "",
+        "key": "Game Creation",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 115
+        }
+      },
+      {
+        "comment": "",
+        "key": "Details",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 129
+        }
+      },
+      {
+        "comment": "",
+        "key": "Game Details",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 161
+        }
+      },
+      {
+        "comment": "",
+        "key": "Game Management",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 199
+        }
+      },
+      {
+        "comment": "",
+        "key": "Additional Comments",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 205
+        }
+      },
+      {
+        "comment": "",
+        "key": "Club location",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 116
+        }
+      },
+      {
+        "comment": "",
+        "key": "Club location",
+        "location": {
+          "startingColumn": 37,
+          "startingLine": 122
+        }
+      },
+      {
+        "comment": "",
+        "key": "Private game (invite link only)",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 124
+        }
+      },
+      {
+        "comment": "",
+        "key": "Court already booked",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 125
+        }
+      },
+      {
+        "comment": "",
+        "key": "Save as draft",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 126
+        }
+      },
+      {
+        "comment": "",
+        "key": "Start at",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 131
+        }
+      },
+      {
+        "comment": "",
+        "key": "Start at",
+        "location": {
+          "startingColumn": 37,
+          "startingLine": 135
+        }
+      },
+      {
+        "comment": "",
+        "key": "Duration: %lld min",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 137
+        }
+      },
+      {
+        "comment": "",
+        "key": "Adjust match duration in minutes",
+        "location": {
+          "startingColumn": 40,
+          "startingLine": 138
+        }
+      },
+      {
+        "comment": "",
+        "key": "Format",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 140
+        }
+      },
+      {
+        "comment": "",
+        "key": "Match format",
+        "location": {
+          "startingColumn": 37,
+          "startingLine": 145
+        }
+      },
+      {
+        "comment": "",
+        "key": "Location name",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 147
+        }
+      },
+      {
+        "comment": "",
+        "key": "Location name",
+        "location": {
+          "startingColumn": 41,
+          "startingLine": 148
+        }
+      },
+      {
+        "comment": "",
+        "key": "Address (optional)",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 150
+        }
+      },
+      {
+        "comment": "",
+        "key": "Address",
+        "location": {
+          "startingColumn": 41,
+          "startingLine": 151
+        }
+      },
+      {
+        "comment": "",
+        "key": "Max players: %lld",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 154
+        }
+      },
+      {
+        "comment": "",
+        "key": "Must be at least %lld for %@",
+        "location": {
+          "startingColumn": 36,
+          "startingLine": 158
+        }
+      },
+      {
+        "comment": "",
+        "key": "I am a player in this game",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 195
+        }
+      },
+      {
+        "comment": "",
+        "key": "Rating game (affects Elo)",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 196
+        }
+      },
+      {
+        "comment": "",
+        "key": "Player rating range: %lld - %lld Elo",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 163
+        }
+      },
+      {
+        "comment": "",
+        "key": "Min Elo",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 167
+        }
+      },
+      {
+        "comment": "",
+        "key": "Max Elo",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 181
+        }
+      },
+      {
+        "comment": "",
+        "key": "Anyone can invite players",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 200
+        }
+      },
+      {
+        "comment": "",
+        "key": "Any player can input results",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 201
+        }
+      },
+      {
+        "comment": "",
+        "key": "Entrance without confirmation",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 202
+        }
+      },
+      {
+        "comment": "",
+        "key": "Notes",
+        "location": {
+          "startingColumn": 41,
+          "startingLine": 208
+        }
+      },
+      {
+        "comment": "",
+        "key": "Add what to bring and any game rules",
+        "location": {
+          "startingColumn": 40,
+          "startingLine": 209
+        }
+      },
+      {
+        "comment": "",
+        "key": "Save Game Draft",
+        "location": {
+          "startingColumn": 42,
+          "startingLine": 232
+        }
+      },
+      {
+        "comment": "",
+        "key": "Create Game",
+        "location": {
+          "startingColumn": 62,
+          "startingLine": 232
+        }
+      },
+      {
+        "comment": "",
+        "key": "OK",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 243
+        }
+      },
+      {
+        "comment": "",
+        "key": "OK",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 248
+        }
+      },
+      {
+        "comment": "",
+        "key": "Saved",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 319
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cannot Save",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 324
+        }
+      },
+      {
+        "comment": "",
+        "key": "Tournament",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 266
+        }
+      },
+      {
+        "comment": "",
+        "key": "Notes",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 299
+        }
+      },
+      {
+        "comment": "",
+        "key": "Title",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 267
+        }
+      },
+      {
+        "comment": "",
+        "key": "Location",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 268
+        }
+      },
+      {
+        "comment": "",
+        "key": "Start at",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 269
+        }
+      },
+      {
+        "comment": "",
+        "key": "Has end date",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 270
+        }
+      },
+      {
+        "comment": "",
+        "key": "End at",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 272
+        }
+      },
+      {
+        "comment": "",
+        "key": "Visibility",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 274
+        }
+      },
+      {
+        "comment": "",
+        "key": "Format",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 279
+        }
+      },
+      {
+        "comment": "",
+        "key": "Max teams: %lld",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 284
+        }
+      },
+      {
+        "comment": "",
+        "key": "Save as draft",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 293
+        }
+      },
+      {
+        "comment": "",
+        "key": "Entry fee",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 286
+        }
+      },
+      {
+        "comment": "",
+        "key": "0",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 288
+        }
+      },
+      {
+        "comment": "",
+        "key": "Save Tournament Draft",
+        "location": {
+          "startingColumn": 49,
+          "startingLine": 305
+        }
+      },
+      {
+        "comment": "",
+        "key": "Create Tournament",
+        "location": {
+          "startingColumn": 75,
+          "startingLine": 305
+        }
+      },
+      {
+        "comment": "",
+        "key": "OK",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 320
+        }
+      },
+      {
+        "comment": "",
+        "key": "OK",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 328
+        }
+      },
+      {
+        "comment": "",
+        "key": "Saved",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 397
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cannot Save",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 402
+        }
+      },
+      {
+        "comment": "",
+        "key": "Practice",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 345
+        }
+      },
+      {
+        "comment": "",
+        "key": "Notes",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 377
+        }
+      },
+      {
+        "comment": "",
+        "key": "Title",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 346
+        }
+      },
+      {
+        "comment": "",
+        "key": "Location",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 347
+        }
+      },
+      {
+        "comment": "",
+        "key": "Start at",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 348
+        }
+      },
+      {
+        "comment": "",
+        "key": "Duration: %lld min",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 349
+        }
+      },
+      {
+        "comment": "",
+        "key": "Players: %lld",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 350
+        }
+      },
+      {
+        "comment": "",
+        "key": "Open join",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 351
+        }
+      },
+      {
+        "comment": "",
+        "key": "Save as draft",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 352
+        }
+      },
+      {
+        "comment": "",
+        "key": "Focus area",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 374
+        }
+      },
+      {
+        "comment": "",
+        "key": "Elo range: %lld - %lld",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 355
+        }
+      },
+      {
+        "comment": "",
+        "key": "Save Practice Draft",
+        "location": {
+          "startingColumn": 40,
+          "startingLine": 383
+        }
+      },
+      {
+        "comment": "",
+        "key": "Create Practice",
+        "location": {
+          "startingColumn": 64,
+          "startingLine": 383
+        }
+      },
+      {
+        "comment": "",
+        "key": "OK",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 398
+        }
+      },
+      {
+        "comment": "",
+        "key": "OK",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 406
+        }
+      },
+      {
+        "comment": "",
+        "key": "Game Drafts",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 426
+        }
+      },
+      {
+        "comment": "",
+        "key": "Tournament Drafts",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 451
+        }
+      },
+      {
+        "comment": "",
+        "key": "Practice Drafts",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 477
+        }
+      },
+      {
+        "comment": "",
+        "key": "No game drafts",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 428
+        }
+      },
+      {
+        "comment": "",
+        "key": "Players: %lld/%lld",
+        "location": {
+          "startingColumn": 38,
+          "startingLine": 441
+        }
+      },
+      {
+        "comment": "",
+        "key": "No tournament drafts",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 453
+        }
+      },
+      {
+        "comment": "",
+        "key": "No practice drafts",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 479
+        }
+      },
+      {
+        "comment": "",
+        "key": "Edit Game Draft",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 571
+        }
+      },
+      {
+        "comment": "",
+        "key": "Draft",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 572
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cannot Save",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 580
+        }
+      },
+      {
+        "comment": "",
+        "key": "Game Creation",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 521
+        }
+      },
+      {
+        "comment": "",
+        "key": "Details",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 532
+        }
+      },
+      {
+        "comment": "",
+        "key": "Game Details",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 545
+        }
+      },
+      {
+        "comment": "",
+        "key": "Club location",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 522
+        }
+      },
+      {
+        "comment": "",
+        "key": "Private game (invite link only)",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 528
+        }
+      },
+      {
+        "comment": "",
+        "key": "Court already booked",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 529
+        }
+      },
+      {
+        "comment": "",
+        "key": "Start at",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 533
+        }
+      },
+      {
+        "comment": "",
+        "key": "Duration: %lld min",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 534
+        }
+      },
+      {
+        "comment": "",
+        "key": "Format",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 535
+        }
+      },
+      {
+        "comment": "",
+        "key": "Location name",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 540
+        }
+      },
+      {
+        "comment": "",
+        "key": "Address (optional)",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 541
+        }
+      },
+      {
+        "comment": "",
+        "key": "Max players: %lld",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 542
+        }
+      },
+      {
+        "comment": "",
+        "key": "I am a player in this game",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 546
+        }
+      },
+      {
+        "comment": "",
+        "key": "Rating game (affects Elo)",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 547
+        }
+      },
+      {
+        "comment": "",
+        "key": "Anyone can invite players",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 548
+        }
+      },
+      {
+        "comment": "",
+        "key": "Any player can input results",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 549
+        }
+      },
+      {
+        "comment": "",
+        "key": "Entrance without confirmation",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 550
+        }
+      },
+      {
+        "comment": "",
+        "key": "Save Draft",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 556
+        }
+      },
+      {
+        "comment": "",
+        "key": "Publish",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 563
+        }
+      },
+      {
+        "comment": "",
+        "key": "OK",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 576
+        }
+      },
+      {
+        "comment": "",
+        "key": "OK",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 584
+        }
+      },
+      {
+        "comment": "",
+        "key": "Edit Tournament Draft",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 663
+        }
+      },
+      {
+        "comment": "",
+        "key": "Draft",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 664
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cannot Save",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 672
+        }
+      },
+      {
+        "comment": "",
+        "key": "Tournament",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 616
+        }
+      },
+      {
+        "comment": "",
+        "key": "Title",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 617
+        }
+      },
+      {
+        "comment": "",
+        "key": "Location",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 618
+        }
+      },
+      {
+        "comment": "",
+        "key": "Start at",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 619
+        }
+      },
+      {
+        "comment": "",
+        "key": "Has end date",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 620
+        }
+      },
+      {
+        "comment": "",
+        "key": "End at",
+        "location": {
+          "startingColumn": 32,
+          "startingLine": 622
+        }
+      },
+      {
+        "comment": "",
+        "key": "Visibility",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 624
+        }
+      },
+      {
+        "comment": "",
+        "key": "Format",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 629
+        }
+      },
+      {
+        "comment": "",
+        "key": "Max teams: %lld",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 634
+        }
+      },
+      {
+        "comment": "",
+        "key": "Entry fee",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 636
+        }
+      },
+      {
+        "comment": "",
+        "key": "0",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 638
+        }
+      },
+      {
+        "comment": "",
+        "key": "Save Draft",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 648
+        }
+      },
+      {
+        "comment": "",
+        "key": "Publish",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 655
+        }
+      },
+      {
+        "comment": "",
+        "key": "OK",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 668
+        }
+      },
+      {
+        "comment": "",
+        "key": "OK",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 676
+        }
+      },
+      {
+        "comment": "",
+        "key": "Edit Practice Draft",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 736
+        }
+      },
+      {
+        "comment": "",
+        "key": "Draft",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 737
+        }
+      },
+      {
+        "comment": "",
+        "key": "Cannot Save",
+        "location": {
+          "startingColumn": 16,
+          "startingLine": 745
+        }
+      },
+      {
+        "comment": "",
+        "key": "Practice",
+        "location": {
+          "startingColumn": 21,
+          "startingLine": 708
+        }
+      },
+      {
+        "comment": "",
+        "key": "Title",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 709
+        }
+      },
+      {
+        "comment": "",
+        "key": "Location",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 710
+        }
+      },
+      {
+        "comment": "",
+        "key": "Start at",
+        "location": {
+          "startingColumn": 28,
+          "startingLine": 711
+        }
+      },
+      {
+        "comment": "",
+        "key": "Duration: %lld min",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 712
+        }
+      },
+      {
+        "comment": "",
+        "key": "Players: %lld",
+        "location": {
+          "startingColumn": 25,
+          "startingLine": 713
+        }
+      },
+      {
+        "comment": "",
+        "key": "Open join",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 714
+        }
+      },
+      {
+        "comment": "",
+        "key": "Focus area",
+        "location": {
+          "startingColumn": 27,
+          "startingLine": 715
+        }
+      },
+      {
+        "comment": "",
+        "key": "Save Draft",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 721
+        }
+      },
+      {
+        "comment": "",
+        "key": "Publish",
+        "location": {
+          "startingColumn": 24,
+          "startingLine": 728
+        }
+      },
+      {
+        "comment": "",
+        "key": "OK",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 741
+        }
+      },
+      {
+        "comment": "",
+        "key": "OK",
+        "location": {
+          "startingColumn": 20,
+          "startingLine": 749
+        }
+      }
+    ]
+  },
+  "version": 1
+}

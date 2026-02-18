@@ -46,10 +46,12 @@ enum MockDataService {
             return users.removeFirst()
         }
 
-        let teamA = Team(id: UUID(), name: "Street Falcons", members: [popUser(), popUser()], maxPlayers: 6)
-        let teamB = Team(id: UUID(), name: "North Strikers", members: [popUser()], maxPlayers: 6)
-
-        let teamC = Team(id: UUID(), name: "South Side FC", members: [popUser()], maxPlayers: 6)
+        let teamA = Team(id: UUID(), name: "Street Falcons", members: [popUser(), popUser(), popUser()], maxPlayers: 6)
+        let teamB = Team(id: UUID(), name: "North Strikers", members: [popUser(), popUser()], maxPlayers: 6)
+        let teamC = Team(id: UUID(), name: "South Side FC", members: [popUser(), popUser()], maxPlayers: 6)
+        let teamD = Team(id: UUID(), name: "City Rockets", members: [popUser(), popUser()], maxPlayers: 6)
+        let teamE = Team(id: UUID(), name: "River Knights", members: [popUser(), popUser()], maxPlayers: 6)
+        let teamF = Team(id: UUID(), name: "Urban Wolves", members: [popUser(), popUser()], maxPlayers: 6)
 
         let now = Date()
         let organiserUser = availableUsers.last ?? fallback
@@ -60,7 +62,7 @@ enum MockDataService {
                 title: "Friday Night Mini Cup",
                 location: "Austin Sports Dome",
                 startDate: Calendar.current.date(byAdding: .day, value: 2, to: now) ?? now,
-                teams: [teamA, teamB],
+                teams: [teamA, teamB, teamC, teamD],
                 entryFee: 30,
                 maxTeams: 8,
                 format: "5v5 Group + Knockout",
@@ -72,10 +74,22 @@ enum MockDataService {
                 title: "Weekend Clash Series",
                 location: "Houston Arena",
                 startDate: Calendar.current.date(byAdding: .day, value: 5, to: now) ?? now,
-                teams: [teamC],
+                teams: [teamC, teamE],
                 entryFee: 25,
                 maxTeams: 10,
                 format: "5v5 Swiss",
+                ownerId: organiserUser.id,
+                organiserIds: [organiserUser.id]
+            ),
+            Tournament(
+                id: UUID(),
+                title: "Metro Night League",
+                location: "Dallas Central Fields",
+                startDate: Calendar.current.date(byAdding: .day, value: 9, to: now) ?? now,
+                teams: [teamD, teamF],
+                entryFee: 20,
+                maxTeams: 12,
+                format: "7v7 League",
                 ownerId: organiserUser.id,
                 organiserIds: [organiserUser.id]
             )

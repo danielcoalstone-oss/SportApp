@@ -141,6 +141,7 @@ struct Match: Identifiable, Hashable {
     var notes: String
     var isRatingGame: Bool
     var isFieldBooked: Bool
+    var isPrivateGame: Bool
     var maxPlayers: Int
     var status: MatchStatus
     var finalHomeScore: Int?
@@ -160,6 +161,7 @@ struct Match: Identifiable, Hashable {
         notes: String = "",
         isRatingGame: Bool,
         isFieldBooked: Bool,
+        isPrivateGame: Bool = false,
         maxPlayers: Int,
         status: MatchStatus = .scheduled,
         finalHomeScore: Int? = nil,
@@ -178,6 +180,7 @@ struct Match: Identifiable, Hashable {
         self.notes = notes
         self.isRatingGame = isRatingGame
         self.isFieldBooked = isFieldBooked
+        self.isPrivateGame = isPrivateGame
         self.maxPlayers = maxPlayers
         self.status = status
         self.finalHomeScore = finalHomeScore

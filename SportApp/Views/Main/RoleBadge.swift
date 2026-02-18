@@ -54,6 +54,8 @@ struct RoleBadge: View {
         switch tag.uppercased() {
         case "ADMIN":
             return (.red, .white)
+        case "COACH":
+            return (.green, .black)
         case "ORGANIZER", "ORGANISER":
             return (.orange, .black)
         default:
@@ -64,7 +66,16 @@ struct RoleBadge: View {
 
 enum RoleTagProvider {
     static func tags(for user: User) -> [String] {
-        [user.globalRole == .admin ? "ADMIN" : "PLAYER"]
+        if user.globalRole == .admin {
+            return ["ADMIN"]
+        }
+        if user.isOrganizerActive {
+            return ["ORGANIZER"]
+        }
+        if user.isCoachActive {
+            return ["COACH"]
+        }
+        return ["PLAYER"]
     }
 
     static func tags(for user: User, tournaments: [Tournament]) -> [String] {
@@ -84,7 +95,7 @@ enum RoleTagProvider {
 
     private static func tags(for user: User, isOrganiser: Bool) -> [String] {
         var values = tags(for: user)
-        if isOrganiser {
+        if isOrganiser && !values.contains("ORGANIZER") {
             values.append("ORGANIZER")
         }
         return values

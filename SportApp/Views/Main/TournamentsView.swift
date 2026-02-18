@@ -2,22 +2,35 @@ import SwiftUI
 
 struct TournamentsView: View {
     private enum PlayFilter {
-        case gamesAndTournaments
+        case games
+        case tournaments
         case practices
+    }
+    
+    private enum PlayRoute: Hashable {
+        case game(UUID)
     }
 
     @EnvironmentObject private var appViewModel: AppViewModel
-    @State private var selectedFilter: PlayFilter = .gamesAndTournaments
+    @State private var selectedFilter: PlayFilter = .games
+    @State private var navigationPath: [PlayRoute] = []
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $navigationPath) {
             VStack(spacing: 0) {
                 HStack(spacing: 10) {
                     filterButton(
-                        title: "Games/Tournaments",
-                        isSelected: selectedFilter == .gamesAndTournaments
+                        title: "Games",
+                        isSelected: selectedFilter == .games
                     ) {
-                        selectedFilter = .gamesAndTournaments
+                        selectedFilter = .games
+                    }
+
+                    filterButton(
+                        title: "Tournaments",
+                        isSelected: selectedFilter == .tournaments
+                    ) {
+                        selectedFilter = .tournaments
                     }
 
                     filterButton(
@@ -31,106 +44,177 @@ struct TournamentsView: View {
                 .padding(.top, 8)
                 .padding(.bottom, 6)
 
-                if selectedFilter == .gamesAndTournaments {
+                if selectedFilter == .games {
                     List {
-                        if !appViewModel.upcomingCreatedGames.isEmpty {
-                            Section("Created Games") {
-                                ForEach(appViewModel.upcomingCreatedGames) { game in
-                                    NavigationLink {
-                                        GameDetailView(game: game)
-                                    } label: {
-                                        VStack(alignment: .leading, spacing: 6) {
-                                            HStack {
-                                                Text(game.locationName)
-                                                    .font(.headline)
-                                                Spacer()
-                                                Text(game.isPrivateGame ? "Private" : "Public")
-                                                    .font(.caption)
-                                                    .foregroundStyle(.secondary)
-                                            }
-                                            Text(DateFormatterService.tournamentDateTime.string(from: game.scheduledDate))
-                                                .font(.subheadline)
-                                                .foregroundStyle(.secondary)
-                                            Text("Players: \(game.players.count)/\(game.numberOfPlayers) • Avg Elo: \(game.averageElo)")
+                        if appViewModel.discoverableUpcomingCreatedGames.isEmpty {
+                            Text("No upcoming games from other players.")
+                                .foregroundStyle(.secondary)
+                        } else {
+                            Section("Upcoming Games") {
+                                ForEach(appViewModel.discoverableUpcomingCreatedGames) { game in
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        HStack {
+                                            Text(game.locationName)
+                                                .font(.headline)
+                                            Spacer()
+                                            Text(game.isPrivateGame ? "Private" : "Public")
                                                 .font(.caption)
                                                 .foregroundStyle(.secondary)
                                         }
-                                    }
-                                }
-                            }
-                        }
-
-                        if !appViewModel.pastCreatedGames.isEmpty {
-                            Section("Past Matches") {
-                                ForEach(appViewModel.pastCreatedGames) { game in
-                                    NavigationLink {
-                                        GameDetailView(game: game)
-                                    } label: {
-                                        VStack(alignment: .leading, spacing: 6) {
-                                            HStack {
-                                                Text(game.locationName)
-                                                    .font(.headline)
-                                                Spacer()
-                                                Text("Past")
-                                                    .font(.caption)
-                                                    .foregroundStyle(.secondary)
-                                            }
-                                            Text(DateFormatterService.tournamentDateTime.string(from: game.scheduledDate))
-                                                .font(.subheadline)
-                                                .foregroundStyle(.secondary)
-                                            Text("Players: \(game.players.count)/\(game.numberOfPlayers) • Avg Elo: \(game.averageElo)")
-                                                .font(.caption)
-                                                .foregroundStyle(.secondary)
-                                        }
-                                    }
-                                }
-                            }
-                        }
-
-                        Section("Tournaments") {
-                            ForEach(appViewModel.visibleTournaments) { tournament in
-                                NavigationLink {
-                                    TournamentDetailView(tournamentID: tournament.id)
-                                } label: {
-                                    VStack(alignment: .leading, spacing: 6) {
-                                        Text(tournament.title)
-                                            .font(.headline)
-                                        Text(DateFormatterService.tournamentDateTime.string(from: tournament.startDate))
+                                        Text(DateFormatterService.tournamentDateTime.string(from: game.scheduledDate))
                                             .font(.subheadline)
                                             .foregroundStyle(.secondary)
-                                        Text("Open team slots: \(tournament.openSpots)")
+                                        Text("Players: \(game.players.count)/\(game.numberOfPlayers) • Avg Elo: \(game.averageElo)")
                                             .font(.caption)
                                             .foregroundStyle(.secondary)
+
+                                        HStack(spacing: 8) {
+                                            NavigationLink(value: PlayRoute.game(game.id)) {
+                                                Text("Open")
+                                            }
+                                            .buttonStyle(.bordered)
+
+                                            if let currentUser = appViewModel.currentUser {
+                                                let joined = game.players.contains(where: { $0.id == currentUser.id })
+                                                Button(joined ? "Leave Game" : "Join Game") {
+                                                    if joined {
+                                                        appViewModel.leaveCreatedGame(gameID: game.id)
+                                                    } else {
+                                                        if appViewModel.joinCreatedGame(gameID: game.id) {
+                                                            navigationPath = [.game(game.id)]
+                                                        }
+                                                    }
+                                                }
+                                                .buttonStyle(.bordered)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                } else if selectedFilter == .tournaments {
+                    List {
+                        let upcomingTournaments = appViewModel.visibleTournaments
+                            .filter { appViewModel.canCurrentUserSeeTournament($0) }
+                            .filter { $0.startDate >= Date() && !$0.isDeleted }
+                            .sorted { $0.startDate < $1.startDate }
+
+                        if upcomingTournaments.isEmpty {
+                            Text("No upcoming tournaments.")
+                                .foregroundStyle(.secondary)
+                        } else {
+                            Section("Upcoming Tournaments") {
+                                ForEach(upcomingTournaments) { tournament in
+                                    NavigationLink {
+                                        TournamentDetailView(tournamentID: tournament.id)
+                                    } label: {
+                                        VStack(alignment: .leading, spacing: 6) {
+                                            Text(tournament.title)
+                                                .font(.headline)
+                                            Text(DateFormatterService.tournamentDateTime.string(from: tournament.startDate))
+                                                .font(.subheadline)
+                                                .foregroundStyle(.secondary)
+                                            Text("Open team slots: \(tournament.openSpots)")
+                                                .font(.caption)
+                                                .foregroundStyle(.secondary)
+                                        }
                                     }
                                 }
                             }
                         }
                     }
                 } else {
-                    List(appViewModel.visiblePractices) { practice in
-                        VStack(alignment: .leading, spacing: 6) {
-                            HStack {
-                                Text(practice.title)
-                                    .font(.headline)
-                                Spacer()
-                                Text(practice.isOpenJoin ? "Open Join" : "Approval Needed")
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
+                    List {
+                        let upcomingPractices = appViewModel.visiblePractices
+                            .filter { $0.startDate >= Date() }
+                            .sorted { $0.startDate < $1.startDate }
+
+                        if upcomingPractices.isEmpty {
+                            Text("No upcoming practices.")
+                                .foregroundStyle(.secondary)
+                        } else {
+                            ForEach(upcomingPractices) { practice in
+                                VStack(alignment: .leading, spacing: 6) {
+                                    if let coachId = practice.ownerId,
+                                       let coach = appViewModel.user(with: coachId) {
+                                        NavigationLink {
+                                            PublicProfileView(userID: coach.id)
+                                        } label: {
+                                            HStack(spacing: 8) {
+                                                PlayerAvatarView(
+                                                    name: coach.fullName,
+                                                    imageData: coach.avatarImageData,
+                                                    size: 26
+                                                )
+                                                Text(coach.fullName)
+                                                    .font(.subheadline.weight(.semibold))
+                                            }
+                                        }
+                                        .buttonStyle(.plain)
+                                    }
+                                    HStack {
+                                        Text(practice.title)
+                                            .font(.headline)
+                                        Spacer()
+                                        Text(practice.isOpenJoin ? "Open" : "Private")
+                                            .font(.caption)
+                                            .foregroundStyle(.secondary)
+                                    }
+                                    Text(DateFormatterService.tournamentDateTime.string(from: practice.startDate))
+                                        .font(.subheadline)
+                                        .foregroundStyle(.secondary)
+                                    Text("\(practice.location) • Players: \(practice.numberOfPlayers)")
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                    Text("Elo: \(practice.minElo)-\(practice.maxElo)")
+                                        .font(.caption2)
+                                        .foregroundStyle(.secondary)
+
+                                    if let currentUser = appViewModel.currentUser {
+                                        let joined = appViewModel.isCurrentUserJoinedPractice(practice.id)
+                                        HStack(spacing: 8) {
+                                            NavigationLink {
+                                                PracticeDetailView(practiceID: practice.id)
+                                            } label: {
+                                                Text("Open")
+                                            }
+                                            .buttonStyle(.bordered)
+
+                                            if practice.isOpenJoin || practice.ownerId == currentUser.id || practice.organiserIds.contains(currentUser.id) || currentUser.isAdmin {
+                                                Button(joined ? "Leave Practice" : "Join Practice") {
+                                                    if joined {
+                                                        appViewModel.leavePractice(sessionID: practice.id)
+                                                    } else {
+                                                        appViewModel.joinPractice(sessionID: practice.id)
+                                                    }
+                                                }
+                                                .buttonStyle(.bordered)
+                                            } else {
+                                                Text("Private practice (invite link)")
+                                                    .font(.caption2)
+                                                    .foregroundStyle(.secondary)
+                                            }
+                                        }
+                                    }
+                                }
                             }
-                            Text(DateFormatterService.tournamentDateTime.string(from: practice.startDate))
-                                .font(.subheadline)
-                                .foregroundStyle(.secondary)
-                            Text("\(practice.location) • Players: \(practice.numberOfPlayers)")
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
-                            Text("Elo: \(practice.minElo)-\(practice.maxElo)")
-                                .font(.caption2)
-                                .foregroundStyle(.secondary)
                         }
                     }
                 }
             }
             .navigationTitle("Play")
+            .navigationDestination(for: PlayRoute.self) { route in
+                switch route {
+                case .game(let gameID):
+                    if let game = appViewModel.createdGame(for: gameID) {
+                    GameDetailView(game: game)
+                    } else {
+                        Text("Game not found")
+                            .foregroundStyle(.secondary)
+                    }
+                }
+            }
         }
     }
 
@@ -151,6 +235,7 @@ struct TournamentsView: View {
 }
 
 struct GameDetailView: View {
+    @EnvironmentObject private var appViewModel: AppViewModel
     let game: CreatedGame
 
     private var openSlots: Int {
@@ -162,6 +247,11 @@ struct GameDetailView: View {
             return game.locationName
         }
         return "\(game.locationName), \(game.address)"
+    }
+
+    private var isJoinedByCurrentUser: Bool {
+        guard let currentUser = appViewModel.currentUser else { return false }
+        return game.players.contains(where: { $0.id == currentUser.id })
     }
 
     var body: some View {
@@ -205,6 +295,17 @@ struct GameDetailView: View {
                 .padding()
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14))
+
+                if appViewModel.currentUser != nil {
+                    Button(isJoinedByCurrentUser ? "Leave Game" : "Join Game") {
+                        if isJoinedByCurrentUser {
+                            appViewModel.leaveCreatedGame(gameID: game.id)
+                        } else {
+                            appViewModel.joinCreatedGame(gameID: game.id)
+                        }
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
 
                 NavigationLink {
                     MatchDetailsView(match: makeMatch())
@@ -294,6 +395,7 @@ struct GameDetailView: View {
             notes: game.notes,
             isRatingGame: game.isRatingGame,
             isFieldBooked: game.hasCourtBooked,
+            isPrivateGame: game.isPrivateGame,
             maxPlayers: game.numberOfPlayers,
             ownerId: ownerId,
             organiserIds: [ownerId]
@@ -361,4 +463,217 @@ private struct EmptySlotView: View {
                 .foregroundStyle(.secondary)
         }
     }
+}
+
+private struct PracticeDetailView: View {
+    @EnvironmentObject private var appViewModel: AppViewModel
+
+    let practiceID: UUID
+
+    private var practice: PracticeSession? {
+        appViewModel.visiblePractices.first(where: { $0.id == practiceID })
+    }
+
+    private var coach: User? {
+        guard let ownerId = practice?.ownerId else { return nil }
+        return appViewModel.user(with: ownerId)
+    }
+
+    private var isJoined: Bool {
+        appViewModel.isCurrentUserJoinedPractice(practiceID)
+    }
+
+    private var canJoinDirectly: Bool {
+        guard let practice, let currentUser = appViewModel.currentUser else { return false }
+        return practice.isOpenJoin
+            || practice.ownerId == currentUser.id
+            || practice.organiserIds.contains(currentUser.id)
+            || currentUser.isAdmin
+    }
+
+    private var joinedPlayers: [User] {
+        guard let currentUser = appViewModel.currentUser, isJoined else { return [] }
+        return [currentUser]
+    }
+
+    var body: some View {
+        Group {
+            if let practice {
+                ScrollView {
+                    VStack(spacing: 14) {
+                        headerCard(practice)
+                        playersCard(practice)
+                    }
+                    .padding()
+                }
+                .background(
+                    LinearGradient(
+                        colors: [Color(red: 0.01, green: 0.14, blue: 0.27), Color(red: 0.02, green: 0.20, blue: 0.38)],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .ignoresSafeArea()
+                )
+                .safeAreaInset(edge: .bottom) {
+                    if appViewModel.currentUser != nil {
+                        bottomCTA(practice)
+                    }
+                }
+            } else {
+                Text("Practice not found")
+                    .foregroundStyle(.secondary)
+            }
+        }
+        .navigationTitle("Practice")
+        .navigationBarTitleDisplayMode(.inline)
+    }
+
+    private func headerCard(_ practice: PracticeSession) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            Text(practice.title)
+                .font(.system(size: 34, weight: .bold, design: .rounded))
+                .foregroundStyle(Color(red: 0.78, green: 0.93, blue: 0.35))
+
+            if let coach {
+                NavigationLink {
+                    PublicProfileView(userID: coach.id)
+                } label: {
+                    HStack(spacing: 8) {
+                        Text("Organiser")
+                            .foregroundStyle(Color(red: 0.78, green: 0.93, blue: 0.35))
+                        Text(coach.fullName)
+                            .foregroundStyle(.white)
+                        Image(systemName: "checkmark.seal.fill")
+                            .foregroundStyle(Color(red: 0.23, green: 0.66, blue: 1.0))
+                    }
+                    .font(.title3.weight(.semibold))
+                }
+                .buttonStyle(.plain)
+            }
+
+            Label(timeRangeText(start: practice.startDate, durationMinutes: practice.durationMinutes), systemImage: "clock.fill")
+            Label(practice.location, systemImage: "mappin.and.ellipse")
+            Label("Focus: \(practice.focusArea)", systemImage: "target")
+            Label(practice.isOpenJoin ? "Open entry" : "Private (invite link)", systemImage: "message.fill")
+
+            if !practice.notes.isEmpty {
+                Text(practice.notes)
+                    .font(.subheadline)
+                    .foregroundStyle(.white.opacity(0.95))
+                    .padding(.top, 2)
+            }
+
+            if let coach {
+                HStack(spacing: 8) {
+                    PlayerAvatarView(name: coach.fullName, imageData: coach.avatarImageData, size: 28)
+                    Text(coach.fullName + " (coach)")
+                        .font(.headline)
+                        .foregroundStyle(.white)
+                    Spacer()
+                }
+                .padding(10)
+                .background(Color.black.opacity(0.2), in: RoundedRectangle(cornerRadius: 10))
+            }
+        }
+        .font(.title3.weight(.medium))
+        .foregroundStyle(.white)
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(
+            LinearGradient(
+                colors: [Color(red: 0.11, green: 0.36, blue: 0.64), Color(red: 0.14, green: 0.42, blue: 0.73)],
+                startPoint: .topLeading,
+                endPoint: .bottomTrailing
+            ),
+            in: RoundedRectangle(cornerRadius: 16)
+        )
+    }
+
+    private func playersCard(_ practice: PracticeSession) -> some View {
+        let filled = joinedPlayers.count
+        let total = max(practice.numberOfPlayers, 1)
+        let open = max(total - filled, 0)
+        let freeSlotsToRender = min(open, 5)
+
+        return VStack(alignment: .leading, spacing: 14) {
+            Text("Players: \(filled)/\(total)")
+                .font(.title2.bold())
+                .foregroundStyle(.white)
+
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 14), count: 3), spacing: 14) {
+                ForEach(joinedPlayers) { user in
+                    VStack(spacing: 6) {
+                        PlayerAvatarView(name: user.fullName, imageData: user.avatarImageData, size: 54)
+                        Text(user.fullName.components(separatedBy: " ").first ?? user.fullName)
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.white)
+                            .lineLimit(1)
+                    }
+                }
+
+                ForEach(0..<freeSlotsToRender, id: \.self) { _ in
+                    VStack(spacing: 6) {
+                        Circle()
+                            .stroke(style: StrokeStyle(lineWidth: 2, dash: [5]))
+                            .fill(Color.white.opacity(0.75))
+                            .frame(width: 54, height: 54)
+                            .overlay(
+                                Image(systemName: "magnifyingglass")
+                                    .foregroundStyle(Color(red: 0.76, green: 0.9, blue: 0.26))
+                            )
+                        Text("Free")
+                            .font(.caption.weight(.semibold))
+                            .foregroundStyle(.white.opacity(0.9))
+                    }
+                }
+            }
+        }
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(Color.black.opacity(0.22), in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    private func bottomCTA(_ practice: PracticeSession) -> some View {
+        Group {
+            if canJoinDirectly {
+                Button(isJoined ? "Leave Practice" : "Join Practice") {
+                    if isJoined {
+                        appViewModel.leavePractice(sessionID: practice.id)
+                    } else {
+                        appViewModel.joinPractice(sessionID: practice.id)
+                    }
+                }
+                .buttonStyle(.plain)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 18)
+                .font(.title3.bold())
+                .foregroundStyle(Color(red: 0.01, green: 0.12, blue: 0.24))
+                .background(Color(red: 0.78, green: 0.93, blue: 0.35), in: RoundedRectangle(cornerRadius: 14))
+                .padding(.horizontal)
+                .padding(.top, 8)
+                .padding(.bottom, 10)
+                .background(Color.black.opacity(0.22))
+            } else {
+                Text("Private practice. Join via invite link.")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(Color.black.opacity(0.3), in: RoundedRectangle(cornerRadius: 12))
+                    .padding()
+            }
+        }
+    }
+
+    private func timeRangeText(start: Date, durationMinutes: Int) -> String {
+        let end = start.addingTimeInterval(TimeInterval(max(durationMinutes, 0) * 60))
+        return "\(DateFormatterService.tournamentDateTime.string(from: start)) - \(Self.hourMinuteFormatter.string(from: end))"
+    }
+
+    private static let hourMinuteFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.timeStyle = .short
+        formatter.dateStyle = .none
+        return formatter
+    }()
 }

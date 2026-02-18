@@ -15,7 +15,7 @@ actor SupabasePlayerProfileRepository: PlayerProfileRepository {
 
     func updatePlayer(_ player: Player) async throws -> Player {
         try await dataService.saveProfile(player, email: email)
-        return player
+        return try await dataService.fetchPlayer(id: player.id)
     }
 
     func fetchMatchHistory(playerID: UUID) async throws -> [PlayerMatch] {

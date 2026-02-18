@@ -1,0 +1,112 @@
+{
+  "source": "/Users/woodie/Desktop/Codex Vibe Coding/SportApp/SportApp/Views/Auth/AuthView.swift",
+  "tables": {
+    "Localizable": [
+      {
+        "comment": "",
+        "key": "Welcome",
+        "location": {
+          "startingColumn": 30,
+          "startingLine": 68
+        }
+      },
+      {
+        "comment": "",
+        "key": "Mini Football Tournaments",
+        "location": {
+          "startingColumn": 26,
+          "startingLine": 17
+        }
+      },
+      {
+        "comment": "",
+        "key": "Create your account",
+        "location": {
+          "startingColumn": 43,
+          "startingLine": 21
+        }
+      },
+      {
+        "comment": "",
+        "key": "Sign in to manage bookings",
+        "location": {
+          "startingColumn": 67,
+          "startingLine": 21
+        }
+      },
+      {
+        "comment": "",
+        "key": "Already have an account? Sign In",
+        "location": {
+          "startingColumn": 45,
+          "startingLine": 60
+        }
+      },
+      {
+        "comment": "",
+        "key": "Need an account? Register",
+        "location": {
+          "startingColumn": 82,
+          "startingLine": 60
+        }
+      },
+      {
+        "comment": "",
+        "key": "Full name",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 26
+        }
+      },
+      {
+        "comment": "",
+        "key": "City",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 30
+        }
+      },
+      {
+        "comment": "",
+        "key": "Favorite position",
+        "location": {
+          "startingColumn": 39,
+          "startingLine": 33
+        }
+      },
+      {
+        "comment": "",
+        "key": "Email",
+        "location": {
+          "startingColumn": 35,
+          "startingLine": 37
+        }
+      },
+      {
+        "comment": "",
+        "key": "Password",
+        "location": {
+          "startingColumn": 37,
+          "startingLine": 43
+        }
+      },
+      {
+        "comment": "",
+        "key": "Register",
+        "location": {
+          "startingColumn": 47,
+          "startingLine": 54
+        }
+      },
+      {
+        "comment": "",
+        "key": "Sign In",
+        "location": {
+          "startingColumn": 60,
+          "startingLine": 54
+        }
+      }
+    ]
+  },
+  "version": 1
+}

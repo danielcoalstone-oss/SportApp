@@ -23,6 +23,15 @@ struct TournamentDetailView: View {
         appViewModel.visibleTournaments.first(where: { $0.id == tournamentID })
     }
 
+    private var isTournamentClosed: Bool {
+        guard let tournament else { return false }
+        if tournament.status == .completed || tournament.status == .cancelled {
+            return true
+        }
+        guard !tournament.matches.isEmpty else { return false }
+        return tournament.matches.allSatisfy { $0.status == .completed || $0.status == .cancelled }
+    }
+
     var body: some View {
         Group {
             if let tournament {
@@ -39,7 +48,7 @@ struct TournamentDetailView: View {
                         }
                         .font(.subheadline)
 
-                        if appViewModel.canCurrentUserEditTournament(tournament) {
+                        if appViewModel.canCurrentUserEditTournament(tournament) && !isTournamentClosed {
                             VStack(alignment: .leading, spacing: 10) {
                                 Text("Create Team & Book")
                                     .font(.headline)
@@ -70,7 +79,9 @@ struct TournamentDetailView: View {
                             teamsSection(tournament)
                         }
 
-                        organiserToolsSection(tournament)
+                        if !isTournamentClosed {
+                            organiserToolsSection(tournament)
+                        }
                     }
                     .padding()
                 }
@@ -109,7 +120,9 @@ struct TournamentDetailView: View {
                         tournamentID: tournament.id,
                         homeTeamID: homeId,
                         awayTeamID: awayId,
-                        startTime: startTime
+                        startTime: startTime,
+                        locationName: tournament.location,
+                        matchday: nil
                     )
                 }
             }

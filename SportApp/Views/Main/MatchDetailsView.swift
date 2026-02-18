@@ -58,6 +58,10 @@ struct MatchDetailsView: View {
         return RoleTagProvider.tags(for: currentUser, in: viewModel.match)
     }
 
+    private var isCompletedMatch: Bool {
+        viewModel.match.status == .completed
+    }
+
     var body: some View {
         Group {
             if viewModel.isDeleted {
@@ -78,9 +82,12 @@ struct MatchDetailsView: View {
                     VStack(alignment: .leading, spacing: 14) {
                         scoreHeader
                         matchInfoCard
-                        rsvpActionsCard
-                        participantsCard
-                        organiserToolsCard
+
+                        if !isCompletedMatch {
+                            rsvpActionsCard
+                            participantsCard
+                            organiserToolsCard
+                        }
 
                         NavigationLink {
                             MatchSummaryView(match: viewModel.match)
@@ -122,6 +129,12 @@ struct MatchDetailsView: View {
                             }
                             .buttonStyle(.borderedProminent)
                             .disabled(!viewModel.canCurrentUserEnterMatchResult)
+                        }
+
+                        if isCompletedMatch {
+                            Text("Match completed: RSVP, participants and organiser tools are hidden. Statistics input remains available.")
+                                .font(.footnote)
+                                .foregroundStyle(.secondary)
                         }
 
                         if !viewModel.canCurrentUserEnterMatchResult {
@@ -166,7 +179,7 @@ struct MatchDetailsView: View {
         }
         .task {
             viewModel.setCurrentUser(appViewModel.currentUser)
-            viewModel.loadPersistedState()
+            await viewModel.loadPersistedState()
         }
         .onChange(of: viewModel.match.status) { _ in
             appViewModel.refreshGameLists()
@@ -304,19 +317,24 @@ struct MatchDetailsView: View {
                     .padding(.vertical, 4)
             } else {
                 ForEach(filteredParticipants) { participant in
-                    HStack {
-                        PlayerAvatarView(
-                            name: participant.name,
-                            imageData: avatarData(for: participant),
-                            size: 28
-                        )
-                        Text(participant.name)
-                        Spacer()
-                        Text("Elo \(participant.elo)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                    NavigationLink {
+                        PublicProfileView(userID: participant.id)
+                    } label: {
+                        HStack {
+                            PlayerAvatarView(
+                                name: participant.name,
+                                imageData: avatarData(for: participant),
+                                size: 28
+                            )
+                            Text(participant.name)
+                            Spacer()
+                            Text("Elo \(participant.elo)")
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                        .padding(.vertical, 2)
                     }
-                    .padding(.vertical, 2)
+                    .buttonStyle(.plain)
                 }
             }
         }

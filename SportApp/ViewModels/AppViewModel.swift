@@ -2200,14 +2200,15 @@ final class AppViewModel: ObservableObject {
     func updatePractice(_ session: PracticeSession) {
         guard let index = practices.firstIndex(where: { $0.id == session.id }) else { return }
         guard canCurrentUserEditPractice(practices[index]) else {
-            authErrorMessage = AuthorizationUX.permissionDeniedMessage
+            tournamentActionMessage = AuthorizationUX.permissionDeniedMessage
             return
         }
         if !practices[index].isDraft && isPracticeFinished(practices[index]) {
-            authErrorMessage = "Practice is finished. Editing is locked."
+            tournamentActionMessage = "Practice is finished. Editing is locked."
             return
         }
         practices[index] = session
+        tournamentActionMessage = "Practice details updated."
 
         if let supabaseDataService {
             Task {
@@ -2215,7 +2216,7 @@ final class AppViewModel: ObservableObject {
                     try await supabaseDataService.updatePractice(session: session)
                 } catch {
                     await MainActor.run {
-                        authErrorMessage = "Practice updated locally, but backend sync failed: \(error.localizedDescription)"
+                        tournamentActionMessage = "Practice updated locally, but backend sync failed: \(error.localizedDescription)"
                     }
                 }
             }
@@ -2225,15 +2226,13 @@ final class AppViewModel: ObservableObject {
     func deletePractice(_ sessionID: UUID) {
         guard let index = practices.firstIndex(where: { $0.id == sessionID }) else { return }
         guard canCurrentUserEditPractice(practices[index]) else {
-            authErrorMessage = AuthorizationUX.permissionDeniedMessage
-            return
-        }
-        if !practices[index].isDraft && isPracticeFinished(practices[index]) {
-            authErrorMessage = "Practice is finished. Deletion is locked."
+            tournamentActionMessage = AuthorizationUX.permissionDeniedMessage
             return
         }
         practices[index].isDeleted = true
         practices[index].deletedAt = Date()
+        joinedPracticeIDs.remove(sessionID)
+        tournamentActionMessage = "Practice deleted."
 
         if let supabaseDataService {
             Task {
@@ -2242,6 +2241,38 @@ final class AppViewModel: ObservableObject {
                 } catch {
                     await MainActor.run {
                         authErrorMessage = "Practice deleted locally, but backend sync failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
+    }
+
+    func endPractice(_ sessionID: UUID) {
+        guard let index = practices.firstIndex(where: { $0.id == sessionID }) else { return }
+        guard canCurrentUserEditPractice(practices[index]) else {
+            tournamentActionMessage = AuthorizationUX.permissionDeniedMessage
+            return
+        }
+
+        if isPracticeFinished(practices[index]) {
+            tournamentActionMessage = "Practice is already finished."
+            return
+        }
+
+        let durationSeconds = TimeInterval(max(practices[index].durationMinutes, 1) * 60)
+        practices[index].startDate = Date().addingTimeInterval(-durationSeconds - 60)
+        practices[index].isDraft = false
+        let updated = practices[index]
+        practices.sort { $0.startDate < $1.startDate }
+        tournamentActionMessage = "Practice ended."
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    try await supabaseDataService.updatePractice(session: updated)
+                } catch {
+                    await MainActor.run {
+                        tournamentActionMessage = "Practice ended locally, but backend sync failed: \(error.localizedDescription)"
                     }
                 }
             }
@@ -2305,20 +2336,15 @@ final class AppViewModel: ObservableObject {
             createdAt: Date()
         )
         coachReviewsByCoach[coachID, default: []].append(review)
+        tournamentActionMessage = "Review submitted."
 
         if let supabaseDataService {
             Task {
                 do {
                     try await supabaseDataService.addCoachReview(review)
-                    let refreshed = try await supabaseDataService.fetchCoachReviews()
-                    let grouped = Dictionary(grouping: refreshed, by: \.coachID)
-                    await MainActor.run {
-                        coachReviewsByCoach = grouped
-                    }
                 } catch {
                     await MainActor.run {
-                        coachReviewsByCoach[coachID]?.removeAll { $0.id == review.id }
-                        authErrorMessage = "Failed to save review: \(error.localizedDescription)"
+                        tournamentActionMessage = "Review saved locally, but backend sync failed: \(error.localizedDescription)"
                     }
                 }
             }

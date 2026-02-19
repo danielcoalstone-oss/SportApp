@@ -374,23 +374,27 @@ private struct PlayerProfileEditorView: View {
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(sessions.prefix(5)) { session in
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Text(session.title)
-                                .font(.headline)
-                            Spacer()
-                            Text(session.location)
+                    NavigationLink {
+                        PracticeDetailView(practiceID: session.id)
+                    } label: {
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Text(session.title)
+                                    .font(.headline)
+                                Spacer()
+                                Text(session.location)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Text(DateFormatterService.tournamentDateTime.string(from: session.startDate))
+                                .font(.subheadline)
+                                .foregroundStyle(.secondary)
+                            Text("Players: \(session.numberOfPlayers) • Elo: \(session.minElo)-\(session.maxElo)")
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
                         }
-                        Text(DateFormatterService.tournamentDateTime.string(from: session.startDate))
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                        Text("Players: \(session.numberOfPlayers) • Elo: \(session.minElo)-\(session.maxElo)")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
+                        .padding(.vertical, 2)
                     }
-                    .padding(.vertical, 2)
                 }
             }
         }
@@ -674,6 +678,11 @@ private struct CoachPublicProfileView: View {
                                 Text(String(repeating: "★", count: review.rating))
                                     .foregroundStyle(.yellow)
                             }
+                            if let practiceLine = practiceLineText(for: review) {
+                                Text(practiceLine)
+                                    .font(.caption.weight(.semibold))
+                                    .foregroundStyle(.white.opacity(0.9))
+                            }
                             Text(review.text)
                                 .font(.subheadline)
                             Text(DateFormatterService.tournamentDateTime.string(from: review.createdAt))
@@ -685,10 +694,8 @@ private struct CoachPublicProfileView: View {
                 }
             }
 
-            Section("Practices") {
-                practiceSection(title: "Upcoming Practices", sessions: upcomingPractices)
-                practiceSection(title: "Past Practices", sessions: pastPractices)
-            }
+            practicesSection(title: "Upcoming Practices", sessions: upcomingPractices)
+            practicesSection(title: "Past Practices", sessions: pastPractices)
         }
         .navigationTitle(user.fullName)
         .navigationBarTitleDisplayMode(.inline)
@@ -746,6 +753,16 @@ private struct CoachPublicProfileView: View {
         .frame(maxWidth: .infinity)
     }
 
+    private func practiceLineText(for review: CoachReview) -> String? {
+        guard let practiceID = review.practiceID else {
+            return "From practice: not specified"
+        }
+        if let practice = appViewModel.practices.first(where: { $0.id == practiceID }) {
+            return "From practice: \(practice.title)"
+        }
+        return "From practice: \(practiceID.uuidString.prefix(8))"
+    }
+
     private var upcomingPractices: [PracticeSession] {
         appViewModel.visiblePractices
             .filter { session in
@@ -764,16 +781,15 @@ private struct CoachPublicProfileView: View {
             .sorted { $0.startDate > $1.startDate }
     }
 
-    private func practiceSection(title: String, sessions: [PracticeSession]) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(title)
-                .font(.headline)
-
-            if sessions.isEmpty {
+    @ViewBuilder
+    private func practicesSection(title: String, sessions: [PracticeSession]) -> some View {
+        Section(title) {
+            let practiceRows = Array(sessions.prefix(8))
+            if practiceRows.isEmpty {
                 Text("No practices")
                     .foregroundStyle(.secondary)
             } else {
-                ForEach(sessions.prefix(8)) { practice in
+                ForEach(practiceRows) { practice in
                     NavigationLink {
                         PracticeDetailView(practiceID: practice.id)
                     } label: {

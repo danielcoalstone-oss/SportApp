@@ -492,6 +492,9 @@ struct PracticeDetailView: View {
     let practiceID: UUID
     @State private var reviewRating: Int = 5
     @State private var reviewText: String = ""
+    @State private var showPracticeEditSheet = false
+    @State private var showEndPracticeConfirmation = false
+    @State private var showDeletePracticeConfirmation = false
 
     private var practice: PracticeSession? {
         appViewModel.visiblePractices.first(where: { $0.id == practiceID })
@@ -535,12 +538,18 @@ struct PracticeDetailView: View {
         appViewModel.hasCurrentUserReviewedPractice(practiceID)
     }
 
+    private var canManagePractice: Bool {
+        guard let practice else { return false }
+        return appViewModel.canCurrentUserEditPractice(practice)
+    }
+
     var body: some View {
         Group {
             if let practice {
                 ScrollView {
                     VStack(spacing: 14) {
                         headerCard(practice)
+                        organiserToolsCard(practice)
                         playersCard(practice)
                         coachReviewCard(practice)
                     }
@@ -570,6 +579,36 @@ struct PracticeDetailView: View {
             Button("OK", role: .cancel) {}
         } message: {
             Text(appViewModel.tournamentActionMessage ?? "")
+        }
+        .alert("End practice?", isPresented: $showEndPracticeConfirmation) {
+            Button("Cancel", role: .cancel) {}
+            Button("End Practice", role: .destructive) {
+                appViewModel.endPractice(practiceID)
+            }
+        } message: {
+            Text("This will move the practice to past sessions and unlock post-practice reviews.")
+        }
+        .alert("Delete practice?", isPresented: $showDeletePracticeConfirmation) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete", role: .destructive) {
+                appViewModel.deletePractice(practiceID)
+            }
+        } message: {
+            Text("This action cannot be undone.")
+        }
+        .sheet(isPresented: $showPracticeEditSheet) {
+            if let practice {
+                PracticeEditSheet(
+                    session: practice,
+                    onSave: { updated in
+                        appViewModel.updatePractice(updated)
+                        showPracticeEditSheet = false
+                    },
+                    onCancel: {
+                        showPracticeEditSheet = false
+                    }
+                )
+            }
         }
     }
 
@@ -609,15 +648,23 @@ struct PracticeDetailView: View {
             }
 
             if let coach {
-                HStack(spacing: 8) {
-                    PlayerAvatarView(name: coach.fullName, imageData: coach.avatarImageData, size: 28)
-                    Text(coach.fullName + " (coach)")
-                        .font(.headline)
-                        .foregroundStyle(.white)
-                    Spacer()
+                NavigationLink {
+                    PublicProfileView(userID: coach.id)
+                } label: {
+                    HStack(spacing: 8) {
+                        PlayerAvatarView(name: coach.fullName, imageData: coach.avatarImageData, size: 28)
+                        Text(coach.fullName + " (coach)")
+                            .font(.headline)
+                            .foregroundStyle(.white)
+                        Spacer()
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.bold))
+                            .foregroundStyle(.white.opacity(0.8))
+                    }
+                    .padding(10)
+                    .background(Color.black.opacity(0.2), in: RoundedRectangle(cornerRadius: 10))
                 }
-                .padding(10)
-                .background(Color.black.opacity(0.2), in: RoundedRectangle(cornerRadius: 10))
+                .buttonStyle(.plain)
             }
         }
         .font(.title3.weight(.medium))
@@ -676,6 +723,36 @@ struct PracticeDetailView: View {
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(Color.black.opacity(0.22), in: RoundedRectangle(cornerRadius: 16))
+    }
+
+    @ViewBuilder
+    private func organiserToolsCard(_ practice: PracticeSession) -> some View {
+        if canManagePractice {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Organiser Tools")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+
+                Button("Edit Practice Details") {
+                    showPracticeEditSheet = true
+                }
+                .buttonStyle(.borderedProminent)
+
+                Button("End Practice") {
+                    showEndPracticeConfirmation = true
+                }
+                .buttonStyle(.bordered)
+                .disabled(!isPracticeOpenForJoinLeave)
+
+                Button("Delete Practice", role: .destructive) {
+                    showDeletePracticeConfirmation = true
+                }
+                .buttonStyle(.bordered)
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.black.opacity(0.22), in: RoundedRectangle(cornerRadius: 16))
+        }
     }
 
     private func bottomCTA(_ practice: PracticeSession) -> some View {
@@ -782,4 +859,101 @@ struct PracticeDetailView: View {
         formatter.dateStyle = .none
         return formatter
     }()
+}
+
+private struct PracticeEditSheet: View {
+    @State private var title: String
+    @State private var location: String
+    @State private var startDate: Date
+    @State private var durationMinutes: Int
+    @State private var numberOfPlayers: Int
+    @State private var minElo: Int
+    @State private var maxElo: Int
+    @State private var isOpenJoin: Bool
+    @State private var focusArea: String
+    @State private var notes: String
+
+    let session: PracticeSession
+    let onSave: (PracticeSession) -> Void
+    let onCancel: () -> Void
+
+    init(session: PracticeSession, onSave: @escaping (PracticeSession) -> Void, onCancel: @escaping () -> Void) {
+        self.session = session
+        self.onSave = onSave
+        self.onCancel = onCancel
+        _title = State(initialValue: session.title)
+        _location = State(initialValue: session.location)
+        _startDate = State(initialValue: session.startDate)
+        _durationMinutes = State(initialValue: session.durationMinutes)
+        _numberOfPlayers = State(initialValue: session.numberOfPlayers)
+        _minElo = State(initialValue: session.minElo)
+        _maxElo = State(initialValue: session.maxElo)
+        _isOpenJoin = State(initialValue: session.isOpenJoin)
+        _focusArea = State(initialValue: session.focusArea)
+        _notes = State(initialValue: session.notes)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section("Details") {
+                    TextField("Title", text: $title)
+                    TextField("Location", text: $location)
+                    DatePicker("Start", selection: $startDate, displayedComponents: [.date, .hourAndMinute])
+                    Stepper("Duration: \(durationMinutes) min", value: $durationMinutes, in: 30...240, step: 15)
+                    Stepper("Players: \(numberOfPlayers)", value: $numberOfPlayers, in: 2...60)
+                }
+
+                Section("Session") {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("Elo Range: \(minElo)-\(maxElo)")
+                            .font(.subheadline)
+                        Slider(
+                            value: Binding(
+                                get: { Double(minElo) },
+                                set: { minElo = min(Int($0), maxElo) }
+                            ),
+                            in: 800...3000,
+                            step: 25
+                        )
+                        Slider(
+                            value: Binding(
+                                get: { Double(maxElo) },
+                                set: { maxElo = max(Int($0), minElo) }
+                            ),
+                            in: 800...3000,
+                            step: 25
+                        )
+                    }
+                    Toggle("Open Join", isOn: $isOpenJoin)
+                    TextField("Focus Area", text: $focusArea)
+                    TextField("Notes", text: $notes, axis: .vertical)
+                        .lineLimit(3...6)
+                }
+            }
+            .navigationTitle("Edit Practice")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("Cancel") { onCancel() }
+                }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        var updated = session
+                        updated.title = title.trimmingCharacters(in: .whitespacesAndNewlines)
+                        updated.location = location.trimmingCharacters(in: .whitespacesAndNewlines)
+                        updated.startDate = startDate
+                        updated.durationMinutes = durationMinutes
+                        updated.numberOfPlayers = numberOfPlayers
+                        updated.minElo = min(minElo, maxElo)
+                        updated.maxElo = max(minElo, maxElo)
+                        updated.isOpenJoin = isOpenJoin
+                        updated.focusArea = focusArea.trimmingCharacters(in: .whitespacesAndNewlines)
+                        updated.notes = notes.trimmingCharacters(in: .whitespacesAndNewlines)
+                        onSave(updated)
+                    }
+                }
+            }
+        }
+    }
 }

@@ -16,6 +16,7 @@ struct TournamentDetailView: View {
     @State private var isScheduleSheetPresented = false
     @State private var selectedMatchForResult: TournamentMatch?
     @State private var selectedTab: TournamentTab = .standings
+    @State private var showCompleteTournamentConfirmation = false
 
     let tournamentID: UUID
 
@@ -48,9 +49,11 @@ struct TournamentDetailView: View {
                         }
                         .font(.subheadline)
 
+                        tournamentStatsSection(tournament)
+
                         if appViewModel.canCurrentUserEditTournament(tournament) && !isTournamentClosed {
                             VStack(alignment: .leading, spacing: 10) {
-                                Text("Create Team & Book")
+                                Text("Organiser Team Setup")
                                     .font(.headline)
                                 TextField("Team name", text: $teamName)
                                     .textFieldStyle(.roundedBorder)
@@ -143,6 +146,14 @@ struct TournamentDetailView: View {
             Text(appViewModel.tournamentActionMessage ?? "")
         }
         .permissionDeniedAlert(message: $appViewModel.tournamentActionMessage)
+        .alert("Complete Tournament?", isPresented: $showCompleteTournamentConfirmation) {
+            Button("Cancel", role: .cancel) {}
+            Button("Complete", role: .destructive) {
+                appViewModel.completeTournament(tournamentID: tournamentID)
+            }
+        } message: {
+            Text("Are you sure you want to complete this tournament?")
+        }
         .onAppear {
             appViewModel.syncTournamentMatchesToCreatedGames(tournamentID: tournamentID)
         }
@@ -200,11 +211,37 @@ struct TournamentDetailView: View {
                         }
                         .pickerStyle(.segmented)
                     }
+
+                    Button("Complete Tournament") {
+                        showCompleteTournamentConfirmation = true
+                    }
+                    .buttonStyle(.borderedProminent)
                 }
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
             .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+        }
+    }
+
+    private func tournamentStatsSection(_ tournament: Tournament) -> some View {
+        let totalMatches = tournament.matches.count
+        let completedMatches = tournament.matches.filter { $0.status == .completed }.count
+        let scheduledMatches = tournament.matches.filter { $0.status == .scheduled }.count
+        let totalGoals = tournament.matches.reduce(0) { partial, match in
+            partial + (match.homeScore ?? 0) + (match.awayScore ?? 0)
+        }
+
+        return VStack(alignment: .leading, spacing: 10) {
+            Text("Tournament Stats")
+                .font(.headline)
+
+            HStack {
+                statsPill(title: "Matches", value: "\(totalMatches)")
+                statsPill(title: "Completed", value: "\(completedMatches)")
+                statsPill(title: "Scheduled", value: "\(scheduledMatches)")
+                statsPill(title: "Goals", value: "\(totalGoals)")
+            }
         }
     }
 
@@ -291,6 +328,10 @@ struct TournamentDetailView: View {
             Text("Teams")
                 .font(.headline)
 
+            Text("Players can join one specific team per tournament.")
+                .font(.caption)
+                .foregroundStyle(.secondary)
+
             if tournament.teams.count < 4 {
                 Text("League MVP works best with 4+ teams.")
                     .font(.caption)
@@ -320,17 +361,44 @@ struct TournamentDetailView: View {
                                     .font(.caption2)
                                     .foregroundStyle(.secondary)
                             } else {
-                                ScrollView(.horizontal, showsIndicators: false) {
-                                    HStack(spacing: 8) {
-                                        ForEach(members) { member in
-                                            HStack(spacing: 5) {
-                                                PlayerAvatarView(
-                                                    name: member.fullName,
-                                                    imageData: member.avatarImageData,
-                                                    size: 20
-                                                )
-                                                Text(member.fullName.components(separatedBy: " ").first ?? member.fullName)
-                                                    .font(.caption2)
+                                VStack(alignment: .leading, spacing: 6) {
+                                    ForEach(members) { member in
+                                        HStack(spacing: 8) {
+                                            PlayerAvatarView(
+                                                name: member.fullName,
+                                                imageData: member.avatarImageData,
+                                                size: 20
+                                            )
+                                            Text(member.fullName)
+                                                .font(.caption)
+                                            if isCaptain(member.id, teamID: team.id, tournament: tournament) {
+                                                Text("Captain")
+                                                    .font(.caption2.bold())
+                                                    .padding(.horizontal, 6)
+                                                    .padding(.vertical, 2)
+                                                    .background(Color.orange.opacity(0.18), in: Capsule())
+                                            }
+                                            Spacer()
+                                            if appViewModel.canCurrentUserManageTournamentTeams(tournament) {
+                                                Menu {
+                                                    Button("Set Captain") {
+                                                        appViewModel.setTournamentCaptain(
+                                                            tournamentID: tournament.id,
+                                                            teamID: team.id,
+                                                            userID: member.id
+                                                        )
+                                                    }
+                                                    Button("Remove", role: .destructive) {
+                                                        appViewModel.removePlayerFromTournamentTeam(
+                                                            tournamentID: tournament.id,
+                                                            teamID: team.id,
+                                                            userID: member.id
+                                                        )
+                                                    }
+                                                } label: {
+                                                    Image(systemName: "ellipsis.circle")
+                                                        .foregroundStyle(.secondary)
+                                                }
                                             }
                                         }
                                     }
@@ -404,6 +472,9 @@ struct TournamentDetailView: View {
         if isCurrentUserInTeam(teamID: team.id, tournament: tournament) {
             return "Leave Team"
         }
+        if isCurrentUserTournamentOrganiser(in: tournament) {
+            return "Organiser cannot join"
+        }
         return team.isFull ? "Team Full" : "Join Team"
     }
 
@@ -411,7 +482,15 @@ struct TournamentDetailView: View {
         if isCurrentUserInTeam(teamID: team.id, tournament: tournament) {
             return false
         }
+        if isCurrentUserTournamentOrganiser(in: tournament) {
+            return true
+        }
         return team.isFull || isCurrentUserInDifferentTeam(teamID: team.id, tournament: tournament)
+    }
+
+    private func isCurrentUserTournamentOrganiser(in tournament: Tournament) -> Bool {
+        guard let currentUserID = appViewModel.currentUser?.id else { return false }
+        return tournament.ownerId == currentUserID || tournament.organiserIds.contains(currentUserID)
     }
 
     private func disputeStatusBinding(for tournament: Tournament) -> Binding<TournamentDisputeStatus> {
@@ -421,6 +500,25 @@ struct TournamentDetailView: View {
                 appViewModel.resolveTournamentDispute(tournamentID: tournament.id, status: newStatus)
             }
         )
+    }
+
+    private func statsPill(title: String, value: String) -> some View {
+        VStack(alignment: .leading, spacing: 2) {
+            Text(value)
+                .font(.subheadline.bold())
+            Text(title)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
+        }
+        .padding(.vertical, 6)
+        .padding(.horizontal, 10)
+        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 10))
+    }
+
+    private func isCaptain(_ userID: UUID, teamID: UUID, tournament: Tournament) -> Bool {
+        tournament.teamMembers.contains { member in
+            member.teamId == teamID && member.playerId == userID && member.isCaptain
+        }
     }
 
     private var tournamentActionAlertBinding: Binding<Bool> {

@@ -52,14 +52,14 @@ private struct PlayerProfileEditorView: View {
     var body: some View {
         List {
             Section("Player Profile") {
-                TextField("Name", text: $viewModel.name)
-
-                HStack(spacing: 12) {
+                VStack(alignment: .leading, spacing: 10) {
                     PlayerAvatarView(
                         name: viewModel.name.isEmpty ? user.fullName : viewModel.name,
                         imageData: viewModel.avatarImageData,
                         size: 56
                     )
+
+                    TextField("Name", text: $viewModel.name)
 
                     PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
                         Label("Upload Image", systemImage: "photo.on.rectangle")

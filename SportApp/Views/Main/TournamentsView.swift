@@ -74,8 +74,8 @@ struct TournamentsView: View {
                                             }
                                             .buttonStyle(.bordered)
 
-                                            if let currentUser = appViewModel.currentUser {
-                                                let joined = game.players.contains(where: { $0.id == currentUser.id })
+                                            if appViewModel.currentUser != nil {
+                                                let joined = appViewModel.isCurrentUserGoingInGame(game.id)
                                                 Button(joined ? "Leave Game" : "Join Game") {
                                                     if joined {
                                                         appViewModel.leaveCreatedGame(gameID: game.id)
@@ -238,32 +238,35 @@ struct GameDetailView: View {
     @EnvironmentObject private var appViewModel: AppViewModel
     let game: CreatedGame
 
+    private var displayedGame: CreatedGame {
+        appViewModel.createdGame(for: game.id) ?? game
+    }
+
     private var openSlots: Int {
-        max(game.numberOfPlayers - game.players.count, 0)
+        max(displayedGame.numberOfPlayers - displayedGame.players.count, 0)
     }
 
     private var addressText: String {
-        if game.address.isEmpty {
-            return game.locationName
+        if displayedGame.address.isEmpty {
+            return displayedGame.locationName
         }
-        return "\(game.locationName), \(game.address)"
+        return "\(displayedGame.locationName), \(displayedGame.address)"
     }
 
     private var isJoinedByCurrentUser: Bool {
-        guard let currentUser = appViewModel.currentUser else { return false }
-        return game.players.contains(where: { $0.id == currentUser.id })
+        appViewModel.isCurrentUserGoingInGame(displayedGame.id)
     }
 
     var body: some View {
         ScrollView {
             VStack(spacing: 14) {
                 VStack(alignment: .leading, spacing: 10) {
-                    Label(DateFormatterService.tournamentDateTime.string(from: game.scheduledDate), systemImage: "clock.fill")
+                    Label(DateFormatterService.tournamentDateTime.string(from: displayedGame.scheduledDate), systemImage: "clock.fill")
                     Label(addressText, systemImage: "mappin.and.ellipse")
-                    Label("Duration: \(game.durationMinutes) min • \(game.format.rawValue)", systemImage: "timer")
-                    Label(game.hasCourtBooked ? "Field booked" : "Field not booked", systemImage: "sportscourt.fill")
-                    Label(game.isRatingGame ? "Rating game" : "Not rating game", systemImage: "chart.bar.fill")
-                    Label("Average Elo: \(game.averageElo)", systemImage: "gauge.with.dots.needle.67percent")
+                    Label("Duration: \(displayedGame.durationMinutes) min • \(displayedGame.format.rawValue)", systemImage: "timer")
+                    Label(displayedGame.hasCourtBooked ? "Field booked" : "Field not booked", systemImage: "sportscourt.fill")
+                    Label(displayedGame.isRatingGame ? "Rating game" : "Not rating game", systemImage: "chart.bar.fill")
+                    Label("Average Elo: \(displayedGame.averageElo)", systemImage: "gauge.with.dots.needle.67percent")
                 }
                 .font(.subheadline.weight(.medium))
                 .foregroundStyle(.white)
@@ -279,11 +282,11 @@ struct GameDetailView: View {
                 )
 
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("Players: \(game.players.count)/\(game.numberOfPlayers)")
+                    Text("Players: \(displayedGame.players.count)/\(displayedGame.numberOfPlayers)")
                         .font(.title3.bold())
 
                     LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 4), spacing: 14) {
-                        ForEach(game.players) { player in
+                        ForEach(displayedGame.players) { player in
                             PlayerSlotView(name: player.fullName, avatarImageData: player.avatarImageData, elo: player.eloRating)
                         }
 
@@ -299,9 +302,9 @@ struct GameDetailView: View {
                 if appViewModel.currentUser != nil {
                     Button(isJoinedByCurrentUser ? "Leave Game" : "Join Game") {
                         if isJoinedByCurrentUser {
-                            appViewModel.leaveCreatedGame(gameID: game.id)
+                            appViewModel.leaveCreatedGame(gameID: displayedGame.id)
                         } else {
-                            appViewModel.joinCreatedGame(gameID: game.id)
+                            appViewModel.joinCreatedGame(gameID: displayedGame.id)
                         }
                     }
                     .buttonStyle(.borderedProminent)
@@ -329,7 +332,7 @@ struct GameDetailView: View {
     }
 
     private func makeMatch() -> Match {
-        let allPlayers = game.players
+        let allPlayers = displayedGame.players
         let splitIndex = max(allPlayers.count / 2, 1)
         let homePlayers = Array(allPlayers.prefix(splitIndex))
         let awayPlayers = Array(allPlayers.dropFirst(splitIndex))
@@ -338,14 +341,14 @@ struct GameDetailView: View {
             id: UUID(),
             name: "Home Team",
             members: homePlayers,
-            maxPlayers: max(game.numberOfPlayers / 2, 1)
+            maxPlayers: max(displayedGame.numberOfPlayers / 2, 1)
         )
 
         let awayTeam = Team(
             id: UUID(),
             name: "Away Team",
             members: awayPlayers,
-            maxPlayers: max(game.numberOfPlayers / 2, 1)
+            maxPlayers: max(displayedGame.numberOfPlayers / 2, 1)
         )
 
         let participants = homePlayers.map {
@@ -367,7 +370,7 @@ struct GameDetailView: View {
         }
 
         let seedEvents: [MatchEvent]
-        let ownerId = game.ownerId
+        let ownerId = displayedGame.ownerId
         if let first = participants.first {
             seedEvents = [
                 MatchEvent(
@@ -384,19 +387,19 @@ struct GameDetailView: View {
         }
 
         return Match(
-            id: game.id,
+            id: displayedGame.id,
             homeTeam: homeTeam,
             awayTeam: awayTeam,
             participants: participants,
             events: seedEvents,
             location: addressText,
-            startTime: game.scheduledDate,
-            format: game.format.rawValue,
-            notes: game.notes,
-            isRatingGame: game.isRatingGame,
-            isFieldBooked: game.hasCourtBooked,
-            isPrivateGame: game.isPrivateGame,
-            maxPlayers: game.numberOfPlayers,
+            startTime: displayedGame.scheduledDate,
+            format: displayedGame.format.rawValue,
+            notes: displayedGame.notes,
+            isRatingGame: displayedGame.isRatingGame,
+            isFieldBooked: displayedGame.hasCourtBooked,
+            isPrivateGame: displayedGame.isPrivateGame,
+            maxPlayers: displayedGame.numberOfPlayers,
             ownerId: ownerId,
             organiserIds: [ownerId]
         )
@@ -465,7 +468,7 @@ private struct EmptySlotView: View {
     }
 }
 
-private struct PracticeDetailView: View {
+struct PracticeDetailView: View {
     @EnvironmentObject private var appViewModel: AppViewModel
 
     let practiceID: UUID

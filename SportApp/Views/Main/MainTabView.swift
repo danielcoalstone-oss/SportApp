@@ -41,6 +41,12 @@ struct MainTabView: View {
 }
 
 struct CreateHubView: View {
+    private enum CreatedDestination: Hashable {
+        case game(UUID)
+        case tournament(UUID)
+        case practice(UUID)
+    }
+
     private enum CreateTab: String, CaseIterable, Identifiable {
         case game = "Game"
         case tournament = "Tournament"
@@ -52,6 +58,7 @@ struct CreateHubView: View {
 
     @EnvironmentObject private var appViewModel: AppViewModel
     @State private var selectedTab: CreateTab = .game
+    @State private var createNavigationPath: [CreatedDestination] = []
 
     private var availableTabs: [CreateTab] {
         var tabs: [CreateTab] = [.game]
@@ -66,7 +73,7 @@ struct CreateHubView: View {
     }
 
     var body: some View {
-        NavigationStack {
+        NavigationStack(path: $createNavigationPath) {
             VStack(spacing: 12) {
                 Picker("Create", selection: $selectedTab) {
                     ForEach(availableTabs) { tab in
@@ -79,11 +86,17 @@ struct CreateHubView: View {
                 Group {
                     switch selectedTab {
                     case .game:
-                        CreateGameView()
+                        CreateGameView { gameID in
+                            createNavigationPath.append(.game(gameID))
+                        }
                     case .tournament:
-                        CreateTournamentView()
+                        CreateTournamentView { tournamentID in
+                            createNavigationPath.append(.tournament(tournamentID))
+                        }
                     case .practice:
-                        CreatePracticeView()
+                        CreatePracticeView { practiceID in
+                            createNavigationPath.append(.practice(practiceID))
+                        }
                     case .drafts:
                         DraftsBoardView()
                     }
@@ -96,12 +109,28 @@ struct CreateHubView: View {
                     selectedTab = availableTabs.first ?? .game
                 }
             }
+            .navigationDestination(for: CreatedDestination.self) { destination in
+                switch destination {
+                case .game(let gameID):
+                    if let game = appViewModel.createdGames.first(where: { $0.id == gameID }) {
+                        GameDetailView(game: game)
+                    } else {
+                        Text("Created game not found")
+                            .foregroundStyle(.secondary)
+                    }
+                case .tournament(let tournamentID):
+                    TournamentDetailView(tournamentID: tournamentID)
+                case .practice(let practiceID):
+                    PracticeDetailView(practiceID: practiceID)
+                }
+            }
         }
     }
 }
 
 struct CreateGameView: View {
     @EnvironmentObject private var appViewModel: AppViewModel
+    let onCreated: (UUID) -> Void
 
     @State private var draft = GameDraft()
     @State private var showCreatedAlert = false
@@ -218,7 +247,11 @@ struct CreateGameView: View {
                         if let inviteLink = created.inviteLink {
                             createdMessage += "\nInvite link: \(inviteLink)"
                         }
-                        showCreatedAlert = true
+                        if created.isDraft {
+                            showCreatedAlert = true
+                        } else {
+                            onCreated(created.id)
+                        }
                         draft = GameDraft()
                     case .failure(let error):
                         if case .unauthorized = error {
@@ -255,6 +288,7 @@ struct CreateGameView: View {
 
 private struct CreateTournamentView: View {
     @EnvironmentObject private var appViewModel: AppViewModel
+    let onCreated: (UUID) -> Void
 
     @State private var draft = TournamentDraft()
     @State private var showSavedAlert = false
@@ -305,8 +339,12 @@ private struct CreateTournamentView: View {
                 Button(draft.status == .draft ? "Save Tournament Draft" : "Create Tournament") {
                     switch appViewModel.createTournament(from: draft) {
                     case .success(let tournament):
-                        savedMessage = tournament.status == .draft ? "Tournament draft saved." : "Tournament created."
-                        showSavedAlert = true
+                        if tournament.status == .draft {
+                            savedMessage = "Tournament draft saved."
+                            showSavedAlert = true
+                        } else {
+                            onCreated(tournament.id)
+                        }
                         draft = TournamentDraft()
                     case .failure(let error):
                         errorMessage = error.localizedDescription
@@ -334,6 +372,7 @@ private struct CreateTournamentView: View {
 
 private struct CreatePracticeView: View {
     @EnvironmentObject private var appViewModel: AppViewModel
+    let onCreated: (UUID) -> Void
 
     @State private var draft = PracticeDraft()
     @State private var showSavedAlert = false
@@ -382,9 +421,13 @@ private struct CreatePracticeView: View {
             Section {
                 Button(draft.isDraft ? "Save Practice Draft" : "Create Practice") {
                     switch appViewModel.createPractice(from: draft) {
-                    case .success:
-                        savedMessage = draft.isDraft ? "Practice draft saved." : "Practice created."
-                        showSavedAlert = true
+                    case .success(let practice):
+                        if draft.isDraft {
+                            savedMessage = "Practice draft saved."
+                            showSavedAlert = true
+                        } else {
+                            onCreated(practice.id)
+                        }
                         draft = PracticeDraft()
                     case .failure(let error):
                         errorMessage = error.localizedDescription

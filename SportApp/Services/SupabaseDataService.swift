@@ -1247,6 +1247,19 @@ final class SupabaseDataService {
         )
     }
 
+    func updateTournamentStatus(tournamentID: UUID, status: TournamentStatus) async throws {
+        let payload: [String: Any] = [
+            "status": status.rawValue
+        ]
+        let body = try JSONSerialization.data(withJSONObject: payload)
+        _ = try await client.requestPostgrest(
+            pathAndQuery: "tournaments?id=eq.\(tournamentID.uuidString)",
+            method: "PATCH",
+            body: body,
+            extraHeaders: ["Prefer": "return=representation"]
+        )
+    }
+
     func updateUserRole(userID: UUID, role: GlobalRole) async throws {
         let payload: [String: Any] = ["global_role": role.rawValue]
         let body = try JSONSerialization.data(withJSONObject: payload)

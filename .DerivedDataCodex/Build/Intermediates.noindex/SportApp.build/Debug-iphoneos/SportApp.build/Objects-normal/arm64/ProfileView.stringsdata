@@ -60,14 +60,6 @@
       },
       {
         "comment": "",
-        "key": "Name",
-        "location": {
-          "startingColumn": 27,
-          "startingLine": 55
-        }
-      },
-      {
-        "comment": "",
         "key": "Main Position",
         "location": {
           "startingColumn": 24,
@@ -88,6 +80,14 @@
         "location": {
           "startingColumn": 24,
           "startingLine": 105
+        }
+      },
+      {
+        "comment": "",
+        "key": "Name",
+        "location": {
+          "startingColumn": 31,
+          "startingLine": 62
         }
       },
       {

@@ -183,7 +183,7 @@
         "key": "Game",
         "location": {
           "startingColumn": 26,
-          "startingLine": 327
+          "startingLine": 330
         }
       },
       {
@@ -191,7 +191,7 @@
         "key": "Leave Game",
         "location": {
           "startingColumn": 52,
-          "startingLine": 300
+          "startingLine": 303
         }
       },
       {
@@ -199,7 +199,7 @@
         "key": "Join Game",
         "location": {
           "startingColumn": 67,
-          "startingLine": 300
+          "startingLine": 303
         }
       },
       {
@@ -207,39 +207,39 @@
         "key": "Duration: %lld min • %@",
         "location": {
           "startingColumn": 27,
-          "startingLine": 263
+          "startingLine": 266
         }
       },
       {
         "comment": "",
         "key": "Field booked",
         "location": {
-          "startingColumn": 49,
-          "startingLine": 264
+          "startingColumn": 58,
+          "startingLine": 267
         }
       },
       {
         "comment": "",
         "key": "Field not booked",
         "location": {
-          "startingColumn": 66,
-          "startingLine": 264
+          "startingColumn": 75,
+          "startingLine": 267
         }
       },
       {
         "comment": "",
         "key": "Rating game",
         "location": {
-          "startingColumn": 47,
-          "startingLine": 265
+          "startingColumn": 56,
+          "startingLine": 268
         }
       },
       {
         "comment": "",
         "key": "Not rating game",
         "location": {
-          "startingColumn": 63,
-          "startingLine": 265
+          "startingColumn": 72,
+          "startingLine": 268
         }
       },
       {
@@ -247,7 +247,7 @@
         "key": "Average Elo: %lld",
         "location": {
           "startingColumn": 27,
-          "startingLine": 266
+          "startingLine": 269
         }
       },
       {
@@ -255,7 +255,7 @@
         "key": "Players: %lld/%lld",
         "location": {
           "startingColumn": 26,
-          "startingLine": 282
+          "startingLine": 285
         }
       },
       {
@@ -263,7 +263,7 @@
         "key": "Open Match Details",
         "location": {
           "startingColumn": 30,
-          "startingLine": 314
+          "startingLine": 317
         }
       },
       {
@@ -271,7 +271,7 @@
         "key": "%lld",
         "location": {
           "startingColumn": 22,
-          "startingLine": 432
+          "startingLine": 435
         }
       },
       {
@@ -279,7 +279,7 @@
         "key": "Invite",
         "location": {
           "startingColumn": 18,
-          "startingLine": 461
+          "startingLine": 464
         }
       },
       {
@@ -287,7 +287,7 @@
         "key": "Practice",
         "location": {
           "startingColumn": 26,
-          "startingLine": 527
+          "startingLine": 530
         }
       },
       {
@@ -295,7 +295,7 @@
         "key": "Practice not found",
         "location": {
           "startingColumn": 22,
-          "startingLine": 523
+          "startingLine": 526
         }
       },
       {
@@ -303,7 +303,7 @@
         "key": "Focus: %@",
         "location": {
           "startingColumn": 19,
-          "startingLine": 556
+          "startingLine": 559
         }
       },
       {
@@ -311,7 +311,7 @@
         "key": "Open entry",
         "location": {
           "startingColumn": 41,
-          "startingLine": 557
+          "startingLine": 560
         }
       },
       {
@@ -319,7 +319,7 @@
         "key": "Private (invite link)",
         "location": {
           "startingColumn": 56,
-          "startingLine": 557
+          "startingLine": 560
         }
       },
       {
@@ -327,7 +327,7 @@
         "key": "Organiser",
         "location": {
           "startingColumn": 30,
-          "startingLine": 542
+          "startingLine": 545
         }
       },
       {
@@ -335,7 +335,7 @@
         "key": "Players: %lld/%lld",
         "location": {
           "startingColumn": 18,
-          "startingLine": 599
+          "startingLine": 602
         }
       },
       {
@@ -343,7 +343,7 @@
         "key": "Free",
         "location": {
           "startingColumn": 30,
-          "startingLine": 624
+          "startingLine": 627
         }
       },
       {
@@ -351,7 +351,7 @@
         "key": "Private practice. Join via invite link.",
         "location": {
           "startingColumn": 22,
-          "startingLine": 657
+          "startingLine": 660
         }
       },
       {
@@ -359,7 +359,7 @@
         "key": "Leave Practice",
         "location": {
           "startingColumn": 35,
-          "startingLine": 639
+          "startingLine": 642
         }
       },
       {
@@ -367,7 +367,7 @@
         "key": "Join Practice",
         "location": {
           "startingColumn": 54,
-          "startingLine": 639
+          "startingLine": 642
         }
       }
     ]

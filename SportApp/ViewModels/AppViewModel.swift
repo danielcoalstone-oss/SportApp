@@ -271,6 +271,7 @@ final class AppViewModel: ObservableObject {
     private let supabaseEnvironment: SupabaseEnvironment
     private let supabaseAuthService: SupabaseAuthService?
     private let supabaseDataService: SupabaseDataService?
+    private var authenticatedSupabaseUserID: UUID?
 
     init() {
         self.matchStore = UserDefaultsMatchLocalStore()
@@ -621,6 +622,7 @@ final class AppViewModel: ObservableObject {
 
         do {
             let authUser = try await supabaseAuthService.currentUser()
+            authenticatedSupabaseUserID = authUser.id
             try await syncFromBackend(currentUserID: authUser.id)
             await MainActor.run {
                 isAuthenticated = true
@@ -652,6 +654,7 @@ final class AppViewModel: ObservableObject {
             Task {
                 do {
                     let session = try await supabaseAuthService.signIn(email: email, password: password)
+                    authenticatedSupabaseUserID = session.user.id
                     try await syncFromBackend(currentUserID: session.user.id)
                     await MainActor.run {
                         isAuthenticated = true
@@ -714,6 +717,7 @@ final class AppViewModel: ObservableObject {
                         location: city,
                         createdAt: Date()
                     )
+                    authenticatedSupabaseUserID = session.user.id
                     try await supabaseDataService.saveProfile(player, email: email)
                     try await syncFromBackend(currentUserID: session.user.id)
                     await MainActor.run {
@@ -763,6 +767,7 @@ final class AppViewModel: ObservableObject {
                 await supabaseAuthService.signOut()
             }
         }
+        authenticatedSupabaseUserID = nil
         joinedPracticeIDs = []
         currentUser = nil
         isAuthenticated = false
@@ -875,7 +880,7 @@ final class AppViewModel: ObservableObject {
 #endif
 
     func createTeamAndJoinTournament(tournamentID: UUID, teamName: String) {
-        guard let user = currentUser, !teamName.isEmpty else {
+        guard !teamName.isEmpty else {
             return
         }
 
@@ -888,15 +893,7 @@ final class AppViewModel: ObservableObject {
             return
         }
 
-        let alreadyInTeam = tournaments[index].teams.contains { team in
-            team.members.contains(where: { $0.id == user.id })
-        }
-        guard !alreadyInTeam else {
-            tournamentActionMessage = "You are already in a tournament team."
-            return
-        }
-
-        let team = Team(id: UUID(), name: teamName, members: [user], maxPlayers: 6)
+        let team = Team(id: UUID(), name: teamName, members: [], maxPlayers: 6)
         let teamEntry = TournamentTeam(
             id: team.id,
             tournamentId: tournamentID,
@@ -904,27 +901,18 @@ final class AppViewModel: ObservableObject {
             colorHex: "#2D6CC4",
             createdAt: Date()
         )
-        let teamMember = TournamentTeamMember(
-            teamId: team.id,
-            playerId: user.id,
-            positionGroup: .bench,
-            sortOrder: 0,
-            isCaptain: true
-        )
         guard tournaments[index].teams.count < tournaments[index].maxTeams else {
             return
         }
 
         tournaments[index].teams.append(team)
         tournaments[index].teamEntries.append(teamEntry)
-        tournaments[index].teamMembers.append(teamMember)
         tournamentActionMessage = "Team created."
 
         if let supabaseDataService {
             Task {
                 do {
                     try await supabaseDataService.createTournamentTeam(tournamentID: tournamentID, team: team)
-                    try await supabaseDataService.addTournamentTeamMember(tournamentID: tournamentID, teamID: team.id, userID: user.id)
                 } catch {
                     await MainActor.run {
                         tournamentActionMessage = "Team created locally, but backend sync failed: \(error.localizedDescription)"
@@ -953,6 +941,26 @@ final class AppViewModel: ObservableObject {
             return
         }
 
+        let isTournamentOrganiser = tournaments[tournamentIndex].ownerId == user.id
+            || tournaments[tournamentIndex].organiserIds.contains(user.id)
+        if isTournamentOrganiser {
+            tournamentActionMessage = "Organiser cannot join tournament teams in own tournament."
+            return
+        }
+
+        guard tournaments[tournamentIndex].status == .published else {
+            tournamentActionMessage = "You can only join teams in active tournaments."
+            return
+        }
+
+        let hasUpcomingMatch = tournaments[tournamentIndex].matches.contains { match in
+            match.status == .scheduled
+        }
+        if !hasUpcomingMatch && !tournaments[tournamentIndex].matches.isEmpty {
+            tournamentActionMessage = "Tournament is finished. Team join is closed."
+            return
+        }
+
         let alreadyInAnotherTeam = tournaments[tournamentIndex].teams.contains { team in
             team.id != teamID && team.members.contains(where: { $0.id == user.id })
         }
@@ -962,7 +970,11 @@ final class AppViewModel: ObservableObject {
         }
 
         var team = tournaments[tournamentIndex].teams[teamIndex]
-        if team.members.contains(where: { $0.id == user.id }) || team.isFull {
+        if team.members.contains(where: { $0.id == user.id }) {
+            return
+        }
+        if team.isFull {
+            tournamentActionMessage = "Team is full."
             return
         }
 
@@ -1014,7 +1026,7 @@ final class AppViewModel: ObservableObject {
             return false
         }
 
-        guard !game.players.contains(where: { $0.id == user.id }) else {
+        guard currentUserRSVPStatus(in: game) != .going else {
             tournamentActionMessage = "You already joined this game."
             return false
         }
@@ -1024,7 +1036,9 @@ final class AppViewModel: ObservableObject {
             return false
         }
 
-        createdGames[index].players.append(user)
+        if !game.players.contains(where: { $0.id == user.id }) {
+            createdGames[index].players.append(user)
+        }
         persistCurrentUserRSVP(matchID: gameID, game: createdGames[index], status: .going)
         tournamentActionMessage = "You joined the game."
 
@@ -1046,6 +1060,7 @@ final class AppViewModel: ObservableObject {
         guard let user = currentUser else { return }
         guard let index = createdGames.firstIndex(where: { $0.id == gameID }) else { return }
         guard persistedMatchStatus(for: createdGames[index].id) == .scheduled else { return }
+        guard currentUserRSVPStatus(in: createdGames[index]) == .going else { return }
         guard createdGames[index].ownerId != user.id else {
             tournamentActionMessage = "Owner cannot leave own game."
             return
@@ -1596,6 +1611,36 @@ final class AppViewModel: ObservableObject {
         }
     }
 
+    func completeTournament(tournamentID: UUID) {
+        guard let index = tournaments.firstIndex(where: { $0.id == tournamentID }) else {
+            return
+        }
+        guard AccessPolicy.canEditTournament(currentUser, tournaments[index]) else {
+            tournamentActionMessage = AuthorizationUX.permissionDeniedMessage
+            return
+        }
+
+        tournaments[index].status = .completed
+        for matchIndex in tournaments[index].matches.indices where tournaments[index].matches[matchIndex].status == .scheduled {
+            tournaments[index].matches[matchIndex].status = .cancelled
+        }
+        syncTournamentMatchesToCreatedGames(tournamentID: tournamentID)
+        tournamentActionMessage = "Tournament marked as completed."
+        AuditLogger.log(action: "tournament_completed", actorId: currentUser?.id, objectId: tournamentID)
+
+        if let supabaseDataService {
+            Task {
+                do {
+                    try await supabaseDataService.updateTournamentStatus(tournamentID: tournamentID, status: .completed)
+                } catch {
+                    await MainActor.run {
+                        tournamentActionMessage = "Completed locally, but backend sync failed: \(error.localizedDescription)"
+                    }
+                }
+            }
+        }
+    }
+
     func simulateMatchResult(didWin: Bool, opponentAverageElo: Int) {
         guard var user = currentUser else {
             return
@@ -1824,6 +1869,10 @@ final class AppViewModel: ObservableObject {
         AuditLogger.log(action: "tournament_created", actorId: currentUser?.id, objectId: tournament.id)
 
         if let supabaseDataService {
+            if isUsingSupabase, authenticatedSupabaseUserID != nil, authenticatedSupabaseUserID != user.id {
+                tournamentActionMessage = "Tournament saved locally. Backend sync is disabled for switched debug users. Sign in as this account to sync."
+                return .success(tournament)
+            }
             Task {
                 do {
                     let backendTournament = try await supabaseDataService.createTournament(
@@ -1847,7 +1896,11 @@ final class AppViewModel: ObservableObject {
                     }
                 } catch {
                     await MainActor.run {
-                        tournamentActionMessage = "Tournament created locally, but backend sync failed: \(error.localizedDescription)"
+                        if error.localizedDescription.localizedCaseInsensitiveContains("row-level security") {
+                            tournamentActionMessage = "Tournament created locally, but backend denied write (RLS). Please sign in with the same account you're using in the app."
+                        } else {
+                            tournamentActionMessage = "Tournament created locally, but backend sync failed: \(error.localizedDescription)"
+                        }
                     }
                 }
             }
@@ -2537,6 +2590,11 @@ final class AppViewModel: ObservableObject {
         visibleCreatedGames.first(where: { $0.id == id })
     }
 
+    func isCurrentUserGoingInGame(_ gameID: UUID) -> Bool {
+        guard let game = createdGames.first(where: { $0.id == gameID }) else { return false }
+        return currentUserRSVPStatus(in: game) == .going
+    }
+
     func syncTournamentMatchesToCreatedGames(tournamentID: UUID) {
         guard let tournament = tournaments.first(where: { $0.id == tournamentID }) else { return }
         for match in tournament.matches {
@@ -3072,6 +3130,7 @@ final class AppViewModel: ObservableObject {
 
     private func syncFromBackend(currentUserID: UUID) async throws {
         guard let supabaseDataService else { return }
+        authenticatedSupabaseUserID = currentUserID
 
         async let usersTask = supabaseDataService.fetchProfiles()
         async let clubsTask = supabaseDataService.fetchClubs()

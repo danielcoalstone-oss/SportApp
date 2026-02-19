@@ -118,15 +118,6 @@ struct HomeView: View {
                         }
                     }
 
-                    Button("Simulate Win (+ Elo)") {
-                        appViewModel.simulateMatchResult(didWin: true, opponentAverageElo: 1500)
-                    }
-                    .buttonStyle(.borderedProminent)
-
-                    Button("Simulate Loss (- Elo)") {
-                        appViewModel.simulateMatchResult(didWin: false, opponentAverageElo: 1500)
-                    }
-                    .buttonStyle(.bordered)
                 }
                 .padding()
             }

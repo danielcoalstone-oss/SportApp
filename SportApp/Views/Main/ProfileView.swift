@@ -60,12 +60,12 @@ private struct PlayerProfileEditorView: View {
                         size: 56
                     )
 
-                    TextField("Name", text: $viewModel.name)
-
                     PhotosPicker(selection: $selectedPhotoItem, matching: .images) {
                         Label("Upload Image", systemImage: "photo.on.rectangle")
                     }
                     .buttonStyle(.bordered)
+
+                    TextField("Name", text: $viewModel.name)
                 }
 
                 Picker("Main Position", selection: $viewModel.mainPosition) {
@@ -644,9 +644,6 @@ private struct CoachPublicProfileView: View {
 
     let user: User
 
-    @State private var reviewRating: Int = 5
-    @State private var reviewText: String = ""
-
     private var reviews: [CoachReview] {
         appViewModel.reviews(for: user.id)
     }
@@ -656,38 +653,11 @@ private struct CoachPublicProfileView: View {
         return Double(reviews.map(\.rating).reduce(0, +)) / Double(reviews.count)
     }
 
-    private var canAddReview: Bool {
-        guard let current = appViewModel.currentUser else { return false }
-        return current.id != user.id
-    }
-
     var body: some View {
         List {
             Section {
                 coachHeroCard
                     .listRowInsets(EdgeInsets(top: 8, leading: 0, bottom: 8, trailing: 0))
-            }
-
-            if canAddReview {
-                Section("Leave Review") {
-                    Picker("Rating", selection: $reviewRating) {
-                        ForEach(1...5, id: \.self) { value in
-                            Text("\(value) ★").tag(value)
-                        }
-                    }
-                    .pickerStyle(.segmented)
-
-                    TextEditor(text: $reviewText)
-                        .frame(minHeight: 90)
-
-                    Button("Submit Review") {
-                        appViewModel.addReview(to: user.id, rating: reviewRating, text: reviewText)
-                        reviewText = ""
-                        reviewRating = 5
-                    }
-                    .buttonStyle(.borderedProminent)
-                    .disabled(reviewText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                }
             }
 
             Section("Reviews") {
@@ -740,9 +710,9 @@ private struct CoachPublicProfileView: View {
             }
 
             HStack(spacing: 12) {
-                coachHeroStat(label: "Reviews", value: reviews.count)
-                coachHeroStat(label: "ELO", value: user.eloRating)
-                coachHeroStat(label: "Rating", value: Int(round(averageRating * 10)))
+                coachHeroStat(label: "Reviews", value: "\(reviews.count)")
+                coachHeroStat(label: "ELO", value: "\(user.eloRating)")
+                coachHeroStat(label: "Rating", value: String(format: "%.1f", averageRating))
             }
 
             Divider()
@@ -764,9 +734,9 @@ private struct CoachPublicProfileView: View {
         .padding(.horizontal, 16)
     }
 
-    private func coachHeroStat(label: String, value: Int) -> some View {
+    private func coachHeroStat(label: String, value: String) -> some View {
         VStack(spacing: 2) {
-            Text("\(value)")
+            Text(value)
                 .font(.title2.bold())
                 .foregroundStyle(Color.green.opacity(0.95))
             Text(label)
@@ -804,23 +774,27 @@ private struct CoachPublicProfileView: View {
                     .foregroundStyle(.secondary)
             } else {
                 ForEach(sessions.prefix(8)) { practice in
-                    VStack(alignment: .leading, spacing: 4) {
-                        HStack {
-                            Text(practice.title)
-                                .font(.headline)
-                            Spacer()
-                            Text(practice.location)
+                    NavigationLink {
+                        PracticeDetailView(practiceID: practice.id)
+                    } label: {
+                        VStack(alignment: .leading, spacing: 4) {
+                            HStack {
+                                Text(practice.title)
+                                    .font(.headline)
+                                Spacer()
+                                Text(practice.location)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                            Text(DateFormatterService.tournamentDateTime.string(from: practice.startDate))
                                 .font(.caption)
                                 .foregroundStyle(.secondary)
+                            Text("Players: \(practice.numberOfPlayers) • Elo: \(practice.minElo)-\(practice.maxElo)")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
                         }
-                        Text(DateFormatterService.tournamentDateTime.string(from: practice.startDate))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        Text("Players: \(practice.numberOfPlayers) • Elo: \(practice.minElo)-\(practice.maxElo)")
-                            .font(.caption2)
-                            .foregroundStyle(.secondary)
+                        .padding(.vertical, 2)
                     }
-                    .padding(.vertical, 2)
                 }
             }
         }

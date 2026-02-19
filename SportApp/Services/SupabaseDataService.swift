@@ -204,13 +204,14 @@ final class SupabaseDataService {
             extendedPayload["email"] = email
         }
 
+        // Upsert so profile exists after registration even if trigger/profile row is missing.
         do {
-            let body = try JSONSerialization.data(withJSONObject: extendedPayload)
+            let upsertBody = try JSONSerialization.data(withJSONObject: [extendedPayload])
             _ = try await client.requestPostgrest(
-                pathAndQuery: "profiles?id=eq.\(player.id.uuidString)",
-                method: "PATCH",
-                body: body,
-                extraHeaders: ["Prefer": "return=representation"]
+                pathAndQuery: "profiles?on_conflict=id",
+                method: "POST",
+                body: upsertBody,
+                extraHeaders: ["Prefer": "resolution=merge-duplicates,return=representation"]
             )
         } catch {
             var coreWithOptional: [String: Any] = corePayload
@@ -220,12 +221,12 @@ final class SupabaseDataService {
             if let email {
                 coreWithOptional["email"] = email
             }
-            let fallbackBody = try JSONSerialization.data(withJSONObject: coreWithOptional)
+            let fallbackBody = try JSONSerialization.data(withJSONObject: [coreWithOptional])
             _ = try await client.requestPostgrest(
-                pathAndQuery: "profiles?id=eq.\(player.id.uuidString)",
-                method: "PATCH",
+                pathAndQuery: "profiles?on_conflict=id",
+                method: "POST",
                 body: fallbackBody,
-                extraHeaders: ["Prefer": "return=representation"]
+                extraHeaders: ["Prefer": "resolution=merge-duplicates,return=representation"]
             )
         }
     }
@@ -1299,6 +1300,20 @@ final class SupabaseDataService {
         )
     }
 
+    func setCoachSubscription(userID: UUID, endsAt: Date?, isPaused: Bool) async throws {
+        let payload: [String: Any] = [
+            "coach_subscription_ends_at": endsAt.map { Self.iso8601WithFractional.string(from: $0) } as Any,
+            "is_coach_subscription_paused": isPaused
+        ]
+        let body = try JSONSerialization.data(withJSONObject: payload)
+        _ = try await client.requestPostgrest(
+            pathAndQuery: "profiles?id=eq.\(userID.uuidString)",
+            method: "PATCH",
+            body: body,
+            extraHeaders: ["Prefer": "return=representation"]
+        )
+    }
+
     func softDeleteTournament(tournamentID: UUID) async throws {
         let payload: [String: Any] = [
             "is_deleted": true,
@@ -1422,13 +1437,13 @@ final class SupabaseDataService {
     func fetchCoachReviews() async throws -> [CoachReview] {
         do {
             let data = try await client.requestPostgrest(
-                pathAndQuery: "coach_reviews?select=id,coach_id,author_id,author_name,rating,text,created_at&order=created_at.desc"
+                pathAndQuery: "coach_reviews?select=id,coach_id,practice_id,author_id,author_name,rating,text,created_at&order=created_at.desc"
             )
             let rows = try SupabaseJSON.decoder().decode([CoachReviewRow].self, from: data)
             return rows.map { $0.toReview() }
         } catch {
             let data = try await client.requestPostgrest(
-                pathAndQuery: "coach_reviews?select=id,coach_id,author_id,rating,text,created_at&order=created_at.desc"
+                pathAndQuery: "coach_reviews?select=id,coach_id,practice_id,author_id,rating,text,created_at&order=created_at.desc"
             )
             let rows = try SupabaseJSON.decoder().decode([CoachReviewFallbackRow].self, from: data)
             let authorNamesByID = try await fetchProfileNamesByIDs(Array(Set(rows.map(\.authorID))))
@@ -1436,6 +1451,7 @@ final class SupabaseDataService {
                 CoachReview(
                     id: row.id,
                     coachID: row.coachID,
+                    practiceID: row.practiceID,
                     authorID: row.authorID,
                     authorName: authorNamesByID[row.authorID] ?? "Player",
                     rating: row.rating,
@@ -1449,6 +1465,7 @@ final class SupabaseDataService {
     func addCoachReview(_ review: CoachReview) async throws {
         let upsertPayloadWithAuthorName: [String: Any] = [
             "coach_id": review.coachID.uuidString,
+            "practice_id": review.practiceID?.uuidString as Any,
             "author_id": review.authorID.uuidString,
             "author_name": review.authorName,
             "rating": review.rating,
@@ -1456,6 +1473,7 @@ final class SupabaseDataService {
         ]
         let upsertPayloadFallback: [String: Any] = [
             "coach_id": review.coachID.uuidString,
+            "practice_id": review.practiceID?.uuidString as Any,
             "author_id": review.authorID.uuidString,
             "rating": review.rating,
             "text": review.text
@@ -1464,19 +1482,52 @@ final class SupabaseDataService {
         do {
             let body = try JSONSerialization.data(withJSONObject: upsertPayloadWithAuthorName)
             _ = try await client.requestPostgrest(
-                pathAndQuery: "coach_reviews?on_conflict=author_id,coach_id",
+                pathAndQuery: "coach_reviews?on_conflict=author_id,coach_id,practice_id",
                 method: "POST",
                 body: body,
                 extraHeaders: ["Prefer": "resolution=merge-duplicates,return=representation"]
             )
         } catch {
-            let body = try JSONSerialization.data(withJSONObject: upsertPayloadFallback)
-            _ = try await client.requestPostgrest(
-                pathAndQuery: "coach_reviews?on_conflict=author_id,coach_id",
-                method: "POST",
-                body: body,
-                extraHeaders: ["Prefer": "resolution=merge-duplicates,return=representation"]
-            )
+            do {
+                let body = try JSONSerialization.data(withJSONObject: upsertPayloadFallback)
+                _ = try await client.requestPostgrest(
+                    pathAndQuery: "coach_reviews?on_conflict=author_id,coach_id,practice_id",
+                    method: "POST",
+                    body: body,
+                    extraHeaders: ["Prefer": "resolution=merge-duplicates,return=representation"]
+                )
+            } catch {
+                let legacyPayloadWithAuthorName: [String: Any] = [
+                    "coach_id": review.coachID.uuidString,
+                    "author_id": review.authorID.uuidString,
+                    "author_name": review.authorName,
+                    "rating": review.rating,
+                    "text": review.text
+                ]
+                let legacyPayloadFallback: [String: Any] = [
+                    "coach_id": review.coachID.uuidString,
+                    "author_id": review.authorID.uuidString,
+                    "rating": review.rating,
+                    "text": review.text
+                ]
+                do {
+                    let body = try JSONSerialization.data(withJSONObject: legacyPayloadWithAuthorName)
+                    _ = try await client.requestPostgrest(
+                        pathAndQuery: "coach_reviews?on_conflict=author_id,coach_id",
+                        method: "POST",
+                        body: body,
+                        extraHeaders: ["Prefer": "resolution=merge-duplicates,return=representation"]
+                    )
+                } catch {
+                    let body = try JSONSerialization.data(withJSONObject: legacyPayloadFallback)
+                    _ = try await client.requestPostgrest(
+                        pathAndQuery: "coach_reviews?on_conflict=author_id,coach_id",
+                        method: "POST",
+                        body: body,
+                        extraHeaders: ["Prefer": "resolution=merge-duplicates,return=representation"]
+                    )
+                }
+            }
         }
     }
 
@@ -2001,6 +2052,7 @@ private struct PracticeRow: Decodable {
 private struct CoachReviewRow: Decodable {
     let id: UUID
     let coachID: UUID
+    let practiceID: UUID?
     let authorID: UUID
     let authorName: String
     let rating: Int
@@ -2010,6 +2062,7 @@ private struct CoachReviewRow: Decodable {
     enum CodingKeys: String, CodingKey {
         case id
         case coachID = "coach_id"
+        case practiceID = "practice_id"
         case authorID = "author_id"
         case authorName = "author_name"
         case rating
@@ -2021,6 +2074,7 @@ private struct CoachReviewRow: Decodable {
         CoachReview(
             id: id,
             coachID: coachID,
+            practiceID: practiceID,
             authorID: authorID,
             authorName: authorName,
             rating: rating,
@@ -2033,6 +2087,7 @@ private struct CoachReviewRow: Decodable {
 private struct CoachReviewFallbackRow: Decodable {
     let id: UUID
     let coachID: UUID
+    let practiceID: UUID?
     let authorID: UUID
     let rating: Int
     let text: String
@@ -2041,6 +2096,7 @@ private struct CoachReviewFallbackRow: Decodable {
     enum CodingKeys: String, CodingKey {
         case id
         case coachID = "coach_id"
+        case practiceID = "practice_id"
         case authorID = "author_id"
         case rating
         case text

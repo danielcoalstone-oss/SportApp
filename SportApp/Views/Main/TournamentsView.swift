@@ -150,21 +150,16 @@ struct TournamentsView: View {
                                 VStack(alignment: .leading, spacing: 6) {
                                     if let coachId = practice.ownerId,
                                        let coach = appViewModel.user(with: coachId) {
-                                        NavigationLink {
-                                            PublicProfileView(userID: coach.id)
-                                        } label: {
-                                            HStack(spacing: 8) {
-                                                PlayerAvatarView(
-                                                    name: coach.fullName,
-                                                    imageData: coach.avatarImageData,
-                                                    size: 26
-                                                )
-                                                Text(coach.fullName)
-                                                    .font(.subheadline.weight(.semibold))
-                                                    .foregroundStyle(.white)
-                                            }
+                                        HStack(spacing: 8) {
+                                            PlayerAvatarView(
+                                                name: coach.fullName,
+                                                imageData: coach.avatarImageData,
+                                                size: 26
+                                            )
+                                            Text(coach.fullName)
+                                                .font(.subheadline.weight(.semibold))
+                                                .foregroundStyle(.white)
                                         }
-                                        .buttonStyle(.plain)
                                     }
                                     HStack {
                                         Text(practice.title)
@@ -495,6 +490,8 @@ struct PracticeDetailView: View {
     @EnvironmentObject private var appViewModel: AppViewModel
 
     let practiceID: UUID
+    @State private var reviewRating: Int = 5
+    @State private var reviewText: String = ""
 
     private var practice: PracticeSession? {
         appViewModel.visiblePractices.first(where: { $0.id == practiceID })
@@ -529,6 +526,15 @@ struct PracticeDetailView: View {
         return [currentUser]
     }
 
+    private var canLeaveCoachReview: Bool {
+        guard let practice else { return false }
+        return appViewModel.canCurrentUserReviewPractice(practice)
+    }
+
+    private var hasCurrentUserReviewForPractice: Bool {
+        appViewModel.hasCurrentUserReviewedPractice(practiceID)
+    }
+
     var body: some View {
         Group {
             if let practice {
@@ -536,6 +542,7 @@ struct PracticeDetailView: View {
                     VStack(spacing: 14) {
                         headerCard(practice)
                         playersCard(practice)
+                        coachReviewCard(practice)
                     }
                     .padding()
                 }
@@ -559,6 +566,11 @@ struct PracticeDetailView: View {
         }
         .navigationTitle("Practice")
         .navigationBarTitleDisplayMode(.inline)
+        .alert("Practice Action", isPresented: practiceActionAlertBinding) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            Text(appViewModel.tournamentActionMessage ?? "")
+        }
     }
 
     private func headerCard(_ practice: PracticeSession) -> some View {
@@ -696,6 +708,67 @@ struct PracticeDetailView: View {
                     .padding()
             }
         }
+    }
+
+    @ViewBuilder
+    private func coachReviewCard(_ practice: PracticeSession) -> some View {
+        if !isPracticeOpenForJoinLeave {
+            VStack(alignment: .leading, spacing: 10) {
+                Text("Coach Review")
+                    .font(.headline)
+                    .foregroundStyle(.white)
+
+                if canLeaveCoachReview, let coachID = practice.ownerId {
+                    Picker("Rating", selection: $reviewRating) {
+                        ForEach(1...5, id: \.self) { value in
+                            Text("\(value) ★").tag(value)
+                        }
+                    }
+                    .pickerStyle(.segmented)
+
+                    TextEditor(text: $reviewText)
+                        .frame(minHeight: 90)
+                        .scrollContentBackground(.hidden)
+                        .padding(8)
+                        .background(Color.black.opacity(0.22), in: RoundedRectangle(cornerRadius: 10))
+
+                    Button("Submit Review") {
+                        appViewModel.addReview(
+                            to: coachID,
+                            practiceID: practice.id,
+                            rating: reviewRating,
+                            text: reviewText
+                        )
+                        reviewText = ""
+                        reviewRating = 5
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(reviewText.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+                } else if hasCurrentUserReviewForPractice {
+                    Text("You already left a review for this practice.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                } else {
+                    Text("Review becomes available only to attending players after practice is finished.")
+                        .font(.subheadline)
+                        .foregroundStyle(.secondary)
+                }
+            }
+            .padding(16)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .background(Color.black.opacity(0.22), in: RoundedRectangle(cornerRadius: 16))
+        }
+    }
+
+    private var practiceActionAlertBinding: Binding<Bool> {
+        Binding(
+            get: { appViewModel.tournamentActionMessage != nil },
+            set: { isPresented in
+                if !isPresented {
+                    appViewModel.tournamentActionMessage = nil
+                }
+            }
+        )
     }
 
     private func timeRangeText(start: Date, durationMinutes: Int) -> String {

@@ -52,17 +52,28 @@ struct AuthView: View {
                     }
 
                     Button(action: submit) {
-                        Text(isRegisterMode ? "Register" : "Sign In")
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
+                        Group {
+                            if appViewModel.isAuthLoading {
+                                ProgressView()
+                                    .tint(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 12)
+                            } else {
+                                Text(isRegisterMode ? "Register" : "Sign In")
+                                    .frame(maxWidth: .infinity)
+                                    .padding(.vertical, 12)
+                            }
+                        }
                     }
                     .buttonStyle(.borderedProminent)
+                    .disabled(appViewModel.isAuthLoading)
 
                     Button(isRegisterMode ? "Already have an account? Sign In" : "Need an account? Register") {
                         appViewModel.authErrorMessage = nil
                         isRegisterMode.toggle()
                     }
                     .font(.footnote)
+                    .disabled(appViewModel.isAuthLoading)
                 }
                 .padding()
             }
@@ -72,6 +83,7 @@ struct AuthView: View {
     }
 
     private func submit() {
+        appViewModel.authErrorMessage = nil
         if isRegisterMode {
             appViewModel.register(
                 name: name,

@@ -5,6 +5,8 @@ struct AdminView: View {
 
     @State private var selectedUserId: UUID?
     @State private var suspensionReason = ""
+    @State private var showClearAllConfirmation = false
+    @State private var showPrepareInvestorDemoConfirmation = false
 
     var body: some View {
         NavigationStack {
@@ -28,6 +30,22 @@ struct AdminView: View {
             Text(appViewModel.adminActionMessage ?? "")
         }
         .permissionDeniedAlert(message: $appViewModel.adminActionMessage)
+        .alert("Clear all data?", isPresented: $showClearAllConfirmation) {
+            Button("Cancel", role: .cancel) {}
+            Button("Clear All", role: .destructive) {
+                appViewModel.adminClearAllPlayableData()
+            }
+        } message: {
+            Text("This will remove all games, tournaments and practices from the app.")
+        }
+        .alert("Prepare investor demo data?", isPresented: $showPrepareInvestorDemoConfirmation) {
+            Button("Cancel", role: .cancel) {}
+            Button("Prepare", role: .destructive) {
+                appViewModel.adminPrepareInvestorDemoData()
+            }
+        } message: {
+            Text("This will clear current games, tournaments and practices, then seed fresh shared demo data in the database.")
+        }
     }
 
     private var usersBlock: some View {
@@ -37,14 +55,9 @@ struct AdminView: View {
                 .foregroundStyle(.white)
 
             Button("Prepare Investor Demo Data") {
-                appViewModel.adminPrepareInvestorDemoData()
+                showPrepareInvestorDemoConfirmation = true
             }
             .buttonStyle(.borderedProminent)
-
-            Button("Seed Shared Demo Data To DB") {
-                appViewModel.adminSeedSharedDemoDataToBackend()
-            }
-            .buttonStyle(.bordered)
 
             ForEach(appViewModel.users) { user in
                 VStack(alignment: .leading, spacing: 8) {
@@ -116,6 +129,11 @@ struct AdminView: View {
             Text("Soft Delete")
                 .font(.title3.bold())
                 .foregroundStyle(.white)
+
+            Button("Clear All Games/Tournaments/Practices", role: .destructive) {
+                showClearAllConfirmation = true
+            }
+            .buttonStyle(.borderedProminent)
 
             if appViewModel.visibleCreatedGames.isEmpty,
                appViewModel.visibleTournaments.isEmpty,

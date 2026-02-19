@@ -208,6 +208,7 @@ enum CreatePracticeValidationError: LocalizedError {
 struct CoachReview: Identifiable, Hashable {
     let id: UUID
     let coachID: UUID
+    let practiceID: UUID?
     let authorID: UUID
     let authorName: String
     let rating: Int
@@ -255,6 +256,7 @@ final class AppViewModel: ObservableObject {
 #endif
 
     @Published var isAuthenticated = false
+    @Published var isAuthLoading = false
     @Published var isBootstrapping = true
     @Published var currentUser: User?
     @Published var users: [User]
@@ -339,6 +341,7 @@ final class AppViewModel: ObservableObject {
                     CoachReview(
                         id: UUID(),
                         coachID: coachOwner,
+                        practiceID: nil,
                         authorID: seededUsers.first(where: { $0.id != coachOwner })?.id ?? coachOwner,
                         authorName: seededUsers.first(where: { $0.id != coachOwner })?.fullName ?? "Player",
                         rating: 5,
@@ -623,7 +626,7 @@ final class AppViewModel: ObservableObject {
         do {
             let authUser = try await supabaseAuthService.currentUser()
             authenticatedSupabaseUserID = authUser.id
-            try await syncFromBackend(currentUserID: authUser.id)
+            try await syncFromBackend(currentUserID: authUser.id, fallbackEmail: authUser.email)
             await MainActor.run {
                 isAuthenticated = true
                 authErrorMessage = nil
@@ -645,24 +648,39 @@ final class AppViewModel: ObservableObject {
     }
 
     func signIn(email: String, password: String) {
-        guard !email.isEmpty, !password.isEmpty else {
+        let normalizedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let normalizedPassword = password.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !normalizedEmail.isEmpty, !normalizedPassword.isEmpty else {
             authErrorMessage = "Please fill in email and password."
             return
         }
 
         if let supabaseAuthService {
+            isAuthLoading = true
             Task {
+                defer {
+                    Task { @MainActor in
+                        self.isAuthLoading = false
+                    }
+                }
                 do {
-                    let session = try await supabaseAuthService.signIn(email: email, password: password)
+                    let session = try await supabaseAuthService.signIn(email: normalizedEmail, password: normalizedPassword)
                     authenticatedSupabaseUserID = session.user.id
-                    try await syncFromBackend(currentUserID: session.user.id)
+                    try await syncFromBackend(currentUserID: session.user.id, fallbackEmail: session.user.email ?? normalizedEmail)
                     await MainActor.run {
                         isAuthenticated = true
                         authErrorMessage = nil
                     }
                 } catch {
                     await MainActor.run {
-                        authErrorMessage = error.localizedDescription
+                        let message = error.localizedDescription
+                        if message.localizedCaseInsensitiveContains("email not confirmed") {
+                            authErrorMessage = "Please confirm your email first, then sign in."
+                        } else if message.localizedCaseInsensitiveContains("invalid login credentials") {
+                            authErrorMessage = "Invalid email or password."
+                        } else {
+                            authErrorMessage = message
+                        }
                         isAuthenticated = false
                     }
                 }
@@ -670,7 +688,7 @@ final class AppViewModel: ObservableObject {
             return
         }
 
-        if let existing = users.first(where: { $0.email.caseInsensitiveCompare(email) == .orderedSame }) {
+        if let existing = users.first(where: { $0.email.caseInsensitiveCompare(normalizedEmail) == .orderedSame }) {
             if existing.isSuspended {
                 authErrorMessage = "This account is suspended. Contact support."
                 return
@@ -689,15 +707,27 @@ final class AppViewModel: ObservableObject {
     }
 
     func register(name: String, email: String, city: String, favoritePosition: String, password: String) {
-        guard !name.isEmpty, !email.isEmpty, !city.isEmpty, !favoritePosition.isEmpty, !password.isEmpty else {
+        let normalizedName = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedEmail = email.trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        let normalizedCity = city.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedFavoritePosition = favoritePosition.trimmingCharacters(in: .whitespacesAndNewlines)
+        let normalizedPassword = password.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        guard !normalizedName.isEmpty, !normalizedEmail.isEmpty, !normalizedCity.isEmpty, !normalizedFavoritePosition.isEmpty, !normalizedPassword.isEmpty else {
             authErrorMessage = "All fields are required."
             return
         }
 
         if let supabaseAuthService, let supabaseDataService {
+            isAuthLoading = true
             Task {
+                defer {
+                    Task { @MainActor in
+                        self.isAuthLoading = false
+                    }
+                }
                 do {
-                    let maybeSession = try await supabaseAuthService.signUp(email: email, password: password)
+                    let maybeSession = try await supabaseAuthService.signUp(email: normalizedEmail, password: normalizedPassword)
                     guard let session = maybeSession else {
                         await MainActor.run {
                             authErrorMessage = "Registration submitted. Check your email to confirm your account."
@@ -707,19 +737,19 @@ final class AppViewModel: ObservableObject {
 
                     let player = Player(
                         id: session.user.id,
-                        name: name,
+                        name: normalizedName,
                         avatarURL: "",
                         avatarImageData: nil,
-                        positions: [favoritePosition],
+                        positions: [normalizedFavoritePosition],
                         preferredPositions: [],
                         preferredFoot: .right,
                         skillLevel: 5,
-                        location: city,
+                        location: normalizedCity,
                         createdAt: Date()
                     )
                     authenticatedSupabaseUserID = session.user.id
-                    try await supabaseDataService.saveProfile(player, email: email)
-                    try await syncFromBackend(currentUserID: session.user.id)
+                    try await supabaseDataService.saveProfile(player, email: normalizedEmail)
+                    try await syncFromBackend(currentUserID: session.user.id, fallbackEmail: session.user.email ?? normalizedEmail)
                     await MainActor.run {
                         isAuthenticated = true
                         authErrorMessage = nil
@@ -734,17 +764,17 @@ final class AppViewModel: ObservableObject {
             return
         }
 
-        guard users.first(where: { $0.email.caseInsensitiveCompare(email) == .orderedSame }) == nil else {
+        guard users.first(where: { $0.email.caseInsensitiveCompare(normalizedEmail) == .orderedSame }) == nil else {
             authErrorMessage = "Email already used. Please sign in instead."
             return
         }
 
         let newUser = User(
             id: UUID(),
-            fullName: name,
-            email: email,
-            favoritePosition: favoritePosition,
-            city: city,
+            fullName: normalizedName,
+            email: normalizedEmail,
+            favoritePosition: normalizedFavoritePosition,
+            city: normalizedCity,
             eloRating: 1400,
             matchesPlayed: 0,
             wins: 0,
@@ -2222,16 +2252,52 @@ final class AppViewModel: ObservableObject {
         (coachReviewsByCoach[coachID] ?? []).sorted { $0.createdAt > $1.createdAt }
     }
 
-    func addReview(to coachID: UUID, rating: Int, text: String) {
+    func hasCurrentUserReviewedPractice(_ practiceID: UUID) -> Bool {
+        guard let authorID = currentUser?.id else { return false }
+        guard let practice = practices.first(where: { $0.id == practiceID }) else { return false }
+        let coachID = practice.ownerId
+        return coachReviewsByCoach.values.joined().contains { review in
+            guard review.authorID == authorID else { return false }
+            if review.practiceID == practiceID {
+                return true
+            }
+            // Backward compatibility for legacy rows created before practice_id existed.
+            if review.practiceID == nil, let coachID, review.coachID == coachID {
+                return true
+            }
+            return false
+        }
+    }
+
+    func canCurrentUserReviewPractice(_ practice: PracticeSession) -> Bool {
+        guard let currentUser else { return false }
+        guard currentUser.globalRole == .player else { return false }
+        guard isPracticeFinished(practice) else { return false }
+        guard let coachID = practice.ownerId else { return false }
+        guard coachID != currentUser.id else { return false }
+        guard joinedPracticeIDs.contains(practice.id) else { return false }
+        guard !hasCurrentUserReviewedPractice(practice.id) else { return false }
+        return users.first(where: { $0.id == coachID })?.isCoachActive == true
+    }
+
+    func addReview(to coachID: UUID, practiceID: UUID?, rating: Int, text: String) {
         guard let author = currentUser else { return }
         guard let coach = users.first(where: { $0.id == coachID }), coach.isCoachActive else { return }
         guard author.id != coachID else { return }
+        if let practiceID {
+            guard let practice = practices.first(where: { $0.id == practiceID }) else { return }
+            guard canCurrentUserReviewPractice(practice) else {
+                tournamentActionMessage = "You can leave one review only after attending a finished practice."
+                return
+            }
+        }
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return }
 
         let review = CoachReview(
             id: UUID(),
             coachID: coachID,
+            practiceID: practiceID,
             authorID: author.id,
             authorName: author.fullName,
             rating: min(max(rating, 1), 5),
@@ -2372,26 +2438,61 @@ final class AppViewModel: ObservableObject {
             adminActionMessage = AuthorizationUX.permissionDeniedMessage
             return
         }
-
-        let demo = buildInvestorDemoData()
-        users = demo.users
-        tournaments = demo.tournaments
-        createdGames = demo.games
-        practices = demo.practices
-        coachReviewsByCoach = demo.coachReviewsByCoach
-        clubs = demo.clubs
-
-        if let adminUser = users.first(where: \.isAdmin) {
-            currentUser = adminUser
+        guard let currentUser else {
+            adminActionMessage = "No active admin user."
+            return
         }
 
-        refreshGameLists()
-        adminActionMessage = "Investor demo data prepared (local)."
-        AuditLogger.log(
-            action: "admin_investor_demo_seeded",
-            actorId: currentUser?.id,
-            objectId: currentUser?.id ?? users.first?.id ?? UUID()
-        )
+        func prepareLocalOnly(message: String) {
+            let demo = buildInvestorDemoData()
+            users = demo.users
+            tournaments = demo.tournaments
+            createdGames = demo.games
+            practices = demo.practices
+            coachReviewsByCoach = demo.coachReviewsByCoach
+            clubs = demo.clubs
+            refreshGameLists()
+            adminActionMessage = message
+            AuditLogger.log(
+                action: "admin_investor_demo_seeded_local",
+                actorId: currentUser.id,
+                objectId: currentUser.id
+            )
+        }
+
+        if isUsingSupabase, authenticatedSupabaseUserID != nil, authenticatedSupabaseUserID != currentUser.id {
+            prepareLocalOnly(message: "Investor demo prepared locally. To write shared demo data to DB, sign in with a real Supabase admin (not Debug Switch User).")
+            return
+        }
+
+        guard let supabaseDataService else {
+            prepareLocalOnly(message: "Investor demo prepared locally (Supabase not configured).")
+            return
+        }
+
+        Task {
+            do {
+                let reviewWriteSucceeded = try await prepareInvestorDemoDataInBackend(
+                    actor: currentUser,
+                    dataService: supabaseDataService
+                )
+                try await syncFromBackend(currentUserID: currentUser.id)
+                await MainActor.run {
+                    adminActionMessage = reviewWriteSucceeded
+                        ? "Investor demo data prepared and synced to DB."
+                        : "Investor demo data prepared and synced to DB (coach review insert skipped by policy)."
+                }
+                AuditLogger.log(
+                    action: "admin_investor_demo_seeded",
+                    actorId: currentUser.id,
+                    objectId: currentUser.id
+                )
+            } catch {
+                await MainActor.run {
+                    adminActionMessage = "Investor demo sync failed: \(error.localizedDescription)"
+                }
+            }
+        }
     }
 
     func adminSeedSharedDemoDataToBackend() {
@@ -2611,6 +2712,53 @@ final class AppViewModel: ObservableObject {
         }
     }
 
+    func adminClearAllPlayableData() {
+        guard AccessPolicy.canManageUsersAsAdmin(currentUser) else {
+            adminActionMessage = AuthorizationUX.permissionDeniedMessage
+            return
+        }
+
+        let now = Date()
+        let gameIDs = createdGames.map(\.id)
+        let tournamentIDs = tournaments.map(\.id)
+        let practiceIDs = practices.map(\.id)
+
+        for index in createdGames.indices {
+            createdGames[index].isDeleted = true
+            createdGames[index].deletedAt = now
+            createdGames[index].status = .cancelled
+        }
+        for index in tournaments.indices {
+            tournaments[index].isDeleted = true
+            tournaments[index].deletedAt = now
+        }
+        for index in practices.indices {
+            practices[index].isDeleted = true
+            practices[index].deletedAt = now
+        }
+        joinedPracticeIDs.removeAll()
+        refreshGameLists()
+        adminActionMessage = "All games, tournaments and practices were cleared."
+        AuditLogger.log(action: "admin_cleared_all_playable_data", actorId: currentUser?.id, objectId: currentUser?.id ?? UUID())
+
+        if let supabaseDataService {
+            Task {
+                for gameID in gameIDs {
+                    try? await supabaseDataService.softDeleteMatch(matchID: gameID)
+                }
+                for tournamentID in tournamentIDs {
+                    try? await supabaseDataService.softDeleteTournament(tournamentID: tournamentID)
+                }
+                for practiceID in practiceIDs {
+                    try? await supabaseDataService.softDeletePractice(sessionID: practiceID)
+                }
+                await MainActor.run {
+                    adminActionMessage = "All games, tournaments and practices were cleared (DB synced)."
+                }
+            }
+        }
+    }
+
     func refreshGameLists() {
         objectWillChange.send()
     }
@@ -2817,6 +2965,311 @@ final class AppViewModel: ObservableObject {
         let practices: [PracticeSession]
         let coachReviewsByCoach: [UUID: [CoachReview]]
         let clubs: [Club]
+    }
+
+    private func prepareInvestorDemoDataInBackend(
+        actor: User,
+        dataService: SupabaseDataService
+    ) async throws -> Bool {
+        var fetchedUsers = try await dataService.fetchProfiles()
+        if fetchedUsers.isEmpty {
+            throw NSError(
+                domain: "AppViewModel",
+                code: 1,
+                userInfo: [NSLocalizedDescriptionKey: "No profiles found in DB. Register a few users first."]
+            )
+        }
+
+        let now = Date()
+        let plusDays: (Int) -> Date = { Calendar.current.date(byAdding: .day, value: $0, to: now) ?? now }
+        let plusHours: (Int) -> Date = { Calendar.current.date(byAdding: .hour, value: $0, to: now) ?? now }
+
+        func updateCachedUser(_ updated: User) {
+            if let index = fetchedUsers.firstIndex(where: { $0.id == updated.id }) {
+                fetchedUsers[index] = updated
+            }
+        }
+
+        guard var organizer = fetchedUsers.first(where: { !$0.isSuspended && $0.id != actor.id && !$0.isAdmin }) ?? fetchedUsers.first(where: { !$0.isSuspended }) else {
+            throw NSError(domain: "AppViewModel", code: 2, userInfo: [NSLocalizedDescriptionKey: "No active users available for demo seed."])
+        }
+
+        if !organizer.isOrganizerActive {
+            let organizerEndsAt = Calendar.current.date(byAdding: .day, value: 30, to: now)
+            try await dataService.setOrganizerSubscription(userID: organizer.id, endsAt: organizerEndsAt, isPaused: false)
+            organizer.organizerSubscriptionEndsAt = organizerEndsAt
+            organizer.isOrganizerSubscriptionPaused = false
+            updateCachedUser(organizer)
+        }
+
+        var coach = fetchedUsers.first(where: { !$0.isSuspended && $0.id != organizer.id && !$0.isAdmin }) ?? organizer
+        if !coach.isCoachActive {
+            let coachEndsAt = Calendar.current.date(byAdding: .day, value: 30, to: now)
+            try await dataService.setCoachSubscription(userID: coach.id, endsAt: coachEndsAt, isPaused: false)
+            coach.coachSubscriptionEndsAt = coachEndsAt
+            coach.isCoachSubscriptionPaused = false
+            updateCachedUser(coach)
+        }
+
+        let usableUsers = dedupeUsersById(fetchedUsers.filter { !$0.isSuspended })
+        let players = usableUsers.filter { $0.id != organizer.id && $0.id != coach.id && $0.id != actor.id }
+        let p1 = players.indices.contains(0) ? players[0] : organizer
+        let p2 = players.indices.contains(1) ? players[1] : coach
+        let p3 = players.indices.contains(2) ? players[2] : actor
+        let p4 = players.indices.contains(3) ? players[3] : p1
+
+        let usersByID = Dictionary(usableUsers.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        let existingGames = try await dataService.fetchCreatedGames(usersById: usersByID)
+        let existingTournaments = try await dataService.fetchTournaments(usersById: usersByID)
+        let existingPractices = try await dataService.fetchPractices()
+
+        for game in existingGames where !game.isDeleted {
+            try? await dataService.softDeleteMatch(matchID: game.id)
+        }
+        for tournament in existingTournaments where !tournament.isDeleted {
+            try? await dataService.softDeleteTournament(tournamentID: tournament.id)
+        }
+        for session in existingPractices where !session.isDeleted {
+            try? await dataService.softDeletePractice(sessionID: session.id)
+        }
+
+        let quickBookingGame = CreatedGame(
+            id: UUID(),
+            ownerId: actor.id,
+            organiserIds: [actor.id],
+            clubLocation: .downtownArena,
+            startAt: plusHours(6),
+            durationMinutes: 90,
+            format: .fiveVFive,
+            locationName: "Downtown Arena",
+            address: "Austin, TX",
+            maxPlayers: 10,
+            isPrivateGame: false,
+            hasCourtBooked: true,
+            minElo: 1000,
+            maxElo: 2500,
+            iAmPlaying: false,
+            isRatingGame: true,
+            anyoneCanInvite: true,
+            anyPlayerCanInputResults: false,
+            entranceWithoutConfirmation: false,
+            notes: "Investor demo quick booking",
+            createdBy: actor.fullName,
+            inviteLink: nil,
+            players: [actor, organizer, p1, p2, p3],
+            status: .scheduled,
+            isDraft: false,
+            finalHomeScore: nil,
+            finalAwayScore: nil,
+            isDeleted: false,
+            deletedAt: nil
+        )
+
+        let upcomingGame = CreatedGame(
+            id: UUID(),
+            ownerId: actor.id,
+            organiserIds: [actor.id],
+            clubLocation: .northSportsCenter,
+            startAt: plusDays(1),
+            durationMinutes: 90,
+            format: .fiveVFive,
+            locationName: "North Sports Center",
+            address: "Dallas, TX",
+            maxPlayers: 10,
+            isPrivateGame: false,
+            hasCourtBooked: false,
+            minElo: 900,
+            maxElo: 2200,
+            iAmPlaying: false,
+            isRatingGame: true,
+            anyoneCanInvite: true,
+            anyPlayerCanInputResults: false,
+            entranceWithoutConfirmation: true,
+            notes: "Investor demo upcoming game",
+            createdBy: actor.fullName,
+            inviteLink: nil,
+            players: [actor, p1, p2, p4],
+            status: .scheduled,
+            isDraft: false,
+            finalHomeScore: nil,
+            finalAwayScore: nil,
+            isDeleted: false,
+            deletedAt: nil
+        )
+
+        let completedGame = CreatedGame(
+            id: UUID(),
+            ownerId: actor.id,
+            organiserIds: [actor.id],
+            clubLocation: .riversideCourts,
+            startAt: plusDays(-2),
+            durationMinutes: 90,
+            format: .fiveVFive,
+            locationName: "Riverside Courts",
+            address: "Houston, TX",
+            maxPlayers: 10,
+            isPrivateGame: false,
+            hasCourtBooked: true,
+            minElo: 900,
+            maxElo: 2400,
+            iAmPlaying: false,
+            isRatingGame: true,
+            anyoneCanInvite: false,
+            anyPlayerCanInputResults: false,
+            entranceWithoutConfirmation: false,
+            notes: "Investor demo completed game",
+            createdBy: actor.fullName,
+            inviteLink: nil,
+            players: [actor, organizer, p1, p2, p3, p4],
+            status: .scheduled,
+            isDraft: false,
+            finalHomeScore: nil,
+            finalAwayScore: nil,
+            isDeleted: false,
+            deletedAt: nil
+        )
+
+        for game in [quickBookingGame, upcomingGame, completedGame] {
+            try await dataService.createMatch(game: game)
+        }
+        try await dataService.completeMatchAndApplyElo(matchID: completedGame.id, homeScore: 4, awayScore: 2)
+
+        let upcomingPractice = PracticeSession(
+            id: UUID(),
+            title: "Ball Control Practice",
+            location: "Downtown Arena",
+            startDate: plusDays(2),
+            durationMinutes: 90,
+            numberOfPlayers: 12,
+            minElo: 900,
+            maxElo: 2200,
+            isOpenJoin: true,
+            focusArea: "Ball control",
+            notes: "Bring water and light bibs.",
+            ownerId: coach.id,
+            organiserIds: [coach.id],
+            isDraft: false,
+            isDeleted: false
+        )
+        let completedPractice = PracticeSession(
+            id: UUID(),
+            title: "Defensive Shape Practice",
+            location: "North Sports Center",
+            startDate: plusDays(-1),
+            durationMinutes: 75,
+            numberOfPlayers: 10,
+            minElo: 1000,
+            maxElo: 2300,
+            isOpenJoin: true,
+            focusArea: "Defending",
+            notes: "Completed practice for demo reviews.",
+            ownerId: coach.id,
+            organiserIds: [coach.id],
+            isDraft: false,
+            isDeleted: false
+        )
+        _ = try await dataService.createPractice(session: upcomingPractice)
+        _ = try await dataService.createPractice(session: completedPractice)
+
+        let upcomingTournament = try await dataService.createTournament(
+            title: "Investor Cup Upcoming",
+            location: "Austin",
+            startDate: plusDays(3),
+            endDate: plusDays(6),
+            visibility: .public,
+            status: .published,
+            entryFee: 25,
+            maxTeams: 8,
+            format: MatchFormat.fiveVFive.rawValue,
+            ownerID: actor.id,
+            organiserIDs: [actor.id]
+        )
+
+        let pastTournament = try await dataService.createTournament(
+            title: "Investor Cup Past",
+            location: "Dallas",
+            startDate: plusDays(-5),
+            endDate: plusDays(-2),
+            visibility: .public,
+            status: .completed,
+            entryFee: 15,
+            maxTeams: 8,
+            format: MatchFormat.fiveVFive.rawValue,
+            ownerID: actor.id,
+            organiserIDs: [actor.id]
+        )
+
+        let allTeamUsers = [p1, p2, p3, p4, actor, coach, organizer]
+        let teamNames = ["Falcons", "Titans", "Wolves", "Comets"]
+
+        func createTournamentSet(_ tournament: Tournament) async throws -> [Team] {
+            var teams: [Team] = []
+            for name in teamNames {
+                let team = Team(id: UUID(), name: name, members: [], maxPlayers: 6)
+                try await dataService.createTournamentTeam(tournamentID: tournament.id, team: team)
+                teams.append(team)
+            }
+
+            for (index, user) in allTeamUsers.enumerated() {
+                let targetTeam = teams[index % teams.count]
+                try? await dataService.addTournamentTeamMember(
+                    tournamentID: tournament.id,
+                    teamID: targetTeam.id,
+                    userID: user.id,
+                    positionGroup: .bench,
+                    sortOrder: index,
+                    isCaptain: index < teams.count
+                )
+            }
+            return teams
+        }
+
+        let upcomingTeams = try await createTournamentSet(upcomingTournament)
+        _ = try await dataService.createTournamentMatch(
+            tournamentID: upcomingTournament.id,
+            ownerID: upcomingTournament.ownerId,
+            organiserIDs: upcomingTournament.organiserIds,
+            homeTeamID: upcomingTeams[0].id,
+            awayTeamID: upcomingTeams[1].id,
+            startTime: plusDays(3),
+            locationName: upcomingTournament.location,
+            format: upcomingTournament.format,
+            matchday: 1
+        )
+
+        let pastTeams = try await createTournamentSet(pastTournament)
+        let pastMatch = try await dataService.createTournamentMatch(
+            tournamentID: pastTournament.id,
+            ownerID: pastTournament.ownerId,
+            organiserIDs: pastTournament.organiserIds,
+            homeTeamID: pastTeams[0].id,
+            awayTeamID: pastTeams[1].id,
+            startTime: plusDays(-4),
+            locationName: pastTournament.location,
+            format: pastTournament.format,
+            matchday: 1
+        )
+        try await dataService.updateTournamentMatchResult(matchID: pastMatch.id, homeScore: 3, awayScore: 1)
+
+        var reviewWriteSucceeded = true
+        do {
+            try await dataService.addCoachReview(
+                CoachReview(
+                    id: UUID(),
+                    coachID: coach.id,
+                    practiceID: completedPractice.id,
+                    authorID: actor.id,
+                    authorName: actor.fullName,
+                    rating: 5,
+                    text: "Great session structure and clear feedback.",
+                    createdAt: now
+                )
+            )
+        } catch {
+            reviewWriteSucceeded = false
+        }
+
+        return reviewWriteSucceeded
     }
 
     private func buildInvestorDemoData() -> InvestorDemoData {
@@ -3139,6 +3592,7 @@ final class AppViewModel: ObservableObject {
                 CoachReview(
                     id: UUID(),
                     coachID: coach.id,
+                    practiceID: nil,
                     authorID: p1.id,
                     authorName: p1.fullName,
                     rating: 5,
@@ -3148,6 +3602,7 @@ final class AppViewModel: ObservableObject {
                 CoachReview(
                     id: UUID(),
                     coachID: coach.id,
+                    practiceID: nil,
                     authorID: p3.id,
                     authorName: p3.fullName,
                     rating: 4,
@@ -3173,51 +3628,56 @@ final class AppViewModel: ObservableObject {
         )
     }
 
-    private func syncFromBackend(currentUserID: UUID) async throws {
+    private func syncFromBackend(currentUserID: UUID, fallbackEmail: String? = nil) async throws {
         guard let supabaseDataService else { return }
         authenticatedSupabaseUserID = currentUserID
 
-        async let usersTask = supabaseDataService.fetchProfiles()
-        async let clubsTask = supabaseDataService.fetchClubs()
-        let fetchedUsers = try await usersTask
-        let fetchedClubs = try await clubsTask
+        let fetchedUsers = (try? await supabaseDataService.fetchProfiles()) ?? []
+        let fetchedClubs = (try? await supabaseDataService.fetchClubs()) ?? clubs
         let usersByID = Dictionary(
             fetchedUsers.map { ($0.id, $0) },
             uniquingKeysWith: { first, _ in first }
         )
-        async let fetchedGamesTask = supabaseDataService.fetchCreatedGames(usersById: usersByID)
-        async let fetchedTournamentsTask = supabaseDataService.fetchTournaments(usersById: usersByID)
+        var fetchedGames = (try? await supabaseDataService.fetchCreatedGames(usersById: usersByID)) ?? createdGames
+        var fetchedTournaments = (try? await supabaseDataService.fetchTournaments(usersById: usersByID)) ?? tournaments
         async let fetchedPracticesTask = supabaseDataService.fetchPractices()
         async let fetchedCoachReviewsTask = supabaseDataService.fetchCoachReviews()
         async let joinedPracticeIDsTask = supabaseDataService.fetchJoinedPracticeIDs(userID: currentUserID)
-        var fetchedGames = try await fetchedGamesTask
-        var fetchedTournaments = try await fetchedTournamentsTask
         let fetchedPractices = (try? await fetchedPracticesTask) ?? practices
         let fetchedCoachReviews = (try? await fetchedCoachReviewsTask) ?? []
         let fetchedJoinedPracticeIDs = (try? await joinedPracticeIDsTask) ?? []
         let reviewsByCoach = Dictionary(grouping: fetchedCoachReviews, by: \.coachID)
-        let currentUser = fetchedUsers.first(where: { $0.id == currentUserID })
-
-        if fetchedGames.isEmpty, let currentUser {
-            try? await seedBackendDemoCreatedGames(for: currentUser, users: fetchedUsers, dataService: supabaseDataService)
-            fetchedGames = (try? await supabaseDataService.fetchCreatedGames(usersById: usersByID)) ?? fetchedGames
+        var resolvedCurrentUser = fetchedUsers.first(where: { $0.id == currentUserID })
+        if resolvedCurrentUser == nil, let existing = users.first(where: { $0.id == currentUserID }) {
+            resolvedCurrentUser = existing
         }
-
-        if fetchedTournaments.isEmpty, let currentUser {
-            try? await supabaseDataService.seedExampleTournament(for: currentUser, users: fetchedUsers)
-            fetchedTournaments = (try? await supabaseDataService.fetchTournaments(usersById: usersByID)) ?? fetchedTournaments
-            fetchedGames = (try? await supabaseDataService.fetchCreatedGames(usersById: usersByID)) ?? fetchedGames
+        if resolvedCurrentUser == nil {
+            resolvedCurrentUser = User(
+                id: currentUserID,
+                fullName: fallbackEmail?.components(separatedBy: "@").first ?? "Player",
+                email: fallbackEmail ?? "",
+                favoritePosition: "Midfielder",
+                city: "",
+                eloRating: 1400,
+                matchesPlayed: 0,
+                wins: 0,
+                globalRole: .player
+            )
         }
 
         await MainActor.run {
-            users = fetchedUsers
+            users = fetchedUsers.isEmpty ? users : fetchedUsers
             clubs = fetchedClubs.isEmpty ? clubs : fetchedClubs
             createdGames = fetchedGames
             tournaments = fetchedTournaments
             practices = fetchedPractices
             joinedPracticeIDs = fetchedJoinedPracticeIDs
             coachReviewsByCoach = reviewsByCoach
-            self.currentUser = currentUser
+            self.currentUser = resolvedCurrentUser
+            if let resolvedCurrentUser,
+               !users.contains(where: { $0.id == resolvedCurrentUser.id }) {
+                users.append(resolvedCurrentUser)
+            }
             isAuthenticated = self.currentUser != nil
         }
     }

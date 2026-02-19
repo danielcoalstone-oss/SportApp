@@ -135,20 +135,26 @@ private struct PlayerProfileEditorView: View {
             }
 
             Section("Upcoming") {
-                if appViewModel.currentUserUpcomingCreatedGames.isEmpty && appViewModel.currentUserUpcomingTournaments.isEmpty {
-                    Text("No upcoming matches or tournaments")
+                if currentUserUpcomingPractices.isEmpty
+                    && appViewModel.currentUserUpcomingCreatedGames.isEmpty
+                    && appViewModel.currentUserUpcomingTournaments.isEmpty {
+                    Text("No upcoming practices, matches or tournaments")
                         .foregroundStyle(.secondary)
                 } else {
+                    practiceSubsection(title: "Practices", sessions: currentUserUpcomingPractices)
                     createdGameSubsection(title: "Matches", games: appViewModel.currentUserUpcomingCreatedGames)
                     tournamentSubsection(title: "Tournaments", tournaments: appViewModel.currentUserUpcomingTournaments)
                 }
             }
 
             Section("Past") {
-                if appViewModel.currentUserPastCreatedGames.isEmpty && appViewModel.currentUserPastTournaments.isEmpty {
-                    Text("No past matches or tournaments")
+                if currentUserPastPractices.isEmpty
+                    && appViewModel.currentUserPastCreatedGames.isEmpty
+                    && appViewModel.currentUserPastTournaments.isEmpty {
+                    Text("No past practices, matches or tournaments")
                         .foregroundStyle(.secondary)
                 } else {
+                    practiceSubsection(title: "Practices", sessions: currentUserPastPractices)
                     createdGameSubsection(title: "Matches", games: appViewModel.currentUserPastCreatedGames)
                     tournamentSubsection(title: "Tournaments", tournaments: appViewModel.currentUserPastTournaments)
                 }
@@ -329,6 +335,28 @@ private struct PlayerProfileEditorView: View {
         appViewModel.visiblePractices
             .filter { session in
                 session.ownerId == user.id || session.organiserIds.contains(user.id)
+            }
+            .filter { $0.startDate < Date() }
+            .sorted { $0.startDate > $1.startDate }
+    }
+
+    private var currentUserUpcomingPractices: [PracticeSession] {
+        appViewModel.visiblePractices
+            .filter { session in
+                session.ownerId == user.id
+                    || session.organiserIds.contains(user.id)
+                    || appViewModel.joinedPracticeIDs.contains(session.id)
+            }
+            .filter { $0.startDate >= Date() }
+            .sorted { $0.startDate < $1.startDate }
+    }
+
+    private var currentUserPastPractices: [PracticeSession] {
+        appViewModel.visiblePractices
+            .filter { session in
+                session.ownerId == user.id
+                    || session.organiserIds.contains(user.id)
+                    || appViewModel.joinedPracticeIDs.contains(session.id)
             }
             .filter { $0.startDate < Date() }
             .sorted { $0.startDate > $1.startDate }

@@ -953,6 +953,11 @@ final class AppViewModel: ObservableObject {
             return
         }
 
+        if tournaments[tournamentIndex].startDate < Date() && !tournaments[tournamentIndex].matches.contains(where: { $0.status == .scheduled }) {
+            tournamentActionMessage = "Tournament is finished. Team join is closed."
+            return
+        }
+
         let hasUpcomingMatch = tournaments[tournamentIndex].matches.contains { match in
             match.status == .scheduled
         }
@@ -1091,6 +1096,10 @@ final class AppViewModel: ObservableObject {
         guard let index = practices.firstIndex(where: { $0.id == sessionID }) else { return }
 
         let session = practices[index]
+        if isPracticeFinished(session) {
+            tournamentActionMessage = "Practice is finished. Join is closed."
+            return
+        }
         let canManage = canCurrentUserEditPractice(session)
         if !session.isOpenJoin && !canManage {
             tournamentActionMessage = "Private practice. Join via invite link."
@@ -1120,6 +1129,11 @@ final class AppViewModel: ObservableObject {
 
     func leavePractice(sessionID: UUID) {
         guard let user = currentUser else { return }
+        guard let session = practices.first(where: { $0.id == sessionID }) else { return }
+        if isPracticeFinished(session) {
+            tournamentActionMessage = "Practice is finished. Join/leave is locked."
+            return
+        }
         guard joinedPracticeIDs.contains(sessionID) else { return }
 
         joinedPracticeIDs.remove(sessionID)
@@ -1144,6 +1158,24 @@ final class AppViewModel: ObservableObject {
         }
 
         guard let tournamentIndex = tournaments.firstIndex(where: { $0.id == tournamentID }) else {
+            return
+        }
+
+        guard tournaments[tournamentIndex].status == .published else {
+            tournamentActionMessage = "Tournament is finished. Team changes are locked."
+            return
+        }
+
+        if tournaments[tournamentIndex].startDate < Date() && !tournaments[tournamentIndex].matches.contains(where: { $0.status == .scheduled }) {
+            tournamentActionMessage = "Tournament is finished. Team changes are locked."
+            return
+        }
+
+        let hasUpcomingMatch = tournaments[tournamentIndex].matches.contains { match in
+            match.status == .scheduled
+        }
+        if !hasUpcomingMatch && !tournaments[tournamentIndex].matches.isEmpty {
+            tournamentActionMessage = "Tournament is finished. Team changes are locked."
             return
         }
 
@@ -2141,6 +2173,10 @@ final class AppViewModel: ObservableObject {
             authErrorMessage = AuthorizationUX.permissionDeniedMessage
             return
         }
+        if !practices[index].isDraft && isPracticeFinished(practices[index]) {
+            authErrorMessage = "Practice is finished. Editing is locked."
+            return
+        }
         practices[index] = session
 
         if let supabaseDataService {
@@ -2160,6 +2196,10 @@ final class AppViewModel: ObservableObject {
         guard let index = practices.firstIndex(where: { $0.id == sessionID }) else { return }
         guard canCurrentUserEditPractice(practices[index]) else {
             authErrorMessage = AuthorizationUX.permissionDeniedMessage
+            return
+        }
+        if !practices[index].isDraft && isPracticeFinished(practices[index]) {
+            authErrorMessage = "Practice is finished. Deletion is locked."
             return
         }
         practices[index].isDeleted = true
@@ -2634,6 +2674,11 @@ final class AppViewModel: ObservableObject {
             return true
         }
         return tournament.startDate < Date()
+    }
+
+    private func isPracticeFinished(_ practice: PracticeSession) -> Bool {
+        let end = practice.startDate.addingTimeInterval(TimeInterval(max(practice.durationMinutes, 0) * 60))
+        return end <= Date()
     }
 
     private func currentUserRSVPStatus(in game: CreatedGame) -> RSVPStatus? {

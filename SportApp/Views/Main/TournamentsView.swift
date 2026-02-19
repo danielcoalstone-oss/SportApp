@@ -75,7 +75,9 @@ struct TournamentsView: View {
                                             }
                                             .buttonStyle(.bordered)
 
-                                            if appViewModel.currentUser != nil {
+                                            if appViewModel.currentUser != nil,
+                                               game.status == .scheduled,
+                                               game.scheduledDate >= Date() {
                                                 let joined = appViewModel.isCurrentUserGoingInGame(game.id)
                                                 Button(joined ? "Leave Game" : "Join Game") {
                                                     if joined {
@@ -185,6 +187,7 @@ struct TournamentsView: View {
 
                                     if let currentUser = appViewModel.currentUser {
                                         let joined = appViewModel.isCurrentUserJoinedPractice(practice.id)
+                                        let isPracticeOpenForJoinLeave = practice.startDate.addingTimeInterval(TimeInterval(max(practice.durationMinutes, 0) * 60)) > Date()
                                         HStack(spacing: 8) {
                                             NavigationLink {
                                                 PracticeDetailView(practiceID: practice.id)
@@ -193,7 +196,8 @@ struct TournamentsView: View {
                                             }
                                             .buttonStyle(.bordered)
 
-                                            if practice.isOpenJoin || practice.ownerId == currentUser.id || practice.organiserIds.contains(currentUser.id) || currentUser.isAdmin {
+                                            if isPracticeOpenForJoinLeave &&
+                                                (practice.isOpenJoin || practice.ownerId == currentUser.id || practice.organiserIds.contains(currentUser.id) || currentUser.isAdmin) {
                                                 Button(joined ? "Leave Practice" : "Join Practice") {
                                                     if joined {
                                                         appViewModel.leavePractice(sessionID: practice.id)
@@ -271,6 +275,10 @@ struct GameDetailView: View {
         appViewModel.isCurrentUserGoingInGame(displayedGame.id)
     }
 
+    private var isGameOpenForJoinLeave: Bool {
+        displayedGame.status == .scheduled
+    }
+
     var body: some View {
         ScrollView {
             VStack(spacing: 14) {
@@ -313,7 +321,7 @@ struct GameDetailView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14))
 
-                if appViewModel.currentUser != nil {
+                if appViewModel.currentUser != nil && isGameOpenForJoinLeave {
                     Button(isJoinedByCurrentUser ? "Leave Game" : "Join Game") {
                         if isJoinedByCurrentUser {
                             appViewModel.leaveCreatedGame(gameID: displayedGame.id)
@@ -503,10 +511,17 @@ struct PracticeDetailView: View {
 
     private var canJoinDirectly: Bool {
         guard let practice, let currentUser = appViewModel.currentUser else { return false }
+        guard isPracticeOpenForJoinLeave else { return false }
         return practice.isOpenJoin
             || practice.ownerId == currentUser.id
             || practice.organiserIds.contains(currentUser.id)
             || currentUser.isAdmin
+    }
+
+    private var isPracticeOpenForJoinLeave: Bool {
+        guard let practice else { return false }
+        let end = practice.startDate.addingTimeInterval(TimeInterval(max(practice.durationMinutes, 0) * 60))
+        return end > Date()
     }
 
     private var joinedPlayers: [User] {
@@ -672,7 +687,7 @@ struct PracticeDetailView: View {
                 .padding(.bottom, 10)
                 .background(Color.black.opacity(0.22))
             } else {
-                Text("Private practice. Join via invite link.")
+                Text(isPracticeOpenForJoinLeave ? "Private practice. Join via invite link." : "Practice finished. Join/leave is locked.")
                     .font(.headline)
                     .foregroundStyle(.white)
                     .frame(maxWidth: .infinity)

@@ -17,6 +17,7 @@ struct TournamentDetailView: View {
     @State private var selectedMatchForResult: TournamentMatch?
     @State private var selectedTab: TournamentTab = .standings
     @State private var showCompleteTournamentConfirmation = false
+    @State private var pendingJoinTeamID: UUID?
 
     let tournamentID: UUID
 
@@ -27,6 +28,9 @@ struct TournamentDetailView: View {
     private var isTournamentClosed: Bool {
         guard let tournament else { return false }
         if tournament.status == .completed || tournament.status == .cancelled {
+            return true
+        }
+        if tournament.startDate < Date() && !tournament.matches.contains(where: { $0.status == .scheduled }) {
             return true
         }
         guard !tournament.matches.isEmpty else { return false }
@@ -159,6 +163,18 @@ struct TournamentDetailView: View {
         }
         .onAppear {
             appViewModel.syncTournamentMatchesToCreatedGames(tournamentID: tournamentID)
+        }
+        .alert("Join Team?", isPresented: joinTeamAlertBinding) {
+            Button("Cancel", role: .cancel) {
+                pendingJoinTeamID = nil
+            }
+            Button("Join") {
+                guard let tournament, let teamID = pendingJoinTeamID else { return }
+                appViewModel.joinTeam(tournamentID: tournament.id, teamID: teamID)
+                pendingJoinTeamID = nil
+            }
+        } message: {
+            Text(joinTeamAlertMessage)
         }
     }
 
@@ -416,15 +432,17 @@ struct TournamentDetailView: View {
                         }
                     }
 
-                    Button(teamActionTitle(for: team, in: tournament)) {
-                        if isCurrentUserInTeam(teamID: team.id, tournament: tournament) {
-                            appViewModel.leaveTeam(tournamentID: tournament.id, teamID: team.id)
-                        } else {
-                            appViewModel.joinTeam(tournamentID: tournament.id, teamID: team.id)
+                    if !isTournamentClosed {
+                        Button(teamActionTitle(for: team, in: tournament)) {
+                            if isCurrentUserInTeam(teamID: team.id, tournament: tournament) {
+                                appViewModel.leaveTeam(tournamentID: tournament.id, teamID: team.id)
+                            } else {
+                                pendingJoinTeamID = team.id
+                            }
                         }
+                        .buttonStyle(.bordered)
+                        .disabled(isTeamActionDisabled(for: team, in: tournament))
                     }
-                    .buttonStyle(.bordered)
-                    .disabled(isTeamActionDisabled(for: team, in: tournament))
                 }
                 .padding()
                 .frame(maxWidth: .infinity, alignment: .leading)
@@ -539,6 +557,28 @@ struct TournamentDetailView: View {
                 }
             }
         )
+    }
+
+    private var joinTeamAlertBinding: Binding<Bool> {
+        Binding(
+            get: { pendingJoinTeamID != nil },
+            set: { isPresented in
+                if !isPresented {
+                    pendingJoinTeamID = nil
+                }
+            }
+        )
+    }
+
+    private var joinTeamAlertMessage: String {
+        guard
+            let tournament,
+            let teamID = pendingJoinTeamID,
+            let team = tournament.teams.first(where: { $0.id == teamID })
+        else {
+            return "Choose a team to join."
+        }
+        return "Join \(team.name)?"
     }
 }
 

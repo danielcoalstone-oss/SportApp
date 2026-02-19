@@ -17,9 +17,10 @@ struct AuthView: View {
                     Text("Mini Football Tournaments")
                         .font(.title.bold())
                         .multilineTextAlignment(.center)
+                        .foregroundStyle(.white)
 
                     Text(isRegisterMode ? "Create your account" : "Sign in to manage bookings")
-                        .foregroundStyle(.secondary)
+                        .foregroundStyle(.white.opacity(0.8))
 
                     VStack(spacing: 12) {
                         if isRegisterMode {
@@ -47,7 +48,7 @@ struct AuthView: View {
                     if let error = appViewModel.authErrorMessage {
                         Text(error)
                             .font(.footnote)
-                            .foregroundStyle(.red)
+                            .foregroundStyle(AppTheme.accent)
                     }
 
                     Button(action: submit) {
@@ -65,6 +66,7 @@ struct AuthView: View {
                 }
                 .padding()
             }
+            .appScreenBackground()
             .navigationTitle("Welcome")
         }
     }

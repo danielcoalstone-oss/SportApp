@@ -12,6 +12,7 @@ struct PermissionDeniedView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding()
+        .appScreenBackground()
     }
 }
 

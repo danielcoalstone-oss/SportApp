@@ -10,6 +10,7 @@ struct HomeView: View {
                     if let user = appViewModel.currentUser {
                         Text("Hi, \(user.fullName)")
                             .font(.title2.bold())
+                            .foregroundStyle(.white)
 
                         VStack(alignment: .leading, spacing: 8) {
                             Label("Current Elo: \(user.eloRating)", systemImage: "chart.line.uptrend.xyaxis")
@@ -17,13 +18,15 @@ struct HomeView: View {
                             Label("Win rate: \(Int(user.winRate * 100))%", systemImage: "trophy")
                         }
                         .font(.subheadline)
+                        .foregroundStyle(.white)
                         .padding()
                         .frame(maxWidth: .infinity, alignment: .leading)
-                        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+                        .appCard()
                     }
 
                     Text("Quick Booking (Next 24h)")
                         .font(.headline)
+                        .foregroundStyle(.white)
 
                     if appViewModel.thisWeekQuickBookingGames.isEmpty {
                         Text("No quick booking games in the next 24 hours.")
@@ -38,7 +41,7 @@ struct HomeView: View {
                                     HStack {
                                         Text(game.locationName)
                                             .font(.headline)
-                                            .foregroundStyle(.primary)
+                                            .foregroundStyle(.white)
                                         Spacer()
                                         Text(game.isPrivateGame ? "Private" : "Public")
                                             .font(.caption)
@@ -53,7 +56,7 @@ struct HomeView: View {
                                 }
                                 .padding()
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+                                .appCard()
                             }
                         }
                     }
@@ -61,6 +64,7 @@ struct HomeView: View {
                     if !appViewModel.currentUserUpcomingCreatedGames.isEmpty {
                         Text("Upcoming Matches")
                             .font(.headline)
+                            .foregroundStyle(.white)
 
                         ForEach(appViewModel.currentUserUpcomingCreatedGames.prefix(3)) { game in
                             NavigationLink {
@@ -70,7 +74,7 @@ struct HomeView: View {
                                     HStack {
                                         Text(game.locationName)
                                             .font(.headline)
-                                            .foregroundStyle(.primary)
+                                            .foregroundStyle(.white)
                                         Spacer()
                                         Text(game.isPrivateGame ? "Private" : "Public")
                                             .font(.caption)
@@ -85,7 +89,7 @@ struct HomeView: View {
                                 }
                                 .padding()
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+                                .appCard()
                             }
                         }
                     }
@@ -93,6 +97,7 @@ struct HomeView: View {
                     if !appViewModel.clubs.isEmpty {
                         Text("Clubs")
                             .font(.headline)
+                            .foregroundStyle(.white)
 
                         ForEach(appViewModel.clubs) { club in
                             NavigationLink {
@@ -101,7 +106,7 @@ struct HomeView: View {
                                 VStack(alignment: .leading, spacing: 6) {
                                     Text(club.name)
                                         .font(.headline)
-                                        .foregroundStyle(.primary)
+                                        .foregroundStyle(.white)
                                     Text(club.location)
                                         .font(.subheadline)
                                         .foregroundStyle(.secondary)
@@ -112,7 +117,7 @@ struct HomeView: View {
                                 }
                                 .padding()
                                 .frame(maxWidth: .infinity, alignment: .leading)
-                                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+                                .appCard()
                             }
                             .buttonStyle(.plain)
                         }
@@ -121,6 +126,7 @@ struct HomeView: View {
                 }
                 .padding()
             }
+            .appScreenBackground()
             .navigationTitle("Main")
         }
     }

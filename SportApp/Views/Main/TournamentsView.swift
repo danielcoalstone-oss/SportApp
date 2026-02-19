@@ -50,12 +50,13 @@ struct TournamentsView: View {
                             Text("No upcoming games from other players.")
                                 .foregroundStyle(.secondary)
                         } else {
-                            Section("Upcoming Games") {
+                            Section {
                                 ForEach(appViewModel.discoverableUpcomingCreatedGames) { game in
                                     VStack(alignment: .leading, spacing: 8) {
                                         HStack {
                                             Text(game.locationName)
                                                 .font(.headline)
+                                                .foregroundStyle(.white)
                                             Spacer()
                                             Text(game.isPrivateGame ? "Private" : "Public")
                                                 .font(.caption)
@@ -90,9 +91,13 @@ struct TournamentsView: View {
                                         }
                                     }
                                 }
+                            } header: {
+                                Text("Upcoming Games")
+                                    .foregroundStyle(.white)
                             }
                         }
                     }
+                    .appListBackground()
                 } else if selectedFilter == .tournaments {
                     List {
                         let upcomingTournaments = appViewModel.visibleTournaments
@@ -104,7 +109,7 @@ struct TournamentsView: View {
                             Text("No upcoming tournaments.")
                                 .foregroundStyle(.secondary)
                         } else {
-                            Section("Upcoming Tournaments") {
+                            Section {
                                 ForEach(upcomingTournaments) { tournament in
                                     NavigationLink {
                                         TournamentDetailView(tournamentID: tournament.id)
@@ -112,6 +117,7 @@ struct TournamentsView: View {
                                         VStack(alignment: .leading, spacing: 6) {
                                             Text(tournament.title)
                                                 .font(.headline)
+                                                .foregroundStyle(.white)
                                             Text(DateFormatterService.tournamentDateTime.string(from: tournament.startDate))
                                                 .font(.subheadline)
                                                 .foregroundStyle(.secondary)
@@ -121,9 +127,13 @@ struct TournamentsView: View {
                                         }
                                     }
                                 }
+                            } header: {
+                                Text("Upcoming Tournaments")
+                                    .foregroundStyle(.white)
                             }
                         }
                     }
+                    .appListBackground()
                 } else {
                     List {
                         let upcomingPractices = appViewModel.visiblePractices
@@ -149,6 +159,7 @@ struct TournamentsView: View {
                                                 )
                                                 Text(coach.fullName)
                                                     .font(.subheadline.weight(.semibold))
+                                                    .foregroundStyle(.white)
                                             }
                                         }
                                         .buttonStyle(.plain)
@@ -156,6 +167,7 @@ struct TournamentsView: View {
                                     HStack {
                                         Text(practice.title)
                                             .font(.headline)
+                                            .foregroundStyle(.white)
                                         Spacer()
                                         Text(practice.isOpenJoin ? "Open" : "Private")
                                             .font(.caption)
@@ -201,8 +213,10 @@ struct TournamentsView: View {
                             }
                         }
                     }
+                    .appListBackground()
                 }
             }
+            .appScreenBackground()
             .navigationTitle("Play")
             .navigationDestination(for: PlayRoute.self) { route in
                 switch route {
@@ -327,6 +341,7 @@ struct GameDetailView: View {
             }
             .padding()
         }
+        .appScreenBackground()
         .navigationTitle("Game")
         .navigationBarTitleDisplayMode(.inline)
     }

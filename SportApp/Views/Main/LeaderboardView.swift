@@ -37,6 +37,7 @@ struct LeaderboardView: View {
                     .padding(.vertical, 4)
                 }
             }
+            .appListBackground()
             .navigationTitle("Elo Leaderboard")
         }
     }

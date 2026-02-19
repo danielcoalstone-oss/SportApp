@@ -25,6 +25,7 @@ struct ProfileView: View {
                 }
             }
             .navigationTitle("Profile")
+            .appScreenBackground()
         }
     }
 }
@@ -187,6 +188,7 @@ private struct PlayerProfileEditorView: View {
             }
 #endif
         }
+        .appListBackground()
         .overlay {
             if viewModel.isLoading {
                 ProgressView()

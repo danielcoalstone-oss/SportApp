@@ -40,6 +40,7 @@ struct DebugSwitchUserView: View {
                 }
                 .buttonStyle(.plain)
             }
+            .appListBackground()
             .navigationTitle("Switch User")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {

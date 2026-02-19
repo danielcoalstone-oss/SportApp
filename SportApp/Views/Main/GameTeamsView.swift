@@ -12,6 +12,7 @@ struct GameTeamsView: View {
             }
             .padding()
         }
+        .appScreenBackground()
         .navigationTitle("Teams")
         .navigationBarTitleDisplayMode(.inline)
         .permissionDeniedAlert(message: $viewModel.toastMessage)
@@ -71,7 +72,7 @@ struct GameTeamsView: View {
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+        .appCard()
     }
 
     private func teamName(for teamId: UUID) -> String {

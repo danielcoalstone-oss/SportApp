@@ -1,5 +1,54 @@
 import SwiftUI
 
+enum AppTheme {
+    static let backgroundTop = Color(red: 0.01, green: 0.14, blue: 0.27)
+    static let backgroundBottom = Color(red: 0.02, green: 0.20, blue: 0.38)
+    static let cardTop = Color(red: 0.11, green: 0.36, blue: 0.64)
+    static let cardBottom = Color(red: 0.14, green: 0.42, blue: 0.73)
+    static let accent = Color(red: 0.78, green: 0.93, blue: 0.35)
+    static let overlayCard = Color.black.opacity(0.48)
+}
+
+struct AppBackgroundView: View {
+    var body: some View {
+        LinearGradient(
+            colors: [AppTheme.backgroundTop, AppTheme.backgroundBottom],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .ignoresSafeArea()
+    }
+}
+
+extension View {
+    func appScreenBackground() -> some View {
+        background(AppBackgroundView())
+    }
+
+    func appListBackground() -> some View {
+        scrollContentBackground(.hidden)
+            .listRowBackground(Color.black.opacity(0.55))
+            .listRowSeparatorTint(.white.opacity(0.14))
+            .background(AppBackgroundView())
+    }
+
+    func appCard() -> some View {
+        background(
+            RoundedRectangle(cornerRadius: 14)
+                .fill(AppTheme.overlayCard)
+                .overlay(
+                    RoundedRectangle(cornerRadius: 14)
+                        .stroke(Color.white.opacity(0.08), lineWidth: 1)
+                )
+        )
+    }
+
+    func appPrimaryAction() -> some View {
+        foregroundStyle(AppTheme.backgroundTop)
+            .background(AppTheme.accent, in: RoundedRectangle(cornerRadius: 12))
+    }
+}
+
 struct MainTabView: View {
     @EnvironmentObject private var appViewModel: AppViewModel
 
@@ -37,6 +86,7 @@ struct MainTabView: View {
                     }
             }
         }
+        .tint(AppTheme.accent)
     }
 }
 
@@ -103,6 +153,7 @@ struct CreateHubView: View {
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
             }
+            .appScreenBackground()
             .navigationTitle("Create")
             .onChange(of: availableTabs.map(\.id).joined(separator: ",")) { _ in
                 if !availableTabs.contains(selectedTab) {
@@ -269,6 +320,7 @@ struct CreateGameView: View {
             }
         }
         .scrollDismissesKeyboard(.interactively)
+        .appListBackground()
         .onChange(of: draft.format) { format in
             draft.maxPlayers = format.defaultMaxPlayers
         }
@@ -354,6 +406,7 @@ private struct CreateTournamentView: View {
                 .frame(maxWidth: .infinity)
             }
         }
+        .appListBackground()
         .alert("Saved", isPresented: $showSavedAlert) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -437,6 +490,7 @@ private struct CreatePracticeView: View {
                 .frame(maxWidth: .infinity)
             }
         }
+        .appListBackground()
         .alert("Saved", isPresented: $showSavedAlert) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -542,6 +596,7 @@ private struct DraftsBoardView: View {
                 }
             }
         }
+        .appListBackground()
     }
 }
 
@@ -611,6 +666,7 @@ private struct EditGameDraftView: View {
                 .buttonStyle(.borderedProminent)
             }
         }
+        .appListBackground()
         .navigationTitle("Edit Game Draft")
         .alert("Draft", isPresented: Binding(
             get: { savedMessage != nil },
@@ -703,6 +759,7 @@ private struct EditTournamentDraftView: View {
                 .buttonStyle(.borderedProminent)
             }
         }
+        .appListBackground()
         .navigationTitle("Edit Tournament Draft")
         .alert("Draft", isPresented: Binding(
             get: { savedMessage != nil },
@@ -776,6 +833,7 @@ private struct EditPracticeDraftView: View {
                 .buttonStyle(.borderedProminent)
             }
         }
+        .appListBackground()
         .navigationTitle("Edit Practice Draft")
         .alert("Draft", isPresented: Binding(
             get: { savedMessage != nil },

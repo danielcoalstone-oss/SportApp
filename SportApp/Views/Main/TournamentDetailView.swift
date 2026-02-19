@@ -40,6 +40,7 @@ struct TournamentDetailView: View {
                     VStack(alignment: .leading, spacing: 16) {
                         Text(tournament.title)
                             .font(.title2.bold())
+                            .foregroundStyle(.white)
 
                         VStack(alignment: .leading, spacing: 8) {
                             Label(tournament.location, systemImage: "mappin")
@@ -55,6 +56,7 @@ struct TournamentDetailView: View {
                             VStack(alignment: .leading, spacing: 10) {
                                 Text("Organiser Team Setup")
                                     .font(.headline)
+                                    .foregroundStyle(.white)
                                 TextField("Team name", text: $teamName)
                                     .textFieldStyle(.roundedBorder)
 
@@ -88,6 +90,7 @@ struct TournamentDetailView: View {
                     }
                     .padding()
                 }
+                .appScreenBackground()
             } else {
                 VStack(spacing: 10) {
                     Image(systemName: "exclamationmark.triangle")
@@ -165,6 +168,7 @@ struct TournamentDetailView: View {
             VStack(alignment: .leading, spacing: 10) {
                 Text("Organiser Tools")
                     .font(.headline)
+                    .foregroundStyle(.white)
 
                 if appViewModel.canCurrentUserEditTournament(tournament) {
                     Button("Edit Tournament Details") {
@@ -220,7 +224,7 @@ struct TournamentDetailView: View {
             }
             .padding()
             .frame(maxWidth: .infinity, alignment: .leading)
-            .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+            .appCard()
         }
     }
 
@@ -235,6 +239,7 @@ struct TournamentDetailView: View {
         return VStack(alignment: .leading, spacing: 10) {
             Text("Tournament Stats")
                 .font(.headline)
+                .foregroundStyle(.white)
 
             HStack {
                 statsPill(title: "Matches", value: "\(totalMatches)")
@@ -251,6 +256,7 @@ struct TournamentDetailView: View {
         return VStack(alignment: .leading, spacing: 8) {
             Text("Standings")
                 .font(.headline)
+                .foregroundStyle(.white)
 
             ForEach(Array(standings.enumerated()), id: \.element.id) { index, row in
                 HStack {
@@ -271,7 +277,7 @@ struct TournamentDetailView: View {
                 }
                 .padding()
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 10))
+                .appCard()
             }
         }
     }
@@ -280,6 +286,7 @@ struct TournamentDetailView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Matches")
                 .font(.headline)
+                .foregroundStyle(.white)
 
             if tournament.matches.isEmpty {
                 Text("No matches scheduled yet")
@@ -317,7 +324,7 @@ struct TournamentDetailView: View {
                     }
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+                    .appCard()
                 }
             }
         }
@@ -327,6 +334,7 @@ struct TournamentDetailView: View {
         VStack(alignment: .leading, spacing: 8) {
             Text("Teams")
                 .font(.headline)
+                .foregroundStyle(.white)
 
             Text("Players can join one specific team per tournament.")
                 .font(.caption)
@@ -343,6 +351,7 @@ struct TournamentDetailView: View {
                     HStack {
                         Text(team.name)
                             .font(.headline)
+                            .foregroundStyle(.white)
                         Spacer()
                         Text("\(team.members.count)/\(team.maxPlayers)")
                             .font(.caption)
@@ -419,7 +428,7 @@ struct TournamentDetailView: View {
                 }
                 .padding()
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+                .appCard()
             }
         }
     }
@@ -512,7 +521,7 @@ struct TournamentDetailView: View {
         }
         .padding(.vertical, 6)
         .padding(.horizontal, 10)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 10))
+        .appCard()
     }
 
     private func isCaptain(_ userID: UUID, teamID: UUID, tournament: Tournament) -> Bool {

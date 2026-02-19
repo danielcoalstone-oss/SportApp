@@ -71,6 +71,7 @@ struct MatchDetailsView: View {
                         .foregroundStyle(.secondary)
                     Text("Match Deleted")
                         .font(.headline)
+                        .foregroundStyle(.white)
                     Text("This match has been cancelled and removed.")
                         .font(.footnote)
                         .foregroundStyle(.secondary)
@@ -95,11 +96,12 @@ struct MatchDetailsView: View {
                             HStack {
                                 Text("Open Match Summary")
                                     .font(.headline)
+                                    .foregroundStyle(.white)
                                 Spacer()
                                 Image(systemName: "chevron.right")
                             }
                             .padding()
-                            .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+                            .appCard()
                         }
                         .buttonStyle(.plain)
 
@@ -110,17 +112,19 @@ struct MatchDetailsView: View {
                             HStack {
                                 Text("Open Teams")
                                     .font(.headline)
+                                    .foregroundStyle(.white)
                                 Spacer()
                                 Image(systemName: "chevron.right")
                             }
                             .padding()
-                            .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+                            .appCard()
                         }
                         .buttonStyle(.plain)
 
                         HStack {
                             Text("Events Timeline")
                                 .font(.title3.bold())
+                                .foregroundStyle(.white)
                             Spacer()
                             Button {
                                 isAddEventSheetPresented = true
@@ -147,6 +151,7 @@ struct MatchDetailsView: View {
                     }
                 }
                 .padding()
+                .appScreenBackground()
             }
         }
         .navigationTitle("Match Details")
@@ -211,6 +216,7 @@ struct MatchDetailsView: View {
                 VStack(alignment: .leading, spacing: 4) {
                     Text(viewModel.match.homeTeam.name)
                         .font(.headline)
+                        .foregroundStyle(.white)
                     Text("\(score.home)")
                         .font(.system(size: 32, weight: .bold))
                 }
@@ -226,13 +232,14 @@ struct MatchDetailsView: View {
                 VStack(alignment: .trailing, spacing: 4) {
                     Text(viewModel.match.awayTeam.name)
                         .font(.headline)
+                        .foregroundStyle(.white)
                     Text("\(score.away)")
                         .font(.system(size: 32, weight: .bold))
                 }
             }
         }
         .padding()
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14))
+        .appCard()
     }
 
     private var matchInfoCard: some View {
@@ -252,7 +259,7 @@ struct MatchDetailsView: View {
         .font(.subheadline)
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14))
+        .appCard()
     }
 
     private var rsvpActionsCard: some View {
@@ -293,7 +300,7 @@ struct MatchDetailsView: View {
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14))
+        .appCard()
     }
 
     private var participantsCard: some View {
@@ -340,7 +347,7 @@ struct MatchDetailsView: View {
         }
         .padding()
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14))
+        .appCard()
     }
 
     private var organiserToolsCard: some View {
@@ -411,7 +418,7 @@ struct MatchDetailsView: View {
                 }
                 .padding()
                 .frame(maxWidth: .infinity, alignment: .leading)
-                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 14))
+                .appCard()
             }
         }
     }
@@ -570,7 +577,7 @@ struct EventsTimeline: View {
                     .foregroundStyle(.secondary)
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+                    .appCard()
             } else {
                 ForEach(events.sorted { $0.minute < $1.minute }) { event in
                     HStack(spacing: 10) {
@@ -594,7 +601,7 @@ struct EventsTimeline: View {
                         Spacer()
                     }
                     .padding()
-                    .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+                    .appCard()
                 }
             }
         }

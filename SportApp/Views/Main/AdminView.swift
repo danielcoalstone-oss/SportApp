@@ -16,6 +16,7 @@ struct AdminView: View {
                     }
                     .padding()
                 }
+                .appScreenBackground()
                 .navigationTitle("Admin")
             } else {
                 PermissionDeniedView()
@@ -33,6 +34,7 @@ struct AdminView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Users")
                 .font(.title3.bold())
+                .foregroundStyle(.white)
 
             Button("Prepare Investor Demo Data") {
                 appViewModel.adminPrepareInvestorDemoData()
@@ -104,7 +106,7 @@ struct AdminView: View {
                     }
                 }
                 .padding()
-                .background(Color(.secondarySystemBackground), in: RoundedRectangle(cornerRadius: 12))
+                .appCard()
             }
         }
     }
@@ -113,6 +115,7 @@ struct AdminView: View {
         VStack(alignment: .leading, spacing: 10) {
             Text("Soft Delete")
                 .font(.title3.bold())
+                .foregroundStyle(.white)
 
             if appViewModel.visibleCreatedGames.isEmpty,
                appViewModel.visibleTournaments.isEmpty,
